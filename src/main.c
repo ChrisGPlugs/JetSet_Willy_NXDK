@@ -32,11 +32,28 @@
 #define DATA_DIR ""
 #endif
 
+#ifdef JSW_ONLY_128
+/* Jet Set Willy 128 (John Elliott, v0.04 Hacklevel 9): 128K machine, AY
+ * music from IM2 interrupts, 130 rooms. */
+#define GAME_TITLE "Jet Set Willy 128"
+#define HAVE_128 1
+static const int v128 = 1;
+#else
 #define GAME_TITLE "Jet Set Willy"
+#endif
 
 #include "zx.h"
 #include "zx_font.h"
 #include "jsw.h"
+#ifdef JSW_ONLY_128
+#include "ay.h"
+#include "jsw128.h"
+#include "z80c.h"
+int jsw_in_title;                       /* jsw.c's, for the 48K build */
+#define JSW_ROOMS 130                   /* HL9: rooms 0-129 */
+#else
+#define JSW_ROOMS 61                    /* rooms 0-60 */
+#endif
 
 #define ROM_FONT 0x3D00
 
@@ -313,8 +330,9 @@ static const zx_keypos_t cheat_keys[] = {
 static int macro_step = -1, macro_timer;
 
 /* Teleport. The game's teleport check (35696, at the end of the main loop)
- * reads the 6-0 row (activator '9', and '6' for bit 5 of the room number)
- * and then the 1-5 row for bits 0-4. The translated code calls the front
+ * reads the 6-0 row (activator '9', and '6' for bit 5 of the room number;
+ * on JSW128, '8', '7' and '6' for bits 5, 6 and 7) and then the 1-5 row for
+ * bits 0-4. The translated code calls the front
  * end when it reaches that check; the very next two port reads are then
  * answered with the target room, so the keys are never held down and no
  * other read of those rows (movement, jump) sees them. */
@@ -326,7 +344,13 @@ static uint8_t teleport_in_filter(uint16_t port, uint8_t v)
     if (teleport_armed == 1 && port == 0xEFFE) {
         teleport_armed = 2;
         v &= (uint8_t)~0x02;                                   /* '9' */
+#ifdef JSW_ONLY_128
+        if (teleport_target & 32)  v &= (uint8_t)~0x04;        /* '8' */
+        if (teleport_target & 64)  v &= (uint8_t)~0x08;        /* '7' */
+        if (teleport_target & 128) v &= (uint8_t)~0x10;        /* '6' */
+#else
         if (teleport_target & 32) v &= (uint8_t)~0x10;         /* '6' */
+#endif
         return v;
     }
     if (teleport_armed == 2 && port == 0xF7FE) {
@@ -340,7 +364,7 @@ static uint8_t teleport_in_filter(uint16_t port, uint8_t v)
 static void start_teleport(int forward)
 {
     if (mem[JSW_TELEPORT] != CHEAT_DONE) return;
-    teleport_target = (mem[JSW_ROOM] + (forward ? 1 : 60)) % 61;   /* rooms 0-60 */
+    teleport_target = (mem[JSW_ROOM] + (forward ? 1 : JSW_ROOMS - 1)) % JSW_ROOMS;
     teleport_pending = 1;
     teleport_frames = 0;
 }
@@ -348,8 +372,13 @@ static void start_teleport(int forward)
 static void game_hook(uint16_t addr)
 {
     switch (addr) {
+#ifdef JSW_ONLY_128
+    case JSW_TITLESCREEN: jsw_in_title = 1; break;
+    case JSW_STARTGAME:   jsw_in_title = 0; break;
+#else
     case JSW_ENTERCODES:  in_codes = 1; break;
     case JSW_TITLESCREEN: in_codes = 0; break;
+#endif
     case JSW_TELECHECK:   if (teleport_pending) teleport_armed = 1; break;
     case JSW_MAINLOOP:    teleport_armed = 0; break;
     default: break;
@@ -787,9 +816,38 @@ static void fatal_screen(const char *line1, const char *line2)
 
 /* The data file: the original tape as TZX or TAP, or a 32K dump. */
 static const char *const data_files[] = {
+#ifdef JSW_ONLY_128
+    DATA_DIR "JetSetWilly128.tzx", DATA_DIR "JetSetWilly128.tap",
+    DATA_DIR "Jet Set Willy 128k v. 0.04 HL 9.tzx", DATA_DIR "Jet Set Willy 128k v. 0.04 HL 9.tap",
+#else
     DATA_DIR "JetSetWilly.tzx", DATA_DIR "JetSetWilly.tap", DATA_DIR "JetSetWilly.bin",
     DATA_DIR "Jet Set Willy.tzx", DATA_DIR "Jet Set Willy.tap",
+#endif
 };
+
+#ifdef JSW_ONLY_128
+static void run_128(const uint8_t *tape_data, long n, int have_rom, const uint8_t *rom)
+{
+    static jsw128_image_t img;
+    if (jsw128_load(tape_data, n, &img))
+        fatal_screen("The data file isn't the JSW128", "v0.04 HL9 tape (see README).");
+    for (;;) {
+        jsw128_prepare(&img);
+        zx_install_font(have_rom ? rom : NULL);
+        ay_init(&ay, AY_CLOCK_128K, AUDIO_RATE);
+        frame_start_level = 0;
+        zx_in_filter = teleport_in_filter;
+        z80c_hook = game_hook;
+        jsw_in_title = 0;
+        jsw128_z80_run(JSW128_BEGIN);
+        /* The translated code only returns if the game went somewhere that
+         * wasn't translated: say where, so it can be reported. */
+        char where[40];
+        snprintf(where, sizeof where, "Stopped at %04X (bank %d).", z80c_bad_addr, zx_bank_c000);
+        fatal_screen(where, "Please report this.");
+    }
+}
+#endif
 
 int main(int argc, char **argv)
 {
@@ -839,6 +897,13 @@ int main(int argc, char **argv)
     zx_frame_hook = frame_hook;
 
     static uint8_t tape[1 << 20];
+#ifdef JSW_ONLY_128
+    for (unsigned i = 0; i < sizeof data_files / sizeof data_files[0]; i++) {
+        long n = load_file(data_files[i], tape, sizeof tape);
+        if (n >= 0) run_128(tape, n, have_rom, rom);
+    }
+    fatal_screen("JetSetWilly128.tzx not found.", "See README for where to get it.");
+#else
     static uint8_t image[JSW_IMAGE_SIZE];
     int found = 0, ok = 0;
     for (unsigned i = 0; i < sizeof data_files / sizeof data_files[0] && !ok; i++) {
@@ -878,5 +943,6 @@ int main(int argc, char **argv)
         in_codes = 0;
         jsw_run();          /* returns only when the game resets the machine */
     }
+#endif
     return 0;
 }

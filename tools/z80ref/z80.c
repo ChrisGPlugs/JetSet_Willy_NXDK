@@ -645,6 +645,7 @@ static inline uint16_t displace(
 }
 
 static inline void process_interrupts(z80* const z) {
+  if (z->before_int) z->before_int(z);
   // "When an EI instruction is executed, any pending interrupt request
   // is not accepted until after the instruction following EI is executed."
   if (z->iff_delay > 0) {
@@ -703,6 +704,7 @@ static inline void process_interrupts(z80* const z) {
 // initialises a z80 struct. Note that read_byte, write_byte, port_in, port_out
 // and userdata must be manually set by the user afterwards.
 void z80_init(z80* const z) {
+  z->before_int = NULL;
   z->read_byte = NULL;
   z->write_byte = NULL;
   z->port_in = NULL;

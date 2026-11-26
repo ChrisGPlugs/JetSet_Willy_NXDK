@@ -15,6 +15,8 @@ NXDK_SDL  = y
 SRCS = $(CURDIR)/src/main.c \
        $(CURDIR)/src/jsw.c \
        $(CURDIR)/src/jsw_code.c \
+       $(CURDIR)/src/z80c_glue.c \
+       $(CURDIR)/src/tape.c \
        $(CURDIR)/src/zx.c \
        $(CURDIR)/src/zx_font.c
 

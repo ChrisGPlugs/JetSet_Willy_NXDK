@@ -16,13 +16,22 @@ uint64_t zx_next_frame = 69888;
 int      zx_contention = 1;
 uint64_t zx_contended_t;
 uint32_t zx_contend_frac;
+int      zx_int_pending;
+uint32_t zx_int_len = 32;
+int      zx_bank_c000;
+int      zx_128k;
+uint8_t  zx_banks[8][16384];
+uint8_t  zx_last_7ffd;
+int      zx_paging_alias;
 
 void zx_set_model(zx_model_t model)
 {
     if (model == ZX_MODEL_128K) {
         zx_cpu_hz = 3546900; zx_t_per_frame = 70908; zx_contend_start = 14361; zx_t_per_line = 228;
+        zx_int_len = 36; zx_128k = 1;
     } else {
         zx_cpu_hz = 3500000; zx_t_per_frame = 69888; zx_contend_start = 14335; zx_t_per_line = 224;
+        zx_int_len = 32; zx_128k = 0;
     }
     zx_next_frame = zx_t + zx_t_per_frame;
 }
@@ -65,6 +74,10 @@ void zx_reset(void)
     zx_im = 1;
     zx_int_hook = 0;
     in_frame = 0;
+    zx_int_pending = 0;
+    zx_bank_c000 = 0;
+    zx_last_7ffd = 0;
+    zx_paging_alias = 0;
     zx_ay_count = 0;
     memset(zx_ay_regs, 0, sizeof zx_ay_regs);
 }
@@ -100,6 +113,7 @@ void zx_frame(void)
         zx_ay_count = 0;
         zx_next_frame += ZX_T_PER_FRAME;
         /* New frame: the ULA raises /INT. */
+        zx_int_pending = 1;
         if (zx_int_hook && zx_iff)
             zx_int_hook();
     }
@@ -123,6 +137,8 @@ static uint8_t zx_in_raw(uint16_t port)
     if ((port & 0xFF) == 0x1F) {
         return zx_kempston_present ? (uint8_t)(zx_kempston & 0x1F) : 0xFF;
     }
+    if (zx_128k && (port & 0xC002) == 0xC000)            /* 0xFFFD: AY register */
+        return zx_ay_regs[zx_ay_sel & 15];
     if (!(port & 1)) {
         /* ULA: every half-row whose address line is low is ANDed in. */
         uint8_t v = 0x1F;
@@ -135,8 +151,33 @@ static uint8_t zx_in_raw(uint16_t port)
     return 0xFF;
 }
 
+uint8_t zx_ay_sel;
+
+void zx_page_7ffd(uint8_t v)
+{
+    if (zx_last_7ffd & 0x20) return;                  /* paging locked */
+    zx_last_7ffd = v;
+    int nb = v & 7;
+    if (nb == zx_bank_c000) return;
+    if (nb == 5 || nb == 2) { zx_paging_alias = 1; return; }
+    memcpy(zx_banks[zx_bank_c000], mem + 0xC000, 0x4000);
+    memcpy(mem + 0xC000, zx_banks[nb], 0x4000);
+    zx_bank_c000 = nb;
+}
+
+uint8_t *zx_bank_ptr(int bank)
+{
+    if (bank == zx_bank_c000) return mem + 0xC000;
+    if (bank == 5) return mem + 0x4000;
+    if (bank == 2) return mem + 0x8000;
+    return zx_banks[bank & 7];
+}
+
 void zx_out(uint16_t port, uint8_t value)
 {
+    if (zx_128k && !(port & 0x8002)) { zx_page_7ffd(value); return; }   /* 0x7FFD */
+    if (zx_128k && (port & 0xC002) == 0xC000) { zx_ay_sel = value; return; }    /* 0xFFFD */
+    if (zx_128k && (port & 0xC002) == 0x8000) { zx_ay_write(zx_ay_sel, value); return; } /* 0xBFFD */
     if (!(port & 1)) {
         zx_border = value & 7;
         uint8_t level = (uint8_t)(value & 0x18);   /* EAR (bit 4) + MIC (bit 3) */
