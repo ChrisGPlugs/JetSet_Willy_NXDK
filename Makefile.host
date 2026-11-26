@@ -1,0 +1,29 @@
+# Desktop build (Linux/macOS/MSYS2) for development and testing.
+#
+#   make -f Makefile.host            # ./jetsetwilly (SDL2)
+#   make -f Makefile.host difftest   # comparison test against the original Z80 code
+#   make -f Makefile.host test       # run it (needs "Data files/JetSetWilly.tzx")
+
+CC      ?= cc
+CFLAGS  ?= -O2 -Wall -Wextra
+SDL_CFLAGS := $(shell pkg-config --cflags sdl2 2>/dev/null || sdl2-config --cflags)
+SDL_LIBS   := $(shell pkg-config --libs sdl2 2>/dev/null || sdl2-config --libs)
+
+GAME_SRCS = src/jsw.c src/jsw_code.c src/zx.c src/zx_font.c
+HDRS = src/*.h
+
+all: jetsetwilly
+
+jetsetwilly: src/main.c $(GAME_SRCS) $(HDRS)
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) -o $@ src/main.c $(GAME_SRCS) $(SDL_LIBS)
+
+difftest: tools/difftest.c $(GAME_SRCS) tools/z80ref/z80.c $(HDRS)
+	$(CC) $(CFLAGS) -Wno-unused-parameter -o $@ tools/difftest.c $(GAME_SRCS) tools/z80ref/z80.c
+
+test: difftest
+	./tools/run_difftest.sh
+
+clean:
+	rm -f jetsetwilly difftest
+
+.PHONY: all test clean

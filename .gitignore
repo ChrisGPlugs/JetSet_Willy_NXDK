@@ -1,0 +1,19 @@
+# Build output
+bin/
+build/
+*.iso
+*.obj
+*.d
+*.lib
+jetsetwilly
+difftest
+shot_*.bmp
+# Game data is copyright: never commit it (or ISOs built with it)
+*.tzx
+*.tap
+*.bin
+*.rom
+*.z80
+*.sna
+*.exe
+*.exp
