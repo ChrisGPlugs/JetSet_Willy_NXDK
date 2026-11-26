@@ -1,0 +1,7 @@
+# Regenerate src/jsw_code.c from the SkoolKit disassembly and the game image.
+#   make -f Makefile.gen SKOOL=/path/to/jetsetwilly/sources/jsw.skool IMAGE=jsw48.bin
+SKOOL ?= ../jetsetwilly/sources/jsw.skool
+IMAGE ?= jsw48.bin
+HOOKS = --hook 34620 --hook 34631 --hook 34762 --hook 35068 --hook 35245 --hook 35914 --hook 35696 --hook 34463
+src/jsw_code.c: tools/z80c/z80c.py $(SKOOL) $(IMAGE)
+	python3 tools/z80c/z80c.py $(SKOOL) $(IMAGE) 32768 $@ $(HOOKS)
