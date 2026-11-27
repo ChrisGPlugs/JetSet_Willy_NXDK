@@ -5,3 +5,23 @@ IMAGE ?= jsw48.bin
 HOOKS = --hook 34620 --hook 34631 --hook 34762 --hook 35068 --hook 35245 --hook 35914 --hook 35696 --hook 34463
 src/jsw_code.c: tools/z80c/z80c.py $(SKOOL) $(IMAGE)
 	python3 tools/z80c/z80c.py $(SKOOL) $(IMAGE) 32768 $@ $(HOOKS)
+
+# Jet Set Willy 128 (HL9). IMAGE128 is the 64K CPU view the HL9 tape loader
+# leaves (bank 0 at 0xC000): make -f Makefile.gen image128 writes it from the
+# tape with tools/jsw128_image. The code map is the trace in tools/z80c/maps
+# (difftest128 ref ... <trace>), widened by descent from it, from every 48K
+# code address whose bytes are unchanged, and from the guardian-type jump
+# table at 34002 (16 entries).
+IMAGE128 ?= build/jsw128_ram.bin
+TAPE128  ?= Data files/JetSetWilly128.tzx
+HOOKS128 = --hook 34762 --hook 35068 --hook 35245 --hook 35914 --hook 35696
+src/jsw128_code.c: tools/z80c/z80c.py tools/z80c/maps/jsw128_hl9_trace.txt $(SKOOL) $(IMAGE) $(IMAGE128)
+	python3 tools/z80c/z80c.py $(SKOOL) $(IMAGE128) 0 $@ --map tools/z80c/maps/jsw128_hl9_trace.txt \
+	    --jumptable 34002:16 --descend --interrupts --func jsw128_z80_run \
+	    --skool48 $(SKOOL) --image48 $(IMAGE) $(HOOKS128)
+
+image128: tools/jsw128_image.c src/jsw128.c src/tape.c src/zx.c
+	@mkdir -p build
+	$(CC) -O2 -o build/jsw128_image tools/jsw128_image.c src/jsw128.c src/tape.c src/zx.c
+	./build/jsw128_image "$(TAPE128)" $(IMAGE128)
+.PHONY: image128

@@ -97,7 +97,7 @@ class Dec:
             return self.decode_ed(pc)
         if x == 1:
             if op == 0x76:
-                return (1, 'HALT', [F4, 'HALT_();'], 'next', [])
+                return (1, 'HALT', [F4, f'HALT_(0x{(pc+1)&0xFFFF:04X});'], 'ret', [])
             if z == 6:
                 return (1, f'LD {R8[y]},(HL)', [F4, f'{R8[y]} = RD(HL);'], 'next', [])
             if y == 6:
@@ -184,7 +184,7 @@ class Dec:
                         'WR((uint16_t)(SP + 1), H); WR(SP, L); IC(SP, 2); HL = (uint16_t)(lo | (hi << 8)); }'], 'next', [])
             if y == 5: return (1, 'EX DE,HL', [F4, '{ uint16_t t = DE; DE = HL; HL = t; }'], 'next', [])
             if y == 6: return (1, 'DI', [F4, 'zx_iff = 0;'], 'next', [])
-            return (1, 'EI', [F4, 'zx_iff = 1;'], 'next', [])
+            return (1, 'EI', [F4, 'zx_iff = 1; ei_delay = 1;'], 'next', [])
         if z == 4:
             tgt = self.w(pc + 1)
             return (3, f'CALL {CCN[y]},{tgt}', [F4, f'IMM(0x{pc+1:04X}); IMM(0x{pc+2:04X});',
@@ -248,6 +248,10 @@ class Dec:
                 return (2, f'IM {[0,0,1,2,0,0,1,2][y]}', [F, f'zx_im = {[0,0,1,2,0,0,1,2][y]};'], 'next', [])
             if z == 7 and y == 0:
                 return (2, 'LD I,A', [F, 'IR(1); I_ = A;'], 'next', [])
+            if z == 7 and y == 2:
+                return (2, 'LD A,I', [F, 'IR(1); A = I_; F = (uint8_t)((F & FC) | sz53_[A] | (zx_iff ? FP : 0));'], 'next', [])
+            if z == 5:
+                return (2, 'RETI' if y == 1 else 'RETN', [F, 'POPPC(); goto dispatch;'], 'ret', [])
         if x == 2 and z <= 1 and y >= 4:
             name = {(4, 0): 'LDI', (5, 0): 'LDD', (6, 0): 'LDIR', (7, 0): 'LDDR',
                     (4, 1): 'CPI', (5, 1): 'CPD', (6, 1): 'CPIR', (7, 1): 'CPDR'}[(y, z)]
@@ -339,10 +343,100 @@ def main():
         i = args.index('--hook')
         hooks.append(int(args[i + 1]))
         del args[i:i + 2]
+    def opt(name, default=None):
+        if name in args:
+            i = args.index(name)
+            v = args[i + 1]
+            del args[i:i + 2]
+            return v
+        return default
+    func = opt('--func', 'z80c_run')
+    mapfile = opt('--map')
+    skool48 = opt('--skool48')        # with --map: comments from the 48K disassembly
+    image48 = opt('--image48')        # ... where the bytes match this 48K image
+    interrupts = '--interrupts' in args
+    if interrupts: args.remove('--interrupts')
+    jumptables = []
+    while '--jumptable' in args:              # ADDR:COUNT table of code addresses (seeds)
+        i = args.index('--jumptable')
+        a, c = args[i + 1].split(':')
+        jumptables.append((int(a), int(c)))
+        del args[i:i + 2]
+    descend = '--descend' in args
+    if descend: args.remove('--descend')
     skool, image, org, out = args[0], args[1], int(args[2]), args[3]
     img = open(image, 'rb').read()
-    code, labels, entries = parse_skool(skool)
     dec = Dec(img, org)
+    if mapfile:
+        code, labels, entries = {}, {}, set()
+        for ln in open(mapfile):
+            ln = ln.strip()
+            if not ln:
+                continue
+            bank, _, a = ln.partition(':')
+            code[int(a)] = ('', '')
+            entries.add(int(a))
+        traced = set(code)
+        for ta, tc in jumptables:
+            for k in range(tc):
+                t = dec.w(ta + 2 * k)
+                if t not in code:
+                    code[t] = ('', '')
+        if descend and skool48 and image48:
+            # Seed the descent with the 48K game's code wherever its bytes are
+            # unchanged: every path of the original engine, run or not.
+            c48s, _, _ = parse_skool(skool48)
+            i48s = open(image48, 'rb').read()
+            seeded = 0
+            for a in c48s:
+                if not (32768 <= a < 65536) or a in code:
+                    continue
+                try:
+                    n1 = dec.decode(a)[0]
+                except Exception:
+                    continue
+                if img[a - org:a - org + n1] == i48s[a - 32768:a - 32768 + n1]:
+                    code[a] = ('', '')
+                    seeded += 1
+            print(f'seeded {seeded} unchanged 48K code addresses', file=sys.stderr)
+        if descend:
+            work = list(code)
+            while work:
+                a = work.pop()
+                try:
+                    n, text, lines, kind, tg = dec.decode(a)
+                except Exception:
+                    continue
+                nxt = [] if kind in ('jump', 'ret') else [a + n]
+                for t in nxt + tg:
+                    if 0x4000 <= t < 0x10000 and t not in code:
+                        try:
+                            dec.decode(t)
+                        except Exception:
+                            continue
+                        code[t] = ('', '')
+                        work.append(t)
+            print(f'descent added {len(code) - len(traced)} addresses', file=sys.stderr)
+        if skool48 and image48:
+            c48, l48, _ = parse_skool(skool48)
+            i48 = open(image48, 'rb').read()
+            d48 = Dec(i48, 32768)
+            for a in list(code):
+                if a in c48:
+                    n1 = dec.decode(a)[0]
+                    if img[a - org:a - org + n1] == i48[a - 32768:a - 32768 + n1]:
+                        code[a] = ('', c48[a][1])
+                        if a in l48:
+                            labels[a] = l48[a]
+                    else:
+                        code[a] = ('', '(JSW128) ' )
+                else:
+                    code[a] = ('', '(JSW128)')
+            for a in l48:
+                if a in code and a not in labels and code[a][1] and not code[a][1].startswith('(JSW128)'):
+                    labels[a] = l48[a]
+    else:
+        code, labels, entries = parse_skool(skool)
     for a in [a for a in code if not (org <= a < org + len(img))]:
         del code[a]
     entries &= set(code)
@@ -378,6 +472,8 @@ def main():
     mism = 0
     for a in addrs:
         sk = code[a][0]
+        if mapfile:
+            break
         if norm(sk) != norm(decoded[a][1]):
             mism += 1
             print(f'mnemonic differs at {a}: skool "{sk}" vs decoded "{decoded[a][1]}"', file=sys.stderr)
@@ -393,25 +489,37 @@ def main():
     o.append(' * This generated file is therefore also licensed under CC BY-SA 3.0.')
     o.append(' * Jet Set Willy (C) 1984 Matthew Smith / Software Projects.')
     o.append(' */')
+    if interrupts:
+        o.append('#define Z80C_INTERRUPTS 1')
     o.append('#include "z80c_rt.h"')
     o.append('')
-    o.append('void z80c_run(uint16_t entry)')
+    o.append(f'void {func}(uint16_t entry)')
     o.append('{')
     o.append('    Z80C_LOCALS;')
     o.append('    pc = entry;')
+    if interrupts:
+        o.append('    I_ = 0x3F; ei_delay = 0;')
     o.append('    goto dispatch;')
     o.append('dispatch:')
     o.append('    switch (pc) {')
     for a in addrs:
-        o.append(f'    case 0x{a:04X}: goto L{a:04X};')
-    o.append('    default: z80c_bad_jump(pc); return;')
+        if a >= 0xC000 and mapfile:
+            o.append(f'    case 0x{a:04X}: if (zx_bank_c000) break; goto L{a:04X};')
+        else:
+            o.append(f'    case 0x{a:04X}: goto L{a:04X};')
+    o.append('    default: break;')
     o.append('    }')
+    o.append('    z80c_bad_jump(pc);')
+    o.append('    return;')
     for a in addrs:
         n, text, lines, kind = decoded[a]
         if a in labels:
             o.append(f'\n/* ---- {labels[a]} ---- */')
         com = code[a][1].replace('*/', '* /')
         o.append(f'L{a:04X}: /* {a} {text:<16} {com} */')
+        if interrupts:
+            o.append(f'    INTCHECK(0x{a:04X});')
+        o.append(f'    VERIFY(0x{a:04X}, 0x{dec.b(a):02X});')
         if a in hooks:
             o.append(f'    Z80C_HOOK(0x{a:04X});')
         if a in variants:

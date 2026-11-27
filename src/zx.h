@@ -64,9 +64,16 @@ static inline void zx_contend_now(void)
 }
 /* Exact contention at the current T-state: used where the translation
  * advances the clock cycle by cycle (LDIR, port I/O). */
+/* 128K paging: the bank at 0xC000 (zx_paging.c). Odd banks are contended
+ * on the 128K, like 0x4000-0x7FFF. */
+extern int zx_bank_c000;
+static inline int zx_is_contended(uint16_t addr)
+{
+    return (addr & 0xC000) == 0x4000 || ((addr & 0xC000) == 0xC000 && (zx_bank_c000 & 1));
+}
 static inline void zx_contend(uint16_t addr)
 {
-    if (zx_contention && (addr & 0xC000) == 0x4000) zx_contend_now();
+    if (zx_contention && zx_is_contended(addr)) zx_contend_now();
 }
 /* Expected contention: the translated routines make their memory accesses
  * in bursts and charge the instruction T-states afterwards, so the exact
@@ -76,7 +83,7 @@ static inline void zx_contend(uint16_t addr)
 extern uint32_t zx_contend_frac;
 static inline void zx_contend_avg(uint16_t addr)
 {
-    if (!zx_contention || (addr & 0xC000) != 0x4000) return;
+    if (!zx_contention || !zx_is_contended(addr)) return;
     uint32_t ft = (uint32_t)(zx_t - (zx_next_frame - zx_t_per_frame));
     if (ft < zx_contend_start) return;
     uint32_t d = ft - zx_contend_start;
@@ -97,7 +104,7 @@ static inline uint8_t *zx_mem(uint16_t addr)
 /* I/O to the ULA (even port): contended like a memory access. */
 static inline void zx_contend_io(uint16_t port)
 {
-    if (zx_contention && (!(port & 1) || (port & 0xC000) == 0x4000)) zx_contend_now();
+    if (zx_contention && (!(port & 1) || zx_is_contended(port))) zx_contend_now();
 }
 
 /* Port I/O, as seen by the game. */
@@ -162,7 +169,36 @@ typedef struct { uint32_t t; uint8_t reg, val; } zx_ay_t;
 extern zx_ay_t zx_ay_log[ZX_AY_MAX];
 extern int     zx_ay_count;
 extern uint8_t zx_ay_regs[16];
+extern uint8_t zx_ay_sel;              /* selected AY register (0xFFFD) */
 void zx_ay_write(uint8_t reg, uint8_t val);
+
+/* ---- 128K paging (port 0x7FFD) ----
+ * mem[] always holds what the CPU sees. Paging copies the outgoing bank's
+ * 16K out of 0xC000 into zx_banks[] and the incoming one in, so the game
+ * code keeps using mem[] directly. Banks 5 and 2 live permanently at
+ * 0x4000 and 0x8000; paging either of them in at 0xC000 (which the games
+ * never do) sets zx_paging_alias. */
+extern int     zx_128k;                  /* 0x7FFD and the AY are decoded */
+extern uint8_t zx_banks[8][16384];       /* banks not currently at 0xC000 */
+extern uint8_t zx_last_7ffd;
+extern int     zx_paging_alias;
+void     zx_page_7ffd(uint8_t v);
+uint8_t *zx_bank_ptr(int bank);          /* the bank's current home */
+
+/* ---- maskable interrupt line ----
+ * /INT goes active at the start of each frame and stays active for
+ * zx_int_len T-states (32 on the 48K, 36 on the 128K); an interrupt is
+ * accepted at the end of an instruction while it is active and IFF1 is set.
+ * zx_int_pending is set by the clock at the frame start; zx_int_active()
+ * drops it once the window has passed. */
+extern int      zx_int_pending;
+extern uint32_t zx_int_len;
+static inline int zx_int_active(void)
+{
+    if (!zx_int_pending) return 0;
+    if ((uint32_t)(zx_t - (zx_next_frame - zx_t_per_frame)) >= zx_int_len) { zx_int_pending = 0; return 0; }
+    return 1;
+}
 
 void zx_reset(void);
 

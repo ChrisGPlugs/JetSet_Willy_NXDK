@@ -2059,6892 +2059,8935 @@ dispatch:
     case 0x96F0: goto L96F0;
     case 0x96F1: goto L96F1;
     case 0x96F3: goto L96F3;
-    default: z80c_bad_jump(pc); return;
+    default: break;
     }
+    z80c_bad_jump(pc);
+    return;
 
 /* ---- BEGIN ---- */
 L8400: /* 33792 DI               Disable interrupts */
+    VERIFY(0x8400, 0xF3);
     FETCH(0x8400);
     zx_iff = 0;
 L8401: /* 33793 LD HL,23551      {Place the address of the routine at #R34463 on the */
+    VERIFY(0x8401, 0x21);
     FETCH(0x8401);
     IMM(0x8402); IMM(0x8403); HL = RD16IMM(0x8402);
 L8404: /* 33796 LD (HL),134      stack */
+    VERIFY(0x8404, 0x36);
     FETCH(0x8404);
     IMM(0x8405); WR(HL, mem[(uint16_t)0x8405]);
 L8406: /* 33798 DEC HL            */
+    VERIFY(0x8406, 0x2B);
     FETCH(0x8406);
     IR(2);
     HL = (uint16_t)(HL - 1);
 L8407: /* 33799 LD (HL),159       */
+    VERIFY(0x8407, 0x36);
     FETCH(0x8407);
     IMM(0x8408); WR(HL, mem[(uint16_t)0x8408]);
 L8409: /* 33801 LD SP,23550      } */
+    VERIFY(0x8409, 0x31);
     FETCH(0x8409);
     IMM(0x840A); IMM(0x840B); SP = RD16IMM(0x840A);
 L840C: /* 33804 SUB A            {Set #REGhl=#N34048 in a roundabout way */
+    VERIFY(0x840C, 0x97);
     FETCH(0x840C);
     sub8(A);
 L840D: /* 33805 LD L,A            */
+    VERIFY(0x840D, 0x6F);
     FETCH(0x840D);
     L = A;
 L840E: /* 33806 XOR 10            */
+    VERIFY(0x840E, 0xEE);
     FETCH(0x840E);
     IMM(0x840F); xor8(mem[(uint16_t)0x840F]);
 L8410: /* 33808 LD B,A            */
+    VERIFY(0x8410, 0x47);
     FETCH(0x8410);
     B = A;
 L8411: /* 33809 INC B             */
+    VERIFY(0x8411, 0x04);
     FETCH(0x8411);
     B = inc8(B);
 L8412: /* 33810 LD H,B            */
+    VERIFY(0x8412, 0x60);
     FETCH(0x8412);
     H = B;
 L8413: /* 33811 RRC H            } */
+    VERIFY(0x8413, 0xCB);
     FETCH(0x8413); FETCH(0x8414);
     H = rrc(H);
 L8415: /* 33813 LD C,(HL)        {Read through addresses #N34048-#N(65535), without */
+    VERIFY(0x8415, 0x4E);
     FETCH(0x8415);
     C = RD(HL);
 L8416: /* 33814 LD A,L           changing their contents; perhaps this code was once used */
+    VERIFY(0x8416, 0x7D);
     FETCH(0x8416);
     A = L;
 L8417: /* 33815 XOR C            to descramble the contents of pages #b133-#b255, but now */
+    VERIFY(0x8417, 0xA9);
     FETCH(0x8417);
     xor8(C);
 L8418: /* 33816 XOR H            all it does is introduce a pause of about 0.47s before */
+    VERIFY(0x8418, 0xAC);
     FETCH(0x8418);
     xor8(H);
 L8419: /* 33817 LD (HL),C        displaying the code entry screen */
+    VERIFY(0x8419, 0x71);
     FETCH(0x8419);
     WR(HL, C);
 L841A: /* 33818 INC HL            */
+    VERIFY(0x841A, 0x23);
     FETCH(0x841A);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L841B: /* 33819 BIT 7,H           */
+    VERIFY(0x841B, 0xCB);
     FETCH(0x841B); FETCH(0x841C);
     bit(7, H);
 L841D: /* 33821 JR NZ,33813      } */
+    VERIFY(0x841D, 0x20);
     FETCH(0x841D);
     IMM(0x841E);
     if (!(F&FZ)) { JRTAKEN(0x841E); goto L8415; }
 L841F: /* 33823 RET              Make an indirect jump to #R34463 */
+    VERIFY(0x841F, 0xC9);
     FETCH(0x841F);
     POPPC(); goto dispatch;
 
 /* ---- ENTERCODES ---- */
 L869F: /* 34463 LD HL,16384      {Clear the display file and attribute file */
+    VERIFY(0x869F, 0x21);
     Z80C_HOOK(0x869F);
     FETCH(0x869F);
     IMM(0x86A0); IMM(0x86A1); HL = RD16IMM(0x86A0);
 L86A2: /* 34466 LD DE,16385       */
+    VERIFY(0x86A2, 0x11);
     FETCH(0x86A2);
     IMM(0x86A3); IMM(0x86A4); DE = RD16IMM(0x86A3);
 L86A5: /* 34469 LD BC,6911        */
+    VERIFY(0x86A5, 0x01);
     FETCH(0x86A5);
     IMM(0x86A6); IMM(0x86A7); BC = RD16IMM(0x86A6);
 L86A8: /* 34472 LD (HL),0         */
+    VERIFY(0x86A8, 0x36);
     FETCH(0x86A8);
     IMM(0x86A9); WR(HL, mem[(uint16_t)0x86A9]);
 L86AA: /* 34474 LDIR             } */
+    VERIFY(0x86AA, 0xED);
     FETCH(0x86AA); FETCH(0x86AB);
     if (ldi_rep(+1)) goto L86AA;
 L86AC: /* 34476 LD IX,34187      Point #REGix at the message at #R34187 ("Enter Code at */
+    VERIFY(0x86AC, 0xDD);
     FETCH(0x86AC); FETCH(0x86AD);
     IMM(0x86AE); IMM(0x86AF); IX = RD16IMM(0x86AE);
 L86B0: /* 34480 CALL 34499       Display the code entry screen and collect a four-digit */
+    VERIFY(0x86B0, 0xCD);
     FETCH(0x86B0);
     IMM(0x86B1); IMM(0x86B2); IC(0x86B2, 1);
     PUSHW(0x86B3); goto L86C3;
 L86B3: /* 34483 JP Z,34762       Start the game if the code is correct */
+    VERIFY(0x86B3, 0xCA);
     FETCH(0x86B3);
     IMM(0x86B4); IMM(0x86B5);
     if ((F&FZ)) goto L87CA;
 L86B6: /* 34486 LD IX,34219      Point #REGix at the message at #R34219 ("Sorry, try code */
+    VERIFY(0x86B6, 0xDD);
     FETCH(0x86B6); FETCH(0x86B7);
     IMM(0x86B8); IMM(0x86B9); IX = RD16IMM(0x86B8);
 L86BA: /* 34490 CALL 34499       Display the code entry screen and collect another */
+    VERIFY(0x86BA, 0xCD);
     FETCH(0x86BA);
     IMM(0x86BB); IMM(0x86BC); IC(0x86BC, 1);
     PUSHW(0x86BD); goto L86C3;
 L86BD: /* 34493 JP Z,34762       Start the game if the code is correct */
+    VERIFY(0x86BD, 0xCA);
     FETCH(0x86BD);
     IMM(0x86BE); IMM(0x86BF);
     if ((F&FZ)) goto L87CA;
 L86C0: /* 34496 JP 0             Otherwise reset the machine */
+    VERIFY(0x86C0, 0xC3);
     FETCH(0x86C0);
     IMM(0x86C1); IMM(0x86C2);
     { pc = 0x0000; goto dispatch; }
 
 /* ---- CODESCREEN ---- */
 L86C3: /* 34499 LD DE,18432      {Print the message pointed to by #REGix at (8,0) */
+    VERIFY(0x86C3, 0x11);
     FETCH(0x86C3);
     IMM(0x86C4); IMM(0x86C5); DE = RD16IMM(0x86C4);
 L86C6: /* 34502 LD C,32           */
+    VERIFY(0x86C6, 0x0E);
     FETCH(0x86C6);
     IMM(0x86C7); C = mem[(uint16_t)0x86C7];
 L86C8: /* 34504 CALL 38528       } */
+    VERIFY(0x86C8, 0xCD);
     FETCH(0x86C8);
     IMM(0x86C9); IMM(0x86CA); IC(0x86CA, 1);
     PUSHW(0x86CB); goto L9680;
 L86CB: /* 34507 LD HL,18498      {Print the graphic for the '1' key at (10,2) */
+    VERIFY(0x86CB, 0x21);
     FETCH(0x86CB);
     IMM(0x86CC); IMM(0x86CD); HL = RD16IMM(0x86CC);
 L86CE: /* 34510 LD DE,39680       */
+    VERIFY(0x86CE, 0x11);
     FETCH(0x86CE);
     IMM(0x86CF); IMM(0x86D0); DE = RD16IMM(0x86CF);
 L86D1: /* 34513 LD C,0            */
+    VERIFY(0x86D1, 0x0E);
     FETCH(0x86D1);
     IMM(0x86D2); C = mem[(uint16_t)0x86D2];
 L86D3: /* 34515 CALL 37974       } */
+    VERIFY(0x86D3, 0xCD);
     FETCH(0x86D3);
     IMM(0x86D4); IMM(0x86D5); IC(0x86D5, 1);
     PUSHW(0x86D6); goto L9456;
 L86D6: /* 34518 LD HL,18501      {Print the graphic for the '2' key at (10,5) */
+    VERIFY(0x86D6, 0x21);
     FETCH(0x86D6);
     IMM(0x86D7); IMM(0x86D8); HL = RD16IMM(0x86D7);
 L86D9: /* 34521 CALL 37974       } */
+    VERIFY(0x86D9, 0xCD);
     FETCH(0x86D9);
     IMM(0x86DA); IMM(0x86DB); IC(0x86DB, 1);
     PUSHW(0x86DC); goto L9456;
 L86DC: /* 34524 LD HL,18504      {Print the graphic for the '3' key at (10,8) */
+    VERIFY(0x86DC, 0x21);
     FETCH(0x86DC);
     IMM(0x86DD); IMM(0x86DE); HL = RD16IMM(0x86DD);
 L86DF: /* 34527 CALL 37974       } */
+    VERIFY(0x86DF, 0xCD);
     FETCH(0x86DF);
     IMM(0x86E0); IMM(0x86E1); IC(0x86E1, 1);
     PUSHW(0x86E2); goto L9456;
 L86E2: /* 34530 LD HL,18507      {Print the graphic for the '4' key at (10,11) */
+    VERIFY(0x86E2, 0x21);
     FETCH(0x86E2);
     IMM(0x86E3); IMM(0x86E4); HL = RD16IMM(0x86E3);
 L86E5: /* 34533 CALL 37974       } */
+    VERIFY(0x86E5, 0xCD);
     FETCH(0x86E5);
     IMM(0x86E6); IMM(0x86E7); IC(0x86E7, 1);
     PUSHW(0x86E8); goto L9456;
 L86E8: /* 34536 LD HL,39808      {Copy the 128 attribute bytes from #R39808 to the screen */
+    VERIFY(0x86E8, 0x21);
     FETCH(0x86E8);
     IMM(0x86E9); IMM(0x86EA); HL = RD16IMM(0x86E9);
 L86EB: /* 34539 LD DE,22784      (lines 8, 9, 10 and 11) */
+    VERIFY(0x86EB, 0x11);
     FETCH(0x86EB);
     IMM(0x86EC); IMM(0x86ED); DE = RD16IMM(0x86EC);
 L86EE: /* 34542 LD BC,128         */
+    VERIFY(0x86EE, 0x01);
     FETCH(0x86EE);
     IMM(0x86EF); IMM(0x86F0); BC = RD16IMM(0x86EF);
 L86F1: /* 34545 LDIR             } */
+    VERIFY(0x86F1, 0xED);
     FETCH(0x86F1); FETCH(0x86F2);
     if (ldi_rep(+1)) goto L86F1;
 L86F3: /* 34547 LD A,(23672)     Collect the LSB of the system variable FRAMES */
+    VERIFY(0x86F3, 0x3A);
     FETCH(0x86F3);
     { IMM(0x86F4); IMM(0x86F5); uint16_t ea = RD16IMM(0x86F4);
     A = RD(ea); }
 L86F6: /* 34550 ADD A,37         {Add #b37 to this value and replace it; this ensures */
+    VERIFY(0x86F6, 0xC6);
     FETCH(0x86F6);
     IMM(0x86F7); add8(mem[(uint16_t)0x86F7]);
 L86F8: /* 34552 LD (23672),A     that the value collected on the second pass through this */
+    VERIFY(0x86F8, 0x32);
     FETCH(0x86F8);
     { IMM(0x86F9); IMM(0x86FA); uint16_t ea = RD16IMM(0x86F9);
     WR(ea, A); }
 L86FB: /* 34555 CP 179           Is the value between #b0 and #b178? */
+    VERIFY(0x86FB, 0xFE);
     FETCH(0x86FB);
     IMM(0x86FC); cp8(mem[(uint16_t)0x86FC]);
 L86FD: /* 34557 JR C,34561       Jump if so */
+    VERIFY(0x86FD, 0x38);
     FETCH(0x86FD);
     IMM(0x86FE);
     if ((F&FC)) { JRTAKEN(0x86FE); goto L8701; }
 L86FF: /* 34559 SUB 180          Otherwise subtract #b180; note that if the original */
+    VERIFY(0x86FF, 0xD6);
     FETCH(0x86FF);
     IMM(0x8700); sub8(mem[(uint16_t)0x8700]);
 L8701: /* 34561 LD L,A           Now #REGl holds either #b255 or some number between #b0 */
+    VERIFY(0x8701, 0x6F);
     FETCH(0x8701);
     L = A;
 L8702: /* 34562 LD H,158         Point #REGhl at one of the entries in the table at */
+    VERIFY(0x8702, 0x26);
     FETCH(0x8702);
     IMM(0x8703); H = mem[(uint16_t)0x8703];
 L8704: /* 34564 LD A,(HL)        Pick up the table entry */
+    VERIFY(0x8704, 0x7E);
     FETCH(0x8704);
     A = RD(HL);
 L8705: /* 34565 ADD A,L          Add #REGl to obtain the actual code */
+    VERIFY(0x8705, 0x85);
     FETCH(0x8705);
     add8(L);
 L8706: /* 34566 LD (34276),A     Store the code at #R34276 */
+    VERIFY(0x8706, 0x32);
     FETCH(0x8706);
     { IMM(0x8707); IMM(0x8708); uint16_t ea = RD16IMM(0x8707);
     WR(ea, A); }
 L8709: /* 34569 LD C,L           Copy the code index to #REGc; this will be used to */
+    VERIFY(0x8709, 0x4D);
     FETCH(0x8709);
     C = L;
 L870A: /* 34570 LD E,47          {Calculate the ASCII code of the grid location number */
+    VERIFY(0x870A, 0x1E);
     FETCH(0x870A);
     IMM(0x870B); E = mem[(uint16_t)0x870B];
 L870C: /* 34572 INC E            (0-9) in #REGe */
+    VERIFY(0x870C, 0x1C);
     FETCH(0x870C);
     E = inc8(E);
 L870D: /* 34573 LD A,C            */
+    VERIFY(0x870D, 0x79);
     FETCH(0x870D);
     A = C;
 L870E: /* 34574 CP 18             */
+    VERIFY(0x870E, 0xFE);
     FETCH(0x870E);
     IMM(0x870F); cp8(mem[(uint16_t)0x870F]);
 L8710: /* 34576 JR C,34583        */
+    VERIFY(0x8710, 0x38);
     FETCH(0x8710);
     IMM(0x8711);
     if ((F&FC)) { JRTAKEN(0x8711); goto L8717; }
 L8712: /* 34578 SUB 18            */
+    VERIFY(0x8712, 0xD6);
     FETCH(0x8712);
     IMM(0x8713); sub8(mem[(uint16_t)0x8713]);
 L8714: /* 34580 LD C,A            */
+    VERIFY(0x8714, 0x4F);
     FETCH(0x8714);
     C = A;
 L8715: /* 34581 JR 34572         } */
+    VERIFY(0x8715, 0x18);
     FETCH(0x8715);
     IMM(0x8716); JRTAKEN(0x8716);
     goto L870C;
 L8717: /* 34583 LD A,E           {Print the grid location number at (8,30) */
+    VERIFY(0x8717, 0x7B);
     FETCH(0x8717);
     A = E;
 L8718: /* 34584 LD DE,18462       */
+    VERIFY(0x8718, 0x11);
     FETCH(0x8718);
     IMM(0x8719); IMM(0x871A); DE = RD16IMM(0x8719);
 L871B: /* 34587 CALL 38545       } */
+    VERIFY(0x871B, 0xCD);
     FETCH(0x871B);
     IMM(0x871C); IMM(0x871D); IC(0x871D, 1);
     PUSHW(0x871E); goto L9691;
 L871E: /* 34590 LD A,C           {Calculate the ASCII code of the grid location letter */
+    VERIFY(0x871E, 0x79);
     FETCH(0x871E);
     A = C;
 L871F: /* 34591 ADD A,65         (A-R) in #REGa} */
+    VERIFY(0x871F, 0xC6);
     FETCH(0x871F);
     IMM(0x8720); add8(mem[(uint16_t)0x8720]);
 L8721: /* 34593 LD DE,18461      {Print the grid location letter at (8,29) */
+    VERIFY(0x8721, 0x11);
     FETCH(0x8721);
     IMM(0x8722); IMM(0x8723); DE = RD16IMM(0x8722);
 L8724: /* 34596 CALL 38545       } */
+    VERIFY(0x8724, 0xCD);
     FETCH(0x8724);
     IMM(0x8725); IMM(0x8726); IC(0x8726, 1);
     PUSHW(0x8727); goto L9691;
 L8727: /* 34599 LD IX,22864      Point #REGix at the attribute file location of the first */
+    VERIFY(0x8727, 0xDD);
     FETCH(0x8727); FETCH(0x8728);
     IMM(0x8729); IMM(0x872A); IX = RD16IMM(0x8729);
 L872B: /* 34603 CALL 34620       Print a coloured block when '1', '2', '3' or '4' is */
+    VERIFY(0x872B, 0xCD);
     FETCH(0x872B);
     IMM(0x872C); IMM(0x872D); IC(0x872D, 1);
     PUSHW(0x872E); goto L873C;
 L872E: /* 34606 INC IX           {Move #REGix along to the location of the next coloured */
+    VERIFY(0x872E, 0xDD);
     FETCH(0x872E); FETCH(0x872F);
     IR(2); IX = (uint16_t)(IX + 1);
 L8730: /* 34608 INC IX           block */
+    VERIFY(0x8730, 0xDD);
     FETCH(0x8730); FETCH(0x8731);
     IR(2); IX = (uint16_t)(IX + 1);
 L8732: /* 34610 INC IX           } */
+    VERIFY(0x8732, 0xDD);
     FETCH(0x8732); FETCH(0x8733);
     IR(2); IX = (uint16_t)(IX + 1);
 L8734: /* 34612 LD A,IXL         {Have we just printed the fourth coloured block at */
+    VERIFY(0x8734, 0xDD);
     FETCH(0x8734); FETCH(0x8735);
     A = IXL;
 L8736: /* 34614 CP 92            (10,25)?} */
+    VERIFY(0x8736, 0xFE);
     FETCH(0x8736);
     IMM(0x8737); cp8(mem[(uint16_t)0x8737]);
 L8738: /* 34616 JR NZ,34603      If not, jump back to print the next one */
+    VERIFY(0x8738, 0x20);
     FETCH(0x8738);
     IMM(0x8739);
     if (!(F&FZ)) { JRTAKEN(0x8739); goto L872B; }
 L873A: /* 34618 JR 34599         Otherwise rewind #REGix to the location of the first */
+    VERIFY(0x873A, 0x18);
     FETCH(0x873A);
     IMM(0x873B); JRTAKEN(0x873B);
     goto L8727;
 
 /* ---- READCODE ---- */
 L873C: /* 34620 LD BC,63486      {Read keys 1-2-3-4-5 */
+    VERIFY(0x873C, 0x01);
     Z80C_HOOK(0x873C);
     FETCH(0x873C);
     IMM(0x873D); IMM(0x873E); BC = RD16IMM(0x873D);
 L873F: /* 34623 IN A,(C)         } */
+    VERIFY(0x873F, 0xED);
     FETCH(0x873F); FETCH(0x8740);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8741: /* 34625 AND 15           {Is '1', '2', '3' or '4' (still) being pressed? */
+    VERIFY(0x8741, 0xE6);
     FETCH(0x8741);
     IMM(0x8742); and8(mem[(uint16_t)0x8742]);
 L8743: /* 34627 CP 15            } */
+    VERIFY(0x8743, 0xFE);
     FETCH(0x8743);
     IMM(0x8744); cp8(mem[(uint16_t)0x8744]);
 L8745: /* 34629 JR NZ,34620      Jump back if so */
+    VERIFY(0x8745, 0x20);
     FETCH(0x8745);
     IMM(0x8746);
     if (!(F&FZ)) { JRTAKEN(0x8746); goto L873C; }
 L8747: /* 34631 LD B,191         {Read keys H-J-K-L-ENTER */
+    VERIFY(0x8747, 0x06);
     Z80C_HOOK(0x8747);
     FETCH(0x8747);
     IMM(0x8748); B = mem[(uint16_t)0x8748];
 L8749: /* 34633 IN A,(C)         } */
+    VERIFY(0x8749, 0xED);
     FETCH(0x8749); FETCH(0x874A);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L874B: /* 34635 BIT 0,A          Is ENTER being pressed? */
+    VERIFY(0x874B, 0xCB);
     FETCH(0x874B); FETCH(0x874C);
     bit(0, A);
 L874D: /* 34637 JR NZ,34693      Jump if not */
+    VERIFY(0x874D, 0x20);
     FETCH(0x874D);
     IMM(0x874E);
     if (!(F&FZ)) { JRTAKEN(0x874E); goto L8785; }
 L874F: /* 34639 LD A,(22873)     Pick up the attribute byte of the fourth 2x2 block at */
+    VERIFY(0x874F, 0x3A);
     FETCH(0x874F);
     { IMM(0x8750); IMM(0x8751); uint16_t ea = RD16IMM(0x8750);
     A = RD(ea); }
 L8752: /* 34642 AND 127          {Has the fourth digit been entered yet? */
+    VERIFY(0x8752, 0xE6);
     FETCH(0x8752);
     IMM(0x8753); and8(mem[(uint16_t)0x8753]);
 L8754: /* 34644 CP 7             } */
+    VERIFY(0x8754, 0xFE);
     FETCH(0x8754);
     IMM(0x8755); cp8(mem[(uint16_t)0x8755]);
 L8756: /* 34646 JR Z,34693       Jump if not */
+    VERIFY(0x8756, 0x28);
     FETCH(0x8756);
     IMM(0x8757);
     if ((F&FZ)) { JRTAKEN(0x8757); goto L8785; }
 L8758: /* 34648 SUB 8            {Compute bits 0 and 1 of the entered code from the */
+    VERIFY(0x8758, 0xD6);
     FETCH(0x8758);
     IMM(0x8759); sub8(mem[(uint16_t)0x8759]);
 L875A: /* 34650 AND 24           attribute byte of the fourth coloured block at (10,25) */
+    VERIFY(0x875A, 0xE6);
     FETCH(0x875A);
     IMM(0x875B); and8(mem[(uint16_t)0x875B]);
 L875C: /* 34652 RRCA             and store them in #REGc */
+    VERIFY(0x875C, 0x0F);
     FETCH(0x875C);
     rrca();
 L875D: /* 34653 RRCA              */
+    VERIFY(0x875D, 0x0F);
     FETCH(0x875D);
     rrca();
 L875E: /* 34654 RRCA              */
+    VERIFY(0x875E, 0x0F);
     FETCH(0x875E);
     rrca();
 L875F: /* 34655 LD C,A           } */
+    VERIFY(0x875F, 0x4F);
     FETCH(0x875F);
     C = A;
 L8760: /* 34656 LD A,(22867)     {Compute bits 4 and 5 of the entered code from the */
+    VERIFY(0x8760, 0x3A);
     FETCH(0x8760);
     { IMM(0x8761); IMM(0x8762); uint16_t ea = RD16IMM(0x8761);
     A = RD(ea); }
 L8763: /* 34659 SUB 8            attribute byte of the second coloured block at (10,19) */
+    VERIFY(0x8763, 0xD6);
     FETCH(0x8763);
     IMM(0x8764); sub8(mem[(uint16_t)0x8764]);
 L8765: /* 34661 AND 24           and store them in #REGc (alongside bits 0 and 1) */
+    VERIFY(0x8765, 0xE6);
     FETCH(0x8765);
     IMM(0x8766); and8(mem[(uint16_t)0x8766]);
 L8767: /* 34663 RLCA              */
+    VERIFY(0x8767, 0x07);
     FETCH(0x8767);
     rlca();
 L8768: /* 34664 OR C              */
+    VERIFY(0x8768, 0xB1);
     FETCH(0x8768);
     or8(C);
 L8769: /* 34665 LD C,A           } */
+    VERIFY(0x8769, 0x4F);
     FETCH(0x8769);
     C = A;
 L876A: /* 34666 LD A,(22870)     {Compute bits 2 and 3 of the entered code from the */
+    VERIFY(0x876A, 0x3A);
     FETCH(0x876A);
     { IMM(0x876B); IMM(0x876C); uint16_t ea = RD16IMM(0x876B);
     A = RD(ea); }
 L876D: /* 34669 SUB 8            attribute byte of the third coloured block at (10,22) */
+    VERIFY(0x876D, 0xD6);
     FETCH(0x876D);
     IMM(0x876E); sub8(mem[(uint16_t)0x876E]);
 L876F: /* 34671 AND 24           and store them in #REGc (alongside bits 0, 1, 4 and 5) */
+    VERIFY(0x876F, 0xE6);
     FETCH(0x876F);
     IMM(0x8770); and8(mem[(uint16_t)0x8770]);
 L8771: /* 34673 RRCA              */
+    VERIFY(0x8771, 0x0F);
     FETCH(0x8771);
     rrca();
 L8772: /* 34674 OR C              */
+    VERIFY(0x8772, 0xB1);
     FETCH(0x8772);
     or8(C);
 L8773: /* 34675 LD C,A           } */
+    VERIFY(0x8773, 0x4F);
     FETCH(0x8773);
     C = A;
 L8774: /* 34676 LD A,(22864)     {Compute bits 6 and 7 of the entered code from the */
+    VERIFY(0x8774, 0x3A);
     FETCH(0x8774);
     { IMM(0x8775); IMM(0x8776); uint16_t ea = RD16IMM(0x8775);
     A = RD(ea); }
 L8777: /* 34679 SUB 8            attribute byte of the first coloured block at (10,16) in */
+    VERIFY(0x8777, 0xD6);
     FETCH(0x8777);
     IMM(0x8778); sub8(mem[(uint16_t)0x8778]);
 L8779: /* 34681 AND 24           #REGa */
+    VERIFY(0x8779, 0xE6);
     FETCH(0x8779);
     IMM(0x877A); and8(mem[(uint16_t)0x877A]);
 L877B: /* 34683 RLCA              */
+    VERIFY(0x877B, 0x07);
     FETCH(0x877B);
     rlca();
 L877C: /* 34684 RLCA              */
+    VERIFY(0x877C, 0x07);
     FETCH(0x877C);
     rlca();
 L877D: /* 34685 RLCA             } */
+    VERIFY(0x877D, 0x07);
     FETCH(0x877D);
     rlca();
 L877E: /* 34686 POP HL           Drop the return address from the stack */
+    VERIFY(0x877E, 0xE1);
     FETCH(0x877E);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L877F: /* 34687 OR C             Merge bits 0-5 of the entered code into #REGa; now #REGa */
+    VERIFY(0x877F, 0xB1);
     FETCH(0x877F);
     or8(C);
 L8780: /* 34688 LD HL,34276      Point #REGhl at #R34276 (where the correct entry code is */
+    VERIFY(0x8780, 0x21);
     FETCH(0x8780);
     IMM(0x8781); IMM(0x8782); HL = RD16IMM(0x8781);
 L8783: /* 34691 CP (HL)          Set the zero flag if the entered code matches */
+    VERIFY(0x8783, 0xBE);
     FETCH(0x8783);
     cp8(RD(HL));
 L8784: /* 34692 RET              Return to the routine at #R34463 */
+    VERIFY(0x8784, 0xC9);
     FETCH(0x8784);
     POPPC(); goto dispatch;
 L8785: /* 34693 SET 7,(IX+0)     {Make sure the current 2x2 block is flashing */
+    VERIFY(0x8785, 0xDD);
     FETCH(0x8785); FETCH(0x8786); IMM(0x8787); IMM(0x8788); IC(0x8788, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8787]); uint8_t v = RD(ea);
     IC(ea, 1); WR(ea, (uint8_t)(v | (1u << 7))); }
 L8789: /* 34697 SET 7,(IX+1)      */
+    VERIFY(0x8789, 0xDD);
     FETCH(0x8789); FETCH(0x878A); IMM(0x878B); IMM(0x878C); IC(0x878C, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x878B]); uint8_t v = RD(ea);
     IC(ea, 1); WR(ea, (uint8_t)(v | (1u << 7))); }
 L878D: /* 34701 SET 7,(IX+32)     */
+    VERIFY(0x878D, 0xDD);
     FETCH(0x878D); FETCH(0x878E); IMM(0x878F); IMM(0x8790); IC(0x8790, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x878F]); uint8_t v = RD(ea);
     IC(ea, 1); WR(ea, (uint8_t)(v | (1u << 7))); }
 L8791: /* 34705 SET 7,(IX+33)    } */
+    VERIFY(0x8791, 0xDD);
     FETCH(0x8791); FETCH(0x8792); IMM(0x8793); IMM(0x8794); IC(0x8794, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8793]); uint8_t v = RD(ea);
     IC(ea, 1); WR(ea, (uint8_t)(v | (1u << 7))); }
 L8795: /* 34709 LD BC,63486      {Read keys 1-2-3-4-5 */
+    VERIFY(0x8795, 0x01);
     FETCH(0x8795);
     IMM(0x8796); IMM(0x8797); BC = RD16IMM(0x8796);
 L8798: /* 34712 IN A,(C)         } */
+    VERIFY(0x8798, 0xED);
     FETCH(0x8798); FETCH(0x8799);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L879A: /* 34714 AND 15           Keep only bits 0-3 (keys 1-2-3-4) */
+    VERIFY(0x879A, 0xE6);
     FETCH(0x879A);
     IMM(0x879B); and8(mem[(uint16_t)0x879B]);
 L879C: /* 34716 LD E,8           #REGe=#b8 (INK 0: PAPER 1) */
+    VERIFY(0x879C, 0x1E);
     FETCH(0x879C);
     IMM(0x879D); E = mem[(uint16_t)0x879D];
 L879E: /* 34718 CP 14            Is '1' alone being pressed? */
+    VERIFY(0x879E, 0xFE);
     FETCH(0x879E);
     IMM(0x879F); cp8(mem[(uint16_t)0x879F]);
 L87A0: /* 34720 JR Z,34741       Jump if so */
+    VERIFY(0x87A0, 0x28);
     FETCH(0x87A0);
     IMM(0x87A1);
     if ((F&FZ)) { JRTAKEN(0x87A1); goto L87B5; }
 L87A2: /* 34722 LD E,16          #REGe=#b16 (INK 0: PAPER 2) */
+    VERIFY(0x87A2, 0x1E);
     FETCH(0x87A2);
     IMM(0x87A3); E = mem[(uint16_t)0x87A3];
 L87A4: /* 34724 CP 13            Is '2' alone being pressed? */
+    VERIFY(0x87A4, 0xFE);
     FETCH(0x87A4);
     IMM(0x87A5); cp8(mem[(uint16_t)0x87A5]);
 L87A6: /* 34726 JR Z,34741       Jump if so */
+    VERIFY(0x87A6, 0x28);
     FETCH(0x87A6);
     IMM(0x87A7);
     if ((F&FZ)) { JRTAKEN(0x87A7); goto L87B5; }
 L87A8: /* 34728 LD E,24          #REGe=#b24 (INK 0: PAPER 3) */
+    VERIFY(0x87A8, 0x1E);
     FETCH(0x87A8);
     IMM(0x87A9); E = mem[(uint16_t)0x87A9];
 L87AA: /* 34730 CP 11            Is '3' alone being pressed? */
+    VERIFY(0x87AA, 0xFE);
     FETCH(0x87AA);
     IMM(0x87AB); cp8(mem[(uint16_t)0x87AB]);
 L87AC: /* 34732 JR Z,34741       Jump if so */
+    VERIFY(0x87AC, 0x28);
     FETCH(0x87AC);
     IMM(0x87AD);
     if ((F&FZ)) { JRTAKEN(0x87AD); goto L87B5; }
 L87AE: /* 34734 LD E,32          #REGe=#b32 (INK 0: PAPER 4) */
+    VERIFY(0x87AE, 0x1E);
     FETCH(0x87AE);
     IMM(0x87AF); E = mem[(uint16_t)0x87AF];
 L87B0: /* 34736 CP 7             Is '4' alone being pressed? */
+    VERIFY(0x87B0, 0xFE);
     FETCH(0x87B0);
     IMM(0x87B1); cp8(mem[(uint16_t)0x87B1]);
 L87B2: /* 34738 JP NZ,34631      If not, jump back to check the ENTER key */
+    VERIFY(0x87B2, 0xC2);
     FETCH(0x87B2);
     IMM(0x87B3); IMM(0x87B4);
     if (!(F&FZ)) goto L8747;
 L87B5: /* 34741 LD (IX+0),E      {Set the colour of the 2x2 block (no longer flashing) */
+    VERIFY(0x87B5, 0xDD);
     FETCH(0x87B5); FETCH(0x87B6);
     IMM(0x87B7); IC(0x87B7, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x87B7]); WR(ea, E); }
 L87B8: /* 34744 LD (IX+1),E       */
+    VERIFY(0x87B8, 0xDD);
     FETCH(0x87B8); FETCH(0x87B9);
     IMM(0x87BA); IC(0x87BA, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x87BA]); WR(ea, E); }
 L87BB: /* 34747 LD (IX+32),E      */
+    VERIFY(0x87BB, 0xDD);
     FETCH(0x87BB); FETCH(0x87BC);
     IMM(0x87BD); IC(0x87BD, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x87BD]); WR(ea, E); }
 L87BE: /* 34750 LD (IX+33),E     } */
+    VERIFY(0x87BE, 0xDD);
     FETCH(0x87BE); FETCH(0x87BF);
     IMM(0x87C0); IC(0x87C0, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x87C0]); WR(ea, E); }
 L87C1: /* 34753 LD BC,24         {Pause for about 0.02s */
+    VERIFY(0x87C1, 0x01);
     FETCH(0x87C1);
     IMM(0x87C2); IMM(0x87C3); BC = RD16IMM(0x87C2);
 L87C4: /* 34756 DJNZ 34756        */
+    VERIFY(0x87C4, 0x10);
     FETCH(0x87C4);
     T(1); IMM(0x87C5);
     if (--B) { JRTAKEN(0x87C5); goto L87C4; }
 L87C6: /* 34758 DEC C             */
+    VERIFY(0x87C6, 0x0D);
     FETCH(0x87C6);
     C = dec8(C);
 L87C7: /* 34759 JR NZ,34756      } */
+    VERIFY(0x87C7, 0x20);
     FETCH(0x87C7);
     IMM(0x87C8);
     if (!(F&FZ)) { JRTAKEN(0x87C8); goto L87C4; }
 L87C9: /* 34761 RET               */
+    VERIFY(0x87C9, 0xC9);
     FETCH(0x87C9);
     POPPC(); goto dispatch;
 
 /* ---- TITLESCREEN ---- */
 L87CA: /* 34762 XOR A            #REGa=0 */
+    VERIFY(0x87CA, 0xAF);
     Z80C_HOOK(0x87CA);
     FETCH(0x87CA);
     xor8(A);
 L87CB: /* 34763 LD (34254),A     Initialise the Kempston joystick indicator at #R34254 */
+    VERIFY(0x87CB, 0x32);
     FETCH(0x87CB);
     { IMM(0x87CC); IMM(0x87CD); uint16_t ea = RD16IMM(0x87CC);
     WR(ea, A); }
 L87CE: /* 34766 LD (34273),A     Initialise the in-game music note index at #R34273 */
+    VERIFY(0x87CE, 0x32);
     FETCH(0x87CE);
     { IMM(0x87CF); IMM(0x87D0); uint16_t ea = RD16IMM(0x87CF);
     WR(ea, A); }
 L87D1: /* 34769 LD (34253),A     Initialise the (unused) screen flash counter at #R34253 */
+    VERIFY(0x87D1, 0x32);
     FETCH(0x87D1);
     { IMM(0x87D2); IMM(0x87D3); uint16_t ea = RD16IMM(0x87D2);
     WR(ea, A); }
 L87D4: /* 34772 LD (34257),A     Initialise the airborne status indicator at #R34257 */
+    VERIFY(0x87D4, 0x32);
     FETCH(0x87D4);
     { IMM(0x87D5); IMM(0x87D6); uint16_t ea = RD16IMM(0x87D5);
     WR(ea, A); }
 L87D7: /* 34775 LD (34251),A     Initialise the minute counter at #R34251 */
+    VERIFY(0x87D7, 0x32);
     FETCH(0x87D7);
     { IMM(0x87D8); IMM(0x87D9); uint16_t ea = RD16IMM(0x87D8);
     WR(ea, A); }
 L87DA: /* 34778 LD (34272),A     Initialise the inactivity timer at #R34272 */
+    VERIFY(0x87DA, 0x32);
     FETCH(0x87DA);
     { IMM(0x87DB); IMM(0x87DC); uint16_t ea = RD16IMM(0x87DB);
     WR(ea, A); }
 L87DD: /* 34781 LD (34271),A     Initialise the game mode indicator at #R34271 */
+    VERIFY(0x87DD, 0x32);
     FETCH(0x87DD);
     { IMM(0x87DE); IMM(0x87DF); uint16_t ea = RD16IMM(0x87DE);
     WR(ea, A); }
 L87E0: /* 34784 LD A,7           {Initialise the number of lives remaining at #R34252 */
+    VERIFY(0x87E0, 0x3E);
     FETCH(0x87E0);
     IMM(0x87E1); A = mem[(uint16_t)0x87E1];
 L87E2: /* 34786 LD (34252),A     } */
+    VERIFY(0x87E2, 0x32);
     FETCH(0x87E2);
     { IMM(0x87E3); IMM(0x87E4); uint16_t ea = RD16IMM(0x87E3);
     WR(ea, A); }
 L87E5: /* 34789 LD A,208         {Initialise Willy's y-coordinate at #R34255 */
+    VERIFY(0x87E5, 0x3E);
     FETCH(0x87E5);
     IMM(0x87E6); A = mem[(uint16_t)0x87E6];
 L87E7: /* 34791 LD (34255),A     } */
+    VERIFY(0x87E7, 0x32);
     FETCH(0x87E7);
     { IMM(0x87E8); IMM(0x87E9); uint16_t ea = RD16IMM(0x87E8);
     WR(ea, A); }
 L87EA: /* 34794 LD A,33          {Initialise the current room number at #R33824 to #b33 */
+    VERIFY(0x87EA, 0x3E);
     FETCH(0x87EA);
     IMM(0x87EB); A = mem[(uint16_t)0x87EB];
 L87EC: /* 34796 LD (33824),A     (#R57600(The Bathroom))} */
+    VERIFY(0x87EC, 0x32);
     FETCH(0x87EC);
     { IMM(0x87ED); IMM(0x87EE); uint16_t ea = RD16IMM(0x87ED);
     WR(ea, A); }
 L87EF: /* 34799 LD HL,23988      {Initialise Willy's coordinates at #R34259 to (13,20) */
+    VERIFY(0x87EF, 0x21);
     FETCH(0x87EF);
     IMM(0x87F0); IMM(0x87F1); HL = RD16IMM(0x87F0);
 L87F2: /* 34802 LD (34259),HL    } */
+    VERIFY(0x87F2, 0x22);
     FETCH(0x87F2);
     { IMM(0x87F3); IMM(0x87F4); uint16_t ea = RD16IMM(0x87F3);
     WR(ea, L); WR((uint16_t)(ea + 1), H); }
 L87F5: /* 34805 LD HL,34172      {Initialise the number of items collected at #R34172 to */
+    VERIFY(0x87F5, 0x21);
     FETCH(0x87F5);
     IMM(0x87F6); IMM(0x87F7); HL = RD16IMM(0x87F6);
 L87F8: /* 34808 LD (HL),48       "000" */
+    VERIFY(0x87F8, 0x36);
     FETCH(0x87F8);
     IMM(0x87F9); WR(HL, mem[(uint16_t)0x87F9]);
 L87FA: /* 34810 INC HL            */
+    VERIFY(0x87FA, 0x23);
     FETCH(0x87FA);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L87FB: /* 34811 LD (HL),48        */
+    VERIFY(0x87FB, 0x36);
     FETCH(0x87FB);
     IMM(0x87FC); WR(HL, mem[(uint16_t)0x87FC]);
 L87FD: /* 34813 INC HL            */
+    VERIFY(0x87FD, 0x23);
     FETCH(0x87FD);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L87FE: /* 34814 LD (HL),48       } */
+    VERIFY(0x87FE, 0x36);
     FETCH(0x87FE);
     IMM(0x87FF); WR(HL, mem[(uint16_t)0x87FF]);
 L8800: /* 34816 LD H,164         Page #R41984(#b164) holds the first byte of each entry */
+    VERIFY(0x8800, 0x26);
     FETCH(0x8800);
     IMM(0x8801); H = mem[(uint16_t)0x8801];
 L8802: /* 34818 LD A,(41983)     Pick up the index of the first item from #R41983 */
+    VERIFY(0x8802, 0x3A);
     FETCH(0x8802);
     { IMM(0x8803); IMM(0x8804); uint16_t ea = RD16IMM(0x8803);
     A = RD(ea); }
 L8805: /* 34821 LD L,A           Point #REGhl at the entry for the first item */
+    VERIFY(0x8805, 0x6F);
     FETCH(0x8805);
     L = A;
 L8806: /* 34822 LD (34270),A     Initialise the counter of items remaining at #R34270 */
+    VERIFY(0x8806, 0x32);
     FETCH(0x8806);
     { IMM(0x8807); IMM(0x8808); uint16_t ea = RD16IMM(0x8807);
     WR(ea, A); }
 L8809: /* 34825 SET 6,(HL)       {Set the collection flag for every item in the item */
+    VERIFY(0x8809, 0xCB);
     FETCH(0x8809); FETCH(0x880A);
     { uint8_t v = RD(HL); IC(HL, 1); WR(HL, (uint8_t)(v | (1u << 6))); }
 L880B: /* 34827 INC L            table at #R41984 */
+    VERIFY(0x880B, 0x2C);
     FETCH(0x880B);
     L = inc8(L);
 L880C: /* 34828 JR NZ,34825      } */
+    VERIFY(0x880C, 0x20);
     FETCH(0x880C);
     IMM(0x880D);
     if (!(F&FZ)) { JRTAKEN(0x880D); goto L8809; }
 L880E: /* 34830 LD HL,34274      {Initialise the keypress flag in bit 0 at #R34274 */
+    VERIFY(0x880E, 0x21);
     FETCH(0x880E);
     IMM(0x880F); IMM(0x8810); HL = RD16IMM(0x880F);
 L8811: /* 34833 SET 0,(HL)       } */
+    VERIFY(0x8811, 0xCB);
     FETCH(0x8811); FETCH(0x8812);
     { uint8_t v = RD(HL); IC(HL, 1); WR(HL, (uint8_t)(v | (1u << 0))); }
 L8813: /* 34835 LD HL,16384      {Clear the entire display file */
+    VERIFY(0x8813, 0x21);
     FETCH(0x8813);
     IMM(0x8814); IMM(0x8815); HL = RD16IMM(0x8814);
 L8816: /* 34838 LD DE,16385       */
+    VERIFY(0x8816, 0x11);
     FETCH(0x8816);
     IMM(0x8817); IMM(0x8818); DE = RD16IMM(0x8817);
 L8819: /* 34841 LD BC,6143        */
+    VERIFY(0x8819, 0x01);
     FETCH(0x8819);
     IMM(0x881A); IMM(0x881B); BC = RD16IMM(0x881A);
 L881C: /* 34844 LD (HL),0         */
+    VERIFY(0x881C, 0x36);
     FETCH(0x881C);
     IMM(0x881D); WR(HL, mem[(uint16_t)0x881D]);
 L881E: /* 34846 LDIR             } */
+    VERIFY(0x881E, 0xED);
     FETCH(0x881E); FETCH(0x881F);
     if (ldi_rep(+1)) goto L881E;
 L8820: /* 34848 LD HL,38912      {Copy the attribute bytes for the title screen from */
+    VERIFY(0x8820, 0x21);
     FETCH(0x8820);
     IMM(0x8821); IMM(0x8822); HL = RD16IMM(0x8821);
 L8823: /* 34851 LD BC,768        #R38912 and #R39424 to the attribute file */
+    VERIFY(0x8823, 0x01);
     FETCH(0x8823);
     IMM(0x8824); IMM(0x8825); BC = RD16IMM(0x8824);
 L8826: /* 34854 LDIR             } */
+    VERIFY(0x8826, 0xED);
     FETCH(0x8826); FETCH(0x8827);
     if (ldi_rep(+1)) goto L8826;
 L8828: /* 34856 LD HL,23136      {Copy the attribute value #b70 (INK 6: PAPER 0: BRIGHT */
+    VERIFY(0x8828, 0x21);
     FETCH(0x8828);
     IMM(0x8829); IMM(0x882A); HL = RD16IMM(0x8829);
 L882B: /* 34859 LD DE,23137      1) into the row of 32 cells from (19,0) to (19,31) on */
+    VERIFY(0x882B, 0x11);
     FETCH(0x882B);
     IMM(0x882C); IMM(0x882D); DE = RD16IMM(0x882C);
 L882E: /* 34862 LD BC,31         the screen */
+    VERIFY(0x882E, 0x01);
     FETCH(0x882E);
     IMM(0x882F); IMM(0x8830); BC = RD16IMM(0x882F);
 L8831: /* 34865 LD (HL),70        */
+    VERIFY(0x8831, 0x36);
     FETCH(0x8831);
     IMM(0x8832); WR(HL, mem[(uint16_t)0x8832]);
 L8833: /* 34867 LDIR             } */
+    VERIFY(0x8833, 0xED);
     FETCH(0x8833); FETCH(0x8834);
     if (ldi_rep(+1)) goto L8833;
 L8835: /* 34869 LD IX,33876      {Print "+++++ Press ENTER to Start +++++" (see #R33876) */
+    VERIFY(0x8835, 0xDD);
     FETCH(0x8835); FETCH(0x8836);
     IMM(0x8837); IMM(0x8838); IX = RD16IMM(0x8837);
 L8839: /* 34873 LD DE,20576      at (19,0) */
+    VERIFY(0x8839, 0x11);
     FETCH(0x8839);
     IMM(0x883A); IMM(0x883B); DE = RD16IMM(0x883A);
 L883C: /* 34876 LD C,32           */
+    VERIFY(0x883C, 0x0E);
     FETCH(0x883C);
     IMM(0x883D); C = mem[(uint16_t)0x883D];
 L883E: /* 34878 CALL 38528       } */
+    VERIFY(0x883E, 0xCD);
     FETCH(0x883E);
     IMM(0x883F); IMM(0x8840); IC(0x8840, 1);
     PUSHW(0x8841); goto L9680;
 L8841: /* 34881 LD DE,22528      Point #REGde at the first byte of the attribute file */
+    VERIFY(0x8841, 0x11);
     FETCH(0x8841);
     IMM(0x8842); IMM(0x8843); DE = RD16IMM(0x8842);
 L8844: /* 34884 LD A,(DE)        Pick up a byte from the attribute file */
+    VERIFY(0x8844, 0x1A);
     FETCH(0x8844);
     A = RD(DE);
 L8845: /* 34885 OR A             Is it #b0 (INK 0: PAPER 0)? */
+    VERIFY(0x8845, 0xB7);
     FETCH(0x8845);
     or8(A);
 L8846: /* 34886 JR Z,34958       If so, jump to consider the next byte in the attribute */
+    VERIFY(0x8846, 0x28);
     FETCH(0x8846);
     IMM(0x8847);
     if ((F&FZ)) { JRTAKEN(0x8847); goto L888E; }
 L8848: /* 34888 CP 211           Is it #b211 (INK 3: PAPER 2: BRIGHT 1: FLASH 1)? */
+    VERIFY(0x8848, 0xFE);
     FETCH(0x8848);
     IMM(0x8849); cp8(mem[(uint16_t)0x8849]);
 L884A: /* 34890 JR Z,34958       If so, jump to consider the next byte in the attribute */
+    VERIFY(0x884A, 0x28);
     FETCH(0x884A);
     IMM(0x884B);
     if ((F&FZ)) { JRTAKEN(0x884B); goto L888E; }
 L884C: /* 34892 CP 9             Is it #b9 (INK 1: PAPER 1)? */
+    VERIFY(0x884C, 0xFE);
     FETCH(0x884C);
     IMM(0x884D); cp8(mem[(uint16_t)0x884D]);
 L884E: /* 34894 JR Z,34958       If so, jump to consider the next byte in the attribute */
+    VERIFY(0x884E, 0x28);
     FETCH(0x884E);
     IMM(0x884F);
     if ((F&FZ)) { JRTAKEN(0x884F); goto L888E; }
 L8850: /* 34896 CP 45            Is it #b45 (INK 5: PAPER 5)? */
+    VERIFY(0x8850, 0xFE);
     FETCH(0x8850);
     IMM(0x8851); cp8(mem[(uint16_t)0x8851]);
 L8852: /* 34898 JR Z,34958       If so, jump to consider the next byte in the attribute */
+    VERIFY(0x8852, 0x28);
     FETCH(0x8852);
     IMM(0x8853);
     if ((F&FZ)) { JRTAKEN(0x8853); goto L888E; }
 L8854: /* 34900 CP 36            Is it #b36 (INK 4: PAPER 4)? */
+    VERIFY(0x8854, 0xFE);
     FETCH(0x8854);
     IMM(0x8855); cp8(mem[(uint16_t)0x8855]);
 L8856: /* 34902 JR Z,34958       If so, jump to consider the next byte in the attribute */
+    VERIFY(0x8856, 0x28);
     FETCH(0x8856);
     IMM(0x8857);
     if ((F&FZ)) { JRTAKEN(0x8857); goto L888E; }
 L8858: /* 34904 LD C,0           #REGc=0; this will be used as an offset from the */
+    VERIFY(0x8858, 0x0E);
     FETCH(0x8858);
     IMM(0x8859); C = mem[(uint16_t)0x8859];
 L885A: /* 34906 CP 8             Is the attribute value #b8 (INK 0: PAPER 1)? */
+    VERIFY(0x885A, 0xFE);
     FETCH(0x885A);
     IMM(0x885B); cp8(mem[(uint16_t)0x885B]);
 L885C: /* 34908 JR Z,34929       Jump if so */
+    VERIFY(0x885C, 0x28);
     FETCH(0x885C);
     IMM(0x885D);
     if ((F&FZ)) { JRTAKEN(0x885D); goto L8871; }
 L885E: /* 34910 CP 41            Is it #b41 (INK 1: PAPER 5)? */
+    VERIFY(0x885E, 0xFE);
     FETCH(0x885E);
     IMM(0x885F); cp8(mem[(uint16_t)0x885F]);
 L8860: /* 34912 JR Z,34929       Jump if so */
+    VERIFY(0x8860, 0x28);
     FETCH(0x8860);
     IMM(0x8861);
     if ((F&FZ)) { JRTAKEN(0x8861); goto L8871; }
 L8862: /* 34914 CP 44            Is it #b44 (INK 4: PAPER 5)? */
+    VERIFY(0x8862, 0xFE);
     FETCH(0x8862);
     IMM(0x8863); cp8(mem[(uint16_t)0x8863]);
 L8864: /* 34916 JR Z,34926       Jump if so */
+    VERIFY(0x8864, 0x28);
     FETCH(0x8864);
     IMM(0x8865);
     if ((F&FZ)) { JRTAKEN(0x8865); goto L886E; }
 L8866: /* 34918 CP 5             Is it #b5 (INK 5: PAPER 0)? */
+    VERIFY(0x8866, 0xFE);
     FETCH(0x8866);
     IMM(0x8867); cp8(mem[(uint16_t)0x8867]);
 L8868: /* 34920 JR Z,34929       Jump if so */
+    VERIFY(0x8868, 0x28);
     FETCH(0x8868);
     IMM(0x8869);
     if ((F&FZ)) { JRTAKEN(0x8869); goto L8871; }
 L886A: /* 34922 LD C,16          Set the triangle UDG offset to #b16 */
+    VERIFY(0x886A, 0x0E);
     FETCH(0x886A);
     IMM(0x886B); C = mem[(uint16_t)0x886B];
 L886C: /* 34924 JR 34929          */
+    VERIFY(0x886C, 0x18);
     FETCH(0x886C);
     IMM(0x886D); JRTAKEN(0x886D);
     goto L8871;
 L886E: /* 34926 LD A,37          {Change the attribute byte here from #b44 (INK 4: PAPER */
+    VERIFY(0x886E, 0x3E);
     FETCH(0x886E);
     IMM(0x886F); A = mem[(uint16_t)0x886F];
 L8870: /* 34928 LD (DE),A        5) to #b37 (INK 5: PAPER 4)} */
+    VERIFY(0x8870, 0x12);
     FETCH(0x8870);
     WR(DE, A);
 L8871: /* 34929 LD A,E           {Point #REGhl at the triangle UDG to draw (#R33841, */
+    VERIFY(0x8871, 0x7B);
     FETCH(0x8871);
     A = E;
 L8872: /* 34930 AND 1            #R33849, #R33857 or #R33865) */
+    VERIFY(0x8872, 0xE6);
     FETCH(0x8872);
     IMM(0x8873); and8(mem[(uint16_t)0x8873]);
 L8874: /* 34932 RLCA              */
+    VERIFY(0x8874, 0x07);
     FETCH(0x8874);
     rlca();
 L8875: /* 34933 RLCA              */
+    VERIFY(0x8875, 0x07);
     FETCH(0x8875);
     rlca();
 L8876: /* 34934 RLCA              */
+    VERIFY(0x8876, 0x07);
     FETCH(0x8876);
     rlca();
 L8877: /* 34935 OR C              */
+    VERIFY(0x8877, 0xB1);
     FETCH(0x8877);
     or8(C);
 L8878: /* 34936 LD C,A            */
+    VERIFY(0x8878, 0x4F);
     FETCH(0x8878);
     C = A;
 L8879: /* 34937 LD B,0            */
+    VERIFY(0x8879, 0x06);
     FETCH(0x8879);
     IMM(0x887A); B = mem[(uint16_t)0x887A];
 L887B: /* 34939 LD HL,33841       */
+    VERIFY(0x887B, 0x21);
     FETCH(0x887B);
     IMM(0x887C); IMM(0x887D); HL = RD16IMM(0x887C);
 L887E: /* 34942 ADD HL,BC        } */
+    VERIFY(0x887E, 0x09);
     FETCH(0x887E);
     IR(7);
     HL = add16(HL, BC);
 L887F: /* 34943 PUSH DE          Save the attribute file address briefly */
+    VERIFY(0x887F, 0xD5);
     FETCH(0x887F);
     IR(1);
     PUSHW(DE);
 L8880: /* 34944 BIT 0,D          Set the zero flag if we're still in the top third of the */
+    VERIFY(0x8880, 0xCB);
     FETCH(0x8880); FETCH(0x8881);
     bit(0, D);
 L8882: /* 34946 LD D,64          Point #REGde at the top third of the display file */
+    VERIFY(0x8882, 0x16);
     FETCH(0x8882);
     IMM(0x8883); D = mem[(uint16_t)0x8883];
 L8884: /* 34948 JR Z,34952       Jump if we're still in the top third of the attribute */
+    VERIFY(0x8884, 0x28);
     FETCH(0x8884);
     IMM(0x8885);
     if ((F&FZ)) { JRTAKEN(0x8885); goto L8888; }
 L8886: /* 34950 LD D,72          Point #REGde at the middle third of the display file */
+    VERIFY(0x8886, 0x16);
     FETCH(0x8886);
     IMM(0x8887); D = mem[(uint16_t)0x8887];
 L8888: /* 34952 LD B,8           There are eight pixel rows in a triangle UDG */
+    VERIFY(0x8888, 0x06);
     FETCH(0x8888);
     IMM(0x8889); B = mem[(uint16_t)0x8889];
 L888A: /* 34954 CALL 38555       Draw a triangle UDG on the screen */
+    VERIFY(0x888A, 0xCD);
     FETCH(0x888A);
     IMM(0x888B); IMM(0x888C); IC(0x888C, 1);
     PUSHW(0x888D); goto L969B;
 L888D: /* 34957 POP DE           Restore the attribute file address to #REGde */
+    VERIFY(0x888D, 0xD1);
     FETCH(0x888D);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; DE = (uint16_t)(lo | (hi << 8)); }
 L888E: /* 34958 INC DE           Point #REGde at the next byte in the attribute file */
+    VERIFY(0x888E, 0x13);
     FETCH(0x888E);
     IR(2);
     DE = (uint16_t)(DE + 1);
 L888F: /* 34959 LD A,D           {Have we finished scanning the top two-thirds of the */
+    VERIFY(0x888F, 0x7A);
     FETCH(0x888F);
     A = D;
 L8890: /* 34960 CP 90            attribute file yet?} */
+    VERIFY(0x8890, 0xFE);
     FETCH(0x8890);
     IMM(0x8891); cp8(mem[(uint16_t)0x8891]);
 L8892: /* 34962 JP NZ,34884      If not, jump back to examine the next byte */
+    VERIFY(0x8892, 0xC2);
     FETCH(0x8892);
     IMM(0x8893); IMM(0x8894);
     if (!(F&FZ)) goto L8844;
 L8895: /* 34965 LD BC,31         This is the joystick port */
+    VERIFY(0x8895, 0x01);
     FETCH(0x8895);
     IMM(0x8896); IMM(0x8897); BC = RD16IMM(0x8896);
 L8898: /* 34968 DI               Disable interrupts (which are already disabled) */
+    VERIFY(0x8898, 0xF3);
     FETCH(0x8898);
     zx_iff = 0;
 L8899: /* 34969 XOR A            #REGa=0 */
+    VERIFY(0x8899, 0xAF);
     FETCH(0x8899);
     xor8(A);
 L889A: /* 34970 IN E,(C)         {Combine 256 readings of the joystick port in #REGa; if */
+    VERIFY(0x889A, 0xED);
     FETCH(0x889A); FETCH(0x889B);
     { uint8_t v = INP(BC); in_flags(v); E = v; }
 L889C: /* 34972 OR E             no joystick is connected, some of these readings will */
+    VERIFY(0x889C, 0xB3);
     FETCH(0x889C);
     or8(E);
 L889D: /* 34973 DJNZ 34970       have bit 5 set} */
+    VERIFY(0x889D, 0x10);
     FETCH(0x889D);
     T(1); IMM(0x889E);
     if (--B) { JRTAKEN(0x889E); goto L889A; }
 L889F: /* 34975 AND 32           Is a joystick connected (bit 5 reset)? */
+    VERIFY(0x889F, 0xE6);
     FETCH(0x889F);
     IMM(0x88A0); and8(mem[(uint16_t)0x88A0]);
 L88A1: /* 34977 JR NZ,34984      Jump if not */
+    VERIFY(0x88A1, 0x20);
     FETCH(0x88A1);
     IMM(0x88A2);
     if (!(F&FZ)) { JRTAKEN(0x88A2); goto L88A8; }
 L88A3: /* 34979 LD A,1           {Set the Kempston joystick indicator at #R34254 to 1 */
+    VERIFY(0x88A3, 0x3E);
     FETCH(0x88A3);
     IMM(0x88A4); A = mem[(uint16_t)0x88A4];
 L88A5: /* 34981 LD (34254),A     } */
+    VERIFY(0x88A5, 0x32);
     FETCH(0x88A5);
     { IMM(0x88A6); IMM(0x88A7); uint16_t ea = RD16IMM(0x88A6);
     WR(ea, A); }
 L88A8: /* 34984 LD HL,34299      Point #REGhl at the theme tune data at #R34299 */
+    VERIFY(0x88A8, 0x21);
     FETCH(0x88A8);
     IMM(0x88A9); IMM(0x88AA); HL = RD16IMM(0x88A9);
 L88AB: /* 34987 CALL 38562       Play the theme tune */
+    VERIFY(0x88AB, 0xCD);
     FETCH(0x88AB);
     IMM(0x88AC); IMM(0x88AD); IC(0x88AD, 1);
     PUSHW(0x88AE); goto L96A2;
 L88AE: /* 34990 JP NZ,35068      Start the game if ENTER, 0 or the fire button was */
+    VERIFY(0x88AE, 0xC2);
     FETCH(0x88AE);
     IMM(0x88AF); IMM(0x88B0);
     if (!(F&FZ)) goto L88FC;
 L88B1: /* 34993 XOR A            {Initialise the temporary game status buffer variable at */
+    VERIFY(0x88B1, 0xAF);
     FETCH(0x88B1);
     xor8(A);
 L88B2: /* 34994 LD (34276),A     #R34276 to 0; this will be used as an index for the */
+    VERIFY(0x88B2, 0x32);
     FETCH(0x88B2);
     { IMM(0x88B3); IMM(0x88B4); uint16_t ea = RD16IMM(0x88B3);
     WR(ea, A); }
 L88B5: /* 34997 CALL 35563       Cycle the INK and PAPER colours */
+    VERIFY(0x88B5, 0xCD);
     FETCH(0x88B5);
     IMM(0x88B6); IMM(0x88B7); IC(0x88B7, 1);
     PUSHW(0x88B8); goto L8AEB;
 L88B8: /* 35000 LD HL,23136      {Copy the attribute value #b79 (INK 7: PAPER 1: BRIGHT */
+    VERIFY(0x88B8, 0x21);
     FETCH(0x88B8);
     IMM(0x88B9); IMM(0x88BA); HL = RD16IMM(0x88B9);
 L88BB: /* 35003 LD DE,23137      1) into the row of 32 cells from (19,0) to (19,31) on */
+    VERIFY(0x88BB, 0x11);
     FETCH(0x88BB);
     IMM(0x88BC); IMM(0x88BD); DE = RD16IMM(0x88BC);
 L88BE: /* 35006 LD BC,31         the screen */
+    VERIFY(0x88BE, 0x01);
     FETCH(0x88BE);
     IMM(0x88BF); IMM(0x88C0); BC = RD16IMM(0x88BF);
 L88C1: /* 35009 LD (HL),79        */
+    VERIFY(0x88C1, 0x36);
     FETCH(0x88C1);
     IMM(0x88C2); WR(HL, mem[(uint16_t)0x88C2]);
 L88C3: /* 35011 LDIR             } */
+    VERIFY(0x88C3, 0xED);
     FETCH(0x88C3); FETCH(0x88C4);
     if (ldi_rep(+1)) goto L88C3;
 L88C5: /* 35013 LD A,(34276)     Pick up the message index from #R34276 */
+    VERIFY(0x88C5, 0x3A);
     FETCH(0x88C5);
     { IMM(0x88C6); IMM(0x88C7); uint16_t ea = RD16IMM(0x88C6);
     A = RD(ea); }
 L88C8: /* 35016 LD IX,33876      {Point #REGix at the corresponding location in the */
+    VERIFY(0x88C8, 0xDD);
     FETCH(0x88C8); FETCH(0x88C9);
     IMM(0x88CA); IMM(0x88CB); IX = RD16IMM(0x88CA);
 L88CC: /* 35020 LD E,A           message at #R33876 */
+    VERIFY(0x88CC, 0x5F);
     FETCH(0x88CC);
     E = A;
 L88CD: /* 35021 LD D,0            */
+    VERIFY(0x88CD, 0x16);
     FETCH(0x88CD);
     IMM(0x88CE); D = mem[(uint16_t)0x88CE];
 L88CF: /* 35023 ADD IX,DE        } */
+    VERIFY(0x88CF, 0xDD);
     FETCH(0x88CF); FETCH(0x88D0);
     IR(7); IX = add16(IX, DE);
 L88D1: /* 35025 LD DE,20576      {Print 32 characters of the message at (19,0) */
+    VERIFY(0x88D1, 0x11);
     FETCH(0x88D1);
     IMM(0x88D2); IMM(0x88D3); DE = RD16IMM(0x88D2);
 L88D4: /* 35028 LD C,32           */
+    VERIFY(0x88D4, 0x0E);
     FETCH(0x88D4);
     IMM(0x88D5); C = mem[(uint16_t)0x88D5];
 L88D6: /* 35030 CALL 38528       } */
+    VERIFY(0x88D6, 0xCD);
     FETCH(0x88D6);
     IMM(0x88D7); IMM(0x88D8); IC(0x88D8, 1);
     PUSHW(0x88D9); goto L9680;
 L88D9: /* 35033 LD A,(34276)     {Prepare a value between #b50 and #b81 in #REGa (for the */
+    VERIFY(0x88D9, 0x3A);
     FETCH(0x88D9);
     { IMM(0x88DA); IMM(0x88DB); uint16_t ea = RD16IMM(0x88DA);
     A = RD(ea); }
 L88DC: /* 35036 AND 31           routine at #R38622) */
+    VERIFY(0x88DC, 0xE6);
     FETCH(0x88DC);
     IMM(0x88DD); and8(mem[(uint16_t)0x88DD]);
 L88DE: /* 35038 ADD A,50         } */
+    VERIFY(0x88DE, 0xC6);
     FETCH(0x88DE);
     IMM(0x88DF); add8(mem[(uint16_t)0x88DF]);
 L88E0: /* 35040 CALL 38622       Make a sound effect */
+    VERIFY(0x88E0, 0xCD);
     FETCH(0x88E0);
     IMM(0x88E1); IMM(0x88E2); IC(0x88E2, 1);
     PUSHW(0x88E3); goto L96DE;
 L88E3: /* 35043 LD BC,45054      {Read keys H-J-K-L-ENTER and 6-7-8-9-0 */
+    VERIFY(0x88E3, 0x01);
     FETCH(0x88E3);
     IMM(0x88E4); IMM(0x88E5); BC = RD16IMM(0x88E4);
 L88E6: /* 35046 IN A,(C)         } */
+    VERIFY(0x88E6, 0xED);
     FETCH(0x88E6); FETCH(0x88E7);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L88E8: /* 35048 AND 1            Keep only bit 0 of the result (ENTER, 0) */
+    VERIFY(0x88E8, 0xE6);
     FETCH(0x88E8);
     IMM(0x88E9); and8(mem[(uint16_t)0x88E9]);
 L88EA: /* 35050 CP 1             Was ENTER or 0 pressed? */
+    VERIFY(0x88EA, 0xFE);
     FETCH(0x88EA);
     IMM(0x88EB); cp8(mem[(uint16_t)0x88EB]);
 L88EC: /* 35052 JR NZ,35068      Jump if so to start the game */
+    VERIFY(0x88EC, 0x20);
     FETCH(0x88EC);
     IMM(0x88ED);
     if (!(F&FZ)) { JRTAKEN(0x88ED); goto L88FC; }
 L88EE: /* 35054 LD A,(34276)     Pick up the message index from #R34276 */
+    VERIFY(0x88EE, 0x3A);
     FETCH(0x88EE);
     { IMM(0x88EF); IMM(0x88F0); uint16_t ea = RD16IMM(0x88EF);
     A = RD(ea); }
 L88F1: /* 35057 INC A            Increment it */
+    VERIFY(0x88F1, 0x3C);
     FETCH(0x88F1);
     A = inc8(A);
 L88F2: /* 35058 CP 224           Set the zero flag if we've reached the end of the */
+    VERIFY(0x88F2, 0xFE);
     FETCH(0x88F2);
     IMM(0x88F3); cp8(mem[(uint16_t)0x88F3]);
 L88F4: /* 35060 LD (34276),A     Store the new message index at #R34276 */
+    VERIFY(0x88F4, 0x32);
     FETCH(0x88F4);
     { IMM(0x88F5); IMM(0x88F6); uint16_t ea = RD16IMM(0x88F5);
     WR(ea, A); }
 L88F7: /* 35063 JR NZ,34997      Jump back unless we've finished scrolling the message */
+    VERIFY(0x88F7, 0x20);
     FETCH(0x88F7);
     IMM(0x88F8);
     if (!(F&FZ)) { JRTAKEN(0x88F8); goto L88B5; }
 L88F9: /* 35065 JP 34835         Jump back to prepare the screen and play the theme tune */
+    VERIFY(0x88F9, 0xC3);
     FETCH(0x88F9);
     IMM(0x88FA); IMM(0x88FB);
     goto L8813;
 
 /* ---- STARTGAME ---- */
 L88FC: /* 35068 LD HL,34181      {Copy the text at #R34181 (" 7:00a") to #R34175, thus */
+    VERIFY(0x88FC, 0x21);
     Z80C_HOOK(0x88FC);
     FETCH(0x88FC);
     IMM(0x88FD); IMM(0x88FE); HL = RD16IMM(0x88FD);
 L88FF: /* 35071 LD DE,34175      resetting the clock */
+    VERIFY(0x88FF, 0x11);
     FETCH(0x88FF);
     IMM(0x8900); IMM(0x8901); DE = RD16IMM(0x8900);
 L8902: /* 35074 LD BC,6           */
+    VERIFY(0x8902, 0x01);
     FETCH(0x8902);
     IMM(0x8903); IMM(0x8904); BC = RD16IMM(0x8903);
 L8905: /* 35077 LDIR             } */
+    VERIFY(0x8905, 0xED);
     FETCH(0x8905); FETCH(0x8906);
     if (ldi_rep(+1)) goto L8905;
 L8907: /* 35079 LD HL,39424      {Copy the attribute bytes from #R39424 to the bottom */
+    VERIFY(0x8907, 0x21);
     FETCH(0x8907);
     IMM(0x8908); IMM(0x8909); HL = RD16IMM(0x8908);
 L890A: /* 35082 LD DE,23040      third of the screen */
+    VERIFY(0x890A, 0x11);
     FETCH(0x890A);
     IMM(0x890B); IMM(0x890C); DE = RD16IMM(0x890B);
 L890D: /* 35085 LD BC,256         */
+    VERIFY(0x890D, 0x01);
     FETCH(0x890D);
     IMM(0x890E); IMM(0x890F); BC = RD16IMM(0x890E);
 L8910: /* 35088 LDIR             } */
+    VERIFY(0x8910, 0xED);
     FETCH(0x8910); FETCH(0x8911);
     if (ldi_rep(+1)) goto L8910;
 
 /* ---- INITROOM ---- */
 L8912: /* 35090 LD A,(33824)     Pick up the current room number from #R33824 */
+    VERIFY(0x8912, 0x3A);
     FETCH(0x8912);
     { IMM(0x8913); IMM(0x8914); uint16_t ea = RD16IMM(0x8913);
     A = RD(ea); }
 L8915: /* 35093 OR 192           {Point #REGhl at the first byte of the room definition */
+    VERIFY(0x8915, 0xF6);
     FETCH(0x8915);
     IMM(0x8916); or8(mem[(uint16_t)0x8916]);
 L8917: /* 35095 LD H,A            */
+    VERIFY(0x8917, 0x67);
     FETCH(0x8917);
     H = A;
 L8918: /* 35096 LD L,0           } */
+    VERIFY(0x8918, 0x2E);
     FETCH(0x8918);
     IMM(0x8919); L = mem[(uint16_t)0x8919];
 L891A: /* 35098 LD DE,32768      {Copy the room definition into the game status buffer at */
+    VERIFY(0x891A, 0x11);
     FETCH(0x891A);
     IMM(0x891B); IMM(0x891C); DE = RD16IMM(0x891B);
 L891D: /* 35101 LD BC,256        #GBUF32768 */
+    VERIFY(0x891D, 0x01);
     FETCH(0x891D);
     IMM(0x891E); IMM(0x891F); BC = RD16IMM(0x891E);
 L8920: /* 35104 LDIR             } */
+    VERIFY(0x8920, 0xED);
     FETCH(0x8920); FETCH(0x8921);
     if (ldi_rep(+1)) goto L8920;
 L8922: /* 35106 LD IX,33008      Point #REGix at the first byte of the first entity */
+    VERIFY(0x8922, 0xDD);
     FETCH(0x8922); FETCH(0x8923);
     IMM(0x8924); IMM(0x8925); IX = RD16IMM(0x8924);
 L8926: /* 35110 LD DE,33024      Point #REGde at the first byte of the first entity */
+    VERIFY(0x8926, 0x11);
     FETCH(0x8926);
     IMM(0x8927); IMM(0x8928); DE = RD16IMM(0x8927);
 L8929: /* 35113 LD A,8           There are at most eight entities in a room */
+    VERIFY(0x8929, 0x3E);
     FETCH(0x8929);
     IMM(0x892A); A = mem[(uint16_t)0x892A];
 L892B: /* 35115 LD L,(IX+0)      Pick up the first byte of the entity specification */
+    VERIFY(0x892B, 0xDD);
     FETCH(0x892B); FETCH(0x892C);
     IMM(0x892D); IC(0x892D, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x892D]); L = RD(ea); }
 L892E: /* 35118 RES 7,L          {Point #REGhl at the corresponding entry in the table of */
+    VERIFY(0x892E, 0xCB);
     FETCH(0x892E); FETCH(0x892F);
     L = (uint8_t)(L & ~(1u << 7));
 L8930: /* 35120 LD H,20          entity definitions at #R40960 */
+    VERIFY(0x8930, 0x26);
     FETCH(0x8930);
     IMM(0x8931); H = mem[(uint16_t)0x8931];
 L8932: /* 35122 ADD HL,HL         */
+    VERIFY(0x8932, 0x29);
     FETCH(0x8932);
     IR(7);
     HL = add16(HL, HL);
 L8933: /* 35123 ADD HL,HL         */
+    VERIFY(0x8933, 0x29);
     FETCH(0x8933);
     IR(7);
     HL = add16(HL, HL);
 L8934: /* 35124 ADD HL,HL        } */
+    VERIFY(0x8934, 0x29);
     FETCH(0x8934);
     IR(7);
     HL = add16(HL, HL);
 L8935: /* 35125 LD BC,2          {Copy the first two bytes of the entity definition into */
+    VERIFY(0x8935, 0x01);
     FETCH(0x8935);
     IMM(0x8936); IMM(0x8937); BC = RD16IMM(0x8936);
 L8938: /* 35128 LDIR             the entity buffer} */
+    VERIFY(0x8938, 0xED);
     FETCH(0x8938); FETCH(0x8939);
     if (ldi_rep(+1)) goto L8938;
 L893A: /* 35130 LD C,(IX+1)      {Copy the second byte of the entity specification into */
+    VERIFY(0x893A, 0xDD);
     FETCH(0x893A); FETCH(0x893B);
     IMM(0x893C); IC(0x893C, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x893C]); C = RD(ea); }
 L893D: /* 35133 LD (HL),C        the third byte of the entity definition} */
+    VERIFY(0x893D, 0x71);
     FETCH(0x893D);
     WR(HL, C);
 L893E: /* 35134 LD BC,6          {Copy the remaining six bytes of the entity definition */
+    VERIFY(0x893E, 0x01);
     FETCH(0x893E);
     IMM(0x893F); IMM(0x8940); BC = RD16IMM(0x893F);
 L8941: /* 35137 LDIR             into the entity buffer} */
+    VERIFY(0x8941, 0xED);
     FETCH(0x8941); FETCH(0x8942);
     if (ldi_rep(+1)) goto L8941;
 L8943: /* 35139 INC IX           {Point #REGix at the first byte of the next entity */
+    VERIFY(0x8943, 0xDD);
     FETCH(0x8943); FETCH(0x8944);
     IR(2); IX = (uint16_t)(IX + 1);
 L8945: /* 35141 INC IX           specification} */
+    VERIFY(0x8945, 0xDD);
     FETCH(0x8945); FETCH(0x8946);
     IR(2); IX = (uint16_t)(IX + 1);
 L8947: /* 35143 DEC A            Have we copied all eight entity definitions into the */
+    VERIFY(0x8947, 0x3D);
     FETCH(0x8947);
     A = dec8(A);
 L8948: /* 35144 JR NZ,35115      If not, jump back to copy the next one */
+    VERIFY(0x8948, 0x20);
     FETCH(0x8948);
     IMM(0x8949);
     if (!(F&FZ)) { JRTAKEN(0x8949); goto L892B; }
 L894A: /* 35146 LD HL,34255      {Copy the seven bytes that define Willy's state */
+    VERIFY(0x894A, 0x21);
     FETCH(0x894A);
     IMM(0x894B); IMM(0x894C); HL = RD16IMM(0x894B);
 L894D: /* 35149 LD DE,34263      (position, animation frame etc.) on entry to this room */
+    VERIFY(0x894D, 0x11);
     FETCH(0x894D);
     IMM(0x894E); IMM(0x894F); DE = RD16IMM(0x894E);
 L8950: /* 35152 LD BC,7          from #GBUF34255,34261 to #R34263 */
+    VERIFY(0x8950, 0x01);
     FETCH(0x8950);
     IMM(0x8951); IMM(0x8952); BC = RD16IMM(0x8951);
 L8953: /* 35155 LDIR             } */
+    VERIFY(0x8953, 0xED);
     FETCH(0x8953); FETCH(0x8954);
     if (ldi_rep(+1)) goto L8953;
 L8955: /* 35157 CALL 36147       Draw the current room to the screen buffer at #R28672 */
+    VERIFY(0x8955, 0xCD);
     FETCH(0x8955);
     IMM(0x8956); IMM(0x8957); IC(0x8957, 1);
     PUSHW(0x8958); goto L8D33;
 L8958: /* 35160 LD HL,20480      {Clear the bottom third of the display file */
+    VERIFY(0x8958, 0x21);
     FETCH(0x8958);
     IMM(0x8959); IMM(0x895A); HL = RD16IMM(0x8959);
 L895B: /* 35163 LD DE,20481       */
+    VERIFY(0x895B, 0x11);
     FETCH(0x895B);
     IMM(0x895C); IMM(0x895D); DE = RD16IMM(0x895C);
 L895E: /* 35166 LD BC,2047        */
+    VERIFY(0x895E, 0x01);
     FETCH(0x895E);
     IMM(0x895F); IMM(0x8960); BC = RD16IMM(0x895F);
 L8961: /* 35169 LD (HL),0         */
+    VERIFY(0x8961, 0x36);
     FETCH(0x8961);
     IMM(0x8962); WR(HL, mem[(uint16_t)0x8962]);
 L8963: /* 35171 LDIR             } */
+    VERIFY(0x8963, 0xED);
     FETCH(0x8963); FETCH(0x8964);
     if (ldi_rep(+1)) goto L8963;
 L8965: /* 35173 LD IX,32896      {Print the room name (see #R32896) at (16,0) */
+    VERIFY(0x8965, 0xDD);
     FETCH(0x8965); FETCH(0x8966);
     IMM(0x8967); IMM(0x8968); IX = RD16IMM(0x8967);
 L8969: /* 35177 LD C,32           */
+    VERIFY(0x8969, 0x0E);
     FETCH(0x8969);
     IMM(0x896A); C = mem[(uint16_t)0x896A];
 L896B: /* 35179 LD DE,20480       */
+    VERIFY(0x896B, 0x11);
     FETCH(0x896B);
     IMM(0x896C); IMM(0x896D); DE = RD16IMM(0x896C);
 L896E: /* 35182 CALL 38528       } */
+    VERIFY(0x896E, 0xCD);
     FETCH(0x896E);
     IMM(0x896F); IMM(0x8970); IC(0x8970, 1);
     PUSHW(0x8971); goto L9680;
 L8971: /* 35185 LD IX,34132      {Print "Items collected 000 Time 00:00 m" (see #R34132) */
+    VERIFY(0x8971, 0xDD);
     FETCH(0x8971); FETCH(0x8972);
     IMM(0x8973); IMM(0x8974); IX = RD16IMM(0x8973);
 L8975: /* 35189 LD DE,20576      at (19,0) */
+    VERIFY(0x8975, 0x11);
     FETCH(0x8975);
     IMM(0x8976); IMM(0x8977); DE = RD16IMM(0x8976);
 L8978: /* 35192 LD C,32           */
+    VERIFY(0x8978, 0x0E);
     FETCH(0x8978);
     IMM(0x8979); C = mem[(uint16_t)0x8979];
 L897A: /* 35194 CALL 38528       } */
+    VERIFY(0x897A, 0xCD);
     FETCH(0x897A);
     IMM(0x897B); IMM(0x897C); IC(0x897C, 1);
     PUSHW(0x897D); goto L9680;
 L897D: /* 35197 LD A,(32990)     Pick up the border colour for the current room from */
+    VERIFY(0x897D, 0x3A);
     FETCH(0x897D);
     { IMM(0x897E); IMM(0x897F); uint16_t ea = RD16IMM(0x897E);
     A = RD(ea); }
 L8980: /* 35200 LD C,254         {Set the border colour */
+    VERIFY(0x8980, 0x0E);
     FETCH(0x8980);
     IMM(0x8981); C = mem[(uint16_t)0x8981];
 L8982: /* 35202 OUT (C),A        } */
+    VERIFY(0x8982, 0xED);
     FETCH(0x8982); FETCH(0x8983);
     OUTP(BC, A);
 L8984: /* 35204 XOR A            {Initialise the rope status indicator at #R34262 to 0 */
+    VERIFY(0x8984, 0xAF);
     FETCH(0x8984);
     xor8(A);
 L8985: /* 35205 LD (34262),A     } */
+    VERIFY(0x8985, 0x32);
     FETCH(0x8985);
     { IMM(0x8986); IMM(0x8987); uint16_t ea = RD16IMM(0x8986);
     WR(ea, A); }
 L8988: /* 35208 JP 35245         Enter the main loop */
+    VERIFY(0x8988, 0xC3);
     FETCH(0x8988);
     IMM(0x8989); IMM(0x898A);
     goto L89AD;
 
 /* ---- DRAWLIVES ---- */
 L898B: /* 35211 LD A,(34252)     Pick up the number of lives remaining from #R34252 */
+    VERIFY(0x898B, 0x3A);
     FETCH(0x898B);
     { IMM(0x898C); IMM(0x898D); uint16_t ea = RD16IMM(0x898C);
     A = RD(ea); }
 L898E: /* 35214 LD HL,20640      Set #REGhl to the display file address at which to draw */
+    VERIFY(0x898E, 0x21);
     FETCH(0x898E);
     IMM(0x898F); IMM(0x8990); HL = RD16IMM(0x898F);
 L8991: /* 35217 OR A             Are there any lives remaining? */
+    VERIFY(0x8991, 0xB7);
     FETCH(0x8991);
     or8(A);
 L8992: /* 35218 RET Z            Return if not */
+    VERIFY(0x8992, 0xC8);
     FETCH(0x8992);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L8993: /* 35219 LD B,A           Initialise #REGb to the number of lives remaining */
+    VERIFY(0x8993, 0x47);
     FETCH(0x8993);
     B = A;
 L8994: /* 35220 LD C,0           #REGc=0; this tells the sprite-drawing routine at */
+    VERIFY(0x8994, 0x0E);
     FETCH(0x8994);
     IMM(0x8995); C = mem[(uint16_t)0x8995];
 L8996: /* 35222 PUSH HL          {Save #REGhl and #REGbc briefly */
+    VERIFY(0x8996, 0xE5);
     FETCH(0x8996);
     IR(1);
     PUSHW(HL);
 L8997: /* 35223 PUSH BC          } */
+    VERIFY(0x8997, 0xC5);
     FETCH(0x8997);
     IR(1);
     PUSHW(BC);
 L8998: /* 35224 LD A,(34273)     Pick up the in-game music note index from #R34273; this */
+    VERIFY(0x8998, 0x3A);
     FETCH(0x8998);
     { IMM(0x8999); IMM(0x899A); uint16_t ea = RD16IMM(0x8999);
     A = RD(ea); }
 L899B: /* 35227 RLCA             {Now #REGa=#b0 (frame 0), #b32 (frame 1), #b64 (frame 2) */
+    VERIFY(0x899B, 0x07);
     FETCH(0x899B);
     rlca();
 L899C: /* 35228 RLCA             or #b96 (frame 3) */
+    VERIFY(0x899C, 0x07);
     FETCH(0x899C);
     rlca();
 L899D: /* 35229 RLCA              */
+    VERIFY(0x899D, 0x07);
     FETCH(0x899D);
     rlca();
 L899E: /* 35230 AND 96           } */
+    VERIFY(0x899E, 0xE6);
     FETCH(0x899E);
     IMM(0x899F); and8(mem[(uint16_t)0x899F]);
 L89A0: /* 35232 LD E,A           {Point #REGde at the corresponding Willy sprite (at */
+    VERIFY(0x89A0, 0x5F);
     FETCH(0x89A0);
     E = A;
 L89A1: /* 35233 LD D,157         #R40192+#REGa)} */
+    VERIFY(0x89A1, 0x16);
     FETCH(0x89A1);
     IMM(0x89A2); D = mem[(uint16_t)0x89A2];
 L89A3: /* 35235 CALL 37974       Draw the Willy sprite on the screen */
+    VERIFY(0x89A3, 0xCD);
     FETCH(0x89A3);
     IMM(0x89A4); IMM(0x89A5); IC(0x89A5, 1);
     PUSHW(0x89A6); goto L9456;
 L89A6: /* 35238 POP BC           {Restore #REGhl and #REGbc */
+    VERIFY(0x89A6, 0xC1);
     FETCH(0x89A6);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; BC = (uint16_t)(lo | (hi << 8)); }
 L89A7: /* 35239 POP HL           } */
+    VERIFY(0x89A7, 0xE1);
     FETCH(0x89A7);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L89A8: /* 35240 INC HL           {Move #REGhl along to the location at which to draw the */
+    VERIFY(0x89A8, 0x23);
     FETCH(0x89A8);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L89A9: /* 35241 INC HL           next Willy sprite} */
+    VERIFY(0x89A9, 0x23);
     FETCH(0x89A9);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L89AA: /* 35242 DJNZ 35220       Jump back to draw any remaining sprites */
+    VERIFY(0x89AA, 0x10);
     FETCH(0x89AA);
     T(1); IMM(0x89AB);
     if (--B) { JRTAKEN(0x89AB); goto L8994; }
 L89AC: /* 35244 RET               */
+    VERIFY(0x89AC, 0xC9);
     FETCH(0x89AC);
     POPPC(); goto dispatch;
 
 /* ---- MAINLOOP ---- */
 L89AD: /* 35245 CALL 35211       Draw the remaining lives */
+    VERIFY(0x89AD, 0xCD);
     Z80C_HOOK(0x89AD);
     FETCH(0x89AD);
     IMM(0x89AE); IMM(0x89AF); IC(0x89AF, 1);
     PUSHW(0x89B0); goto L898B;
 L89B0: /* 35248 LD HL,24064      {Copy the contents of the attribute buffer at #R24064 */
+    VERIFY(0x89B0, 0x21);
     FETCH(0x89B0);
     IMM(0x89B1); IMM(0x89B2); HL = RD16IMM(0x89B1);
 L89B3: /* 35251 LD DE,23552      (the attributes for the empty room) into the attribute */
+    VERIFY(0x89B3, 0x11);
     FETCH(0x89B3);
     IMM(0x89B4); IMM(0x89B5); DE = RD16IMM(0x89B4);
 L89B6: /* 35254 LD BC,512        buffer at #R23552 */
+    VERIFY(0x89B6, 0x01);
     FETCH(0x89B6);
     IMM(0x89B7); IMM(0x89B8); BC = RD16IMM(0x89B7);
 L89B9: /* 35257 LDIR             } */
+    VERIFY(0x89B9, 0xED);
     FETCH(0x89B9); FETCH(0x89BA);
     if (ldi_rep(+1)) goto L89B9;
 L89BB: /* 35259 LD HL,28672      {Copy the contents of the screen buffer at #R28672 (the */
+    VERIFY(0x89BB, 0x21);
     FETCH(0x89BB);
     IMM(0x89BC); IMM(0x89BD); HL = RD16IMM(0x89BC);
 L89BE: /* 35262 LD DE,24576      tiles for the empty room) into the screen buffer at */
+    VERIFY(0x89BE, 0x11);
     FETCH(0x89BE);
     IMM(0x89BF); IMM(0x89C0); DE = RD16IMM(0x89BF);
 L89C1: /* 35265 LD BC,4096       #R24576 */
+    VERIFY(0x89C1, 0x01);
     FETCH(0x89C1);
     IMM(0x89C2); IMM(0x89C3); BC = RD16IMM(0x89C2);
 L89C4: /* 35268 LDIR             } */
+    VERIFY(0x89C4, 0xED);
     FETCH(0x89C4); FETCH(0x89C5);
     if (ldi_rep(+1)) goto L89C4;
 L89C6: /* 35270 CALL 37056       Move the rope and guardians in the current room */
+    VERIFY(0x89C6, 0xCD);
     FETCH(0x89C6);
     IMM(0x89C7); IMM(0x89C8); IC(0x89C8, 1);
     PUSHW(0x89C9); goto L90C0;
 L89C9: /* 35273 LD A,(34271)     Pick up the game mode indicator from #R34271 */
+    VERIFY(0x89C9, 0x3A);
     FETCH(0x89C9);
     { IMM(0x89CA); IMM(0x89CB); uint16_t ea = RD16IMM(0x89CA);
     A = RD(ea); }
 L89CC: /* 35276 CP 3             Is Willy's head down the toilet? */
+    VERIFY(0x89CC, 0xFE);
     FETCH(0x89CC);
     IMM(0x89CD); cp8(mem[(uint16_t)0x89CD]);
 L89CE: /* 35278 CALL NZ,36307    If not, move Willy */
+    VERIFY(0x89CE, 0xC4);
     FETCH(0x89CE);
     IMM(0x89CF); IMM(0x89D0);
     if (!(F&FZ)) { IC(0x89D0, 1); PUSHW(0x89D1); goto L8DD3; }
 
 /* ---- AFTERMOVE1 ---- */
 L89D1: /* 35281 LD A,(34255)     Pick up Willy's y-coordinate from #R34255 */
+    VERIFY(0x89D1, 0x3A);
     FETCH(0x89D1);
     { IMM(0x89D2); IMM(0x89D3); uint16_t ea = RD16IMM(0x89D2);
     A = RD(ea); }
 L89D4: /* 35284 CP 225           Has Willy just moved up a ramp or a rope past the top of */
+    VERIFY(0x89D4, 0xFE);
     FETCH(0x89D4);
     IMM(0x89D5); cp8(mem[(uint16_t)0x89D5]);
 L89D6: /* 35286 CALL NC,38064    If so, move Willy into the room above */
+    VERIFY(0x89D6, 0xD4);
     FETCH(0x89D6);
     IMM(0x89D7); IMM(0x89D8);
     if (!(F&FC)) { IC(0x89D8, 1); PUSHW(0x89D9); goto L94B0; }
 
 /* ---- AFTERMOVE2 ---- */
 L89D9: /* 35289 LD A,(34271)     Pick up the game mode indicator from #R34271 */
+    VERIFY(0x89D9, 0x3A);
     FETCH(0x89D9);
     { IMM(0x89DA); IMM(0x89DB); uint16_t ea = RD16IMM(0x89DA);
     A = RD(ea); }
 L89DC: /* 35292 CP 3             Is Willy's head down the toilet? */
+    VERIFY(0x89DC, 0xFE);
     FETCH(0x89DC);
     IMM(0x89DD); cp8(mem[(uint16_t)0x89DD]);
 L89DE: /* 35294 CALL NZ,38344    If not, check and set the attribute bytes for Willy's */
+    VERIFY(0x89DE, 0xC4);
     FETCH(0x89DE);
     IMM(0x89DF); IMM(0x89E0);
     if (!(F&FZ)) { IC(0x89E0, 1); PUSHW(0x89E1); goto L95C8; }
 L89E1: /* 35297 LD A,(34271)     Pick up the game mode indicator from #R34271 */
+    VERIFY(0x89E1, 0x3A);
     FETCH(0x89E1);
     { IMM(0x89E2); IMM(0x89E3); uint16_t ea = RD16IMM(0x89E2);
     A = RD(ea); }
 L89E4: /* 35300 CP 2             Is Willy on his way to the toilet? */
+    VERIFY(0x89E4, 0xFE);
     FETCH(0x89E4);
     IMM(0x89E5); cp8(mem[(uint16_t)0x89E5]);
 L89E6: /* 35302 CALL Z,38276     If so, check whether he's reached it yet */
+    VERIFY(0x89E6, 0xCC);
     FETCH(0x89E6);
     IMM(0x89E7); IMM(0x89E8);
     if ((F&FZ)) { IC(0x89E8, 1); PUSHW(0x89E9); goto L9584; }
 L89E9: /* 35305 CALL 38196       Deal with special rooms (#R58112(Master Bedroom), */
+    VERIFY(0x89E9, 0xCD);
     FETCH(0x89E9);
     IMM(0x89EA); IMM(0x89EB); IC(0x89EB, 1);
     PUSHW(0x89EC); goto L9534;
 L89EC: /* 35308 CALL 37310       Draw the rope, arrows and guardians in the current room */
+    VERIFY(0x89EC, 0xCD);
     FETCH(0x89EC);
     IMM(0x89ED); IMM(0x89EE); IC(0x89EE, 1);
     PUSHW(0x89EF); goto L91BE;
 L89EF: /* 35311 CALL 38137       Move the conveyor in the current room (if there is one) */
+    VERIFY(0x89EF, 0xCD);
     FETCH(0x89EF);
     IMM(0x89F0); IMM(0x89F1); IC(0x89F1, 1);
     PUSHW(0x89F2); goto L94F9;
 L89F2: /* 35314 CALL 37841       Draw the items in the current room (if there are any) */
+    VERIFY(0x89F2, 0xCD);
     FETCH(0x89F2);
     IMM(0x89F3); IMM(0x89F4); IC(0x89F4, 1);
     PUSHW(0x89F5); goto L93D1;
 L89F5: /* 35317 LD HL,24576      {Copy the contents of the screen buffer at #R24576 to */
+    VERIFY(0x89F5, 0x21);
     FETCH(0x89F5);
     IMM(0x89F6); IMM(0x89F7); HL = RD16IMM(0x89F6);
 L89F8: /* 35320 LD DE,16384      the display file */
+    VERIFY(0x89F8, 0x11);
     FETCH(0x89F8);
     IMM(0x89F9); IMM(0x89FA); DE = RD16IMM(0x89F9);
 L89FB: /* 35323 LD BC,4096        */
+    VERIFY(0x89FB, 0x01);
     FETCH(0x89FB);
     IMM(0x89FC); IMM(0x89FD); BC = RD16IMM(0x89FC);
 L89FE: /* 35326 LDIR             } */
+    VERIFY(0x89FE, 0xED);
     FETCH(0x89FE); FETCH(0x89FF);
     if (ldi_rep(+1)) goto L89FE;
 L8A00: /* 35328 LD A,(34271)     Pick up the game mode indicator from #R34271 */
+    VERIFY(0x8A00, 0x3A);
     FETCH(0x8A00);
     { IMM(0x8A01); IMM(0x8A02); uint16_t ea = RD16IMM(0x8A01);
     A = RD(ea); }
 L8A03: /* 35331 AND 2            {Now #REGa=1 if Willy is running to the toilet or */
+    VERIFY(0x8A03, 0xE6);
     FETCH(0x8A03);
     IMM(0x8A04); and8(mem[(uint16_t)0x8A04]);
 L8A05: /* 35333 RRCA             already has his head down it, 0 otherwise} */
+    VERIFY(0x8A05, 0x0F);
     FETCH(0x8A05);
     rrca();
 L8A06: /* 35334 LD HL,34258      {Set Willy's animation frame at #R34258 to 1 or 3 if */
+    VERIFY(0x8A06, 0x21);
     FETCH(0x8A06);
     IMM(0x8A07); IMM(0x8A08); HL = RD16IMM(0x8A07);
 L8A09: /* 35337 OR (HL)          Willy is running to the toilet or already has his head */
+    VERIFY(0x8A09, 0xB6);
     FETCH(0x8A09);
     or8(RD(HL));
 L8A0A: /* 35338 LD (HL),A        down it; this has the effect of moving Willy at twice */
+    VERIFY(0x8A0A, 0x77);
     FETCH(0x8A0A);
     WR(HL, A);
 
 /* ---- SCRFLASH ---- */
 L8A0B: /* 35339 LD A,(34253)     Pick up the screen flash counter (unused and always 0) */
+    VERIFY(0x8A0B, 0x3A);
     FETCH(0x8A0B);
     { IMM(0x8A0C); IMM(0x8A0D); uint16_t ea = RD16IMM(0x8A0C);
     A = RD(ea); }
 L8A0E: /* 35342 OR A             Is it zero? */
+    VERIFY(0x8A0E, 0xB7);
     FETCH(0x8A0E);
     or8(A);
 L8A0F: /* 35343 JR Z,35366       Jump if so (this jump is always made) */
+    VERIFY(0x8A0F, 0x28);
     FETCH(0x8A0F);
     IMM(0x8A10);
     if ((F&FZ)) { JRTAKEN(0x8A10); goto L8A26; }
 L8A11: /* 35345 DEC A            {Decrement the screen flash counter at #R34253 */
+    VERIFY(0x8A11, 0x3D);
     FETCH(0x8A11);
     A = dec8(A);
 L8A12: /* 35346 LD (34253),A     } */
+    VERIFY(0x8A12, 0x32);
     FETCH(0x8A12);
     { IMM(0x8A13); IMM(0x8A14); uint16_t ea = RD16IMM(0x8A13);
     WR(ea, A); }
 L8A15: /* 35349 RLCA             {Move bits 0-2 into bits 3-5 and clear all the other */
+    VERIFY(0x8A15, 0x07);
     FETCH(0x8A15);
     rlca();
 L8A16: /* 35350 RLCA             bits */
+    VERIFY(0x8A16, 0x07);
     FETCH(0x8A16);
     rlca();
 L8A17: /* 35351 RLCA              */
+    VERIFY(0x8A17, 0x07);
     FETCH(0x8A17);
     rlca();
 L8A18: /* 35352 AND 56           } */
+    VERIFY(0x8A18, 0xE6);
     FETCH(0x8A18);
     IMM(0x8A19); and8(mem[(uint16_t)0x8A19]);
 L8A1A: /* 35354 LD HL,23552      {Set every attribute byte in the buffer at #R23552 to */
+    VERIFY(0x8A1A, 0x21);
     FETCH(0x8A1A);
     IMM(0x8A1B); IMM(0x8A1C); HL = RD16IMM(0x8A1B);
 L8A1D: /* 35357 LD DE,23553      this value */
+    VERIFY(0x8A1D, 0x11);
     FETCH(0x8A1D);
     IMM(0x8A1E); IMM(0x8A1F); DE = RD16IMM(0x8A1E);
 L8A20: /* 35360 LD BC,511         */
+    VERIFY(0x8A20, 0x01);
     FETCH(0x8A20);
     IMM(0x8A21); IMM(0x8A22); BC = RD16IMM(0x8A21);
 L8A23: /* 35363 LD (HL),A         */
+    VERIFY(0x8A23, 0x77);
     FETCH(0x8A23);
     WR(HL, A);
 L8A24: /* 35364 LDIR             } */
+    VERIFY(0x8A24, 0xED);
     FETCH(0x8A24); FETCH(0x8A25);
     if (ldi_rep(+1)) goto L8A24;
 L8A26: /* 35366 LD HL,23552      {Copy the contents of the attribute buffer at #R23552 to */
+    VERIFY(0x8A26, 0x21);
     FETCH(0x8A26);
     IMM(0x8A27); IMM(0x8A28); HL = RD16IMM(0x8A27);
 L8A29: /* 35369 LD DE,22528      the attribute file */
+    VERIFY(0x8A29, 0x11);
     FETCH(0x8A29);
     IMM(0x8A2A); IMM(0x8A2B); DE = RD16IMM(0x8A2A);
 L8A2C: /* 35372 LD BC,512         */
+    VERIFY(0x8A2C, 0x01);
     FETCH(0x8A2C);
     IMM(0x8A2D); IMM(0x8A2E); BC = RD16IMM(0x8A2D);
 L8A2F: /* 35375 LDIR             } */
+    VERIFY(0x8A2F, 0xED);
     FETCH(0x8A2F); FETCH(0x8A30);
     if (ldi_rep(+1)) goto L8A2F;
 L8A31: /* 35377 LD IX,34175      {Print the current time (see #R34175) at (19,25) */
+    VERIFY(0x8A31, 0xDD);
     FETCH(0x8A31); FETCH(0x8A32);
     IMM(0x8A33); IMM(0x8A34); IX = RD16IMM(0x8A33);
 L8A35: /* 35381 LD DE,20601       */
+    VERIFY(0x8A35, 0x11);
     FETCH(0x8A35);
     IMM(0x8A36); IMM(0x8A37); DE = RD16IMM(0x8A36);
 L8A38: /* 35384 LD C,6            */
+    VERIFY(0x8A38, 0x0E);
     FETCH(0x8A38);
     IMM(0x8A39); C = mem[(uint16_t)0x8A39];
 L8A3A: /* 35386 CALL 38528       } */
+    VERIFY(0x8A3A, 0xCD);
     FETCH(0x8A3A);
     IMM(0x8A3B); IMM(0x8A3C); IC(0x8A3C, 1);
     PUSHW(0x8A3D); goto L9680;
 L8A3D: /* 35389 LD IX,34172      {Print the number of items collected (see #R34172) at */
+    VERIFY(0x8A3D, 0xDD);
     FETCH(0x8A3D); FETCH(0x8A3E);
     IMM(0x8A3F); IMM(0x8A40); IX = RD16IMM(0x8A3F);
 L8A41: /* 35393 LD DE,20592      (19,16) */
+    VERIFY(0x8A41, 0x11);
     FETCH(0x8A41);
     IMM(0x8A42); IMM(0x8A43); DE = RD16IMM(0x8A42);
 L8A44: /* 35396 LD C,3            */
+    VERIFY(0x8A44, 0x0E);
     FETCH(0x8A44);
     IMM(0x8A45); C = mem[(uint16_t)0x8A45];
 L8A46: /* 35398 CALL 38528       } */
+    VERIFY(0x8A46, 0xCD);
     FETCH(0x8A46);
     IMM(0x8A47); IMM(0x8A48); IC(0x8A48, 1);
     PUSHW(0x8A49); goto L9680;
 L8A49: /* 35401 LD A,(34251)     {Increment the minute counter at #R34251 */
+    VERIFY(0x8A49, 0x3A);
     FETCH(0x8A49);
     { IMM(0x8A4A); IMM(0x8A4B); uint16_t ea = RD16IMM(0x8A4A);
     A = RD(ea); }
 L8A4C: /* 35404 INC A             */
+    VERIFY(0x8A4C, 0x3C);
     FETCH(0x8A4C);
     A = inc8(A);
 L8A4D: /* 35405 LD (34251),A     } */
+    VERIFY(0x8A4D, 0x32);
     FETCH(0x8A4D);
     { IMM(0x8A4E); IMM(0x8A4F); uint16_t ea = RD16IMM(0x8A4E);
     WR(ea, A); }
 L8A50: /* 35408 JR NZ,35499      Jump unless the minute counter has ticked over to 0 */
+    VERIFY(0x8A50, 0x20);
     FETCH(0x8A50);
     IMM(0x8A51);
     if (!(F&FZ)) { JRTAKEN(0x8A51); goto L8AAB; }
 L8A52: /* 35410 LD IX,34175      Point #REGix at the current time at #R34175 */
+    VERIFY(0x8A52, 0xDD);
     FETCH(0x8A52); FETCH(0x8A53);
     IMM(0x8A54); IMM(0x8A55); IX = RD16IMM(0x8A54);
 L8A56: /* 35414 INC (IX+4)       Increment the units digit of the minute */
+    VERIFY(0x8A56, 0xDD);
     FETCH(0x8A56); FETCH(0x8A57);
     IMM(0x8A58); IC(0x8A58, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A58]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L8A59: /* 35417 LD A,(IX+4)      Pick up the new units digit */
+    VERIFY(0x8A59, 0xDD);
     FETCH(0x8A59); FETCH(0x8A5A);
     IMM(0x8A5B); IC(0x8A5B, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A5B]); A = RD(ea); }
 L8A5C: /* 35420 CP 58            Was it '9' before? */
+    VERIFY(0x8A5C, 0xFE);
     FETCH(0x8A5C);
     IMM(0x8A5D); cp8(mem[(uint16_t)0x8A5D]);
 L8A5E: /* 35422 JR NZ,35499      Jump if not */
+    VERIFY(0x8A5E, 0x20);
     FETCH(0x8A5E);
     IMM(0x8A5F);
     if (!(F&FZ)) { JRTAKEN(0x8A5F); goto L8AAB; }
 L8A60: /* 35424 LD (IX+4),48     Set the units digit of the minute to '0' */
+    VERIFY(0x8A60, 0xDD);
     FETCH(0x8A60); FETCH(0x8A61);
     IMM(0x8A62); IMM(0x8A63); IC(0x8A63, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A62]); WR(ea, mem[0x8A63]); }
 L8A64: /* 35428 INC (IX+3)       Increment the tens digit of the minute */
+    VERIFY(0x8A64, 0xDD);
     FETCH(0x8A64); FETCH(0x8A65);
     IMM(0x8A66); IC(0x8A66, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A66]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L8A67: /* 35431 LD A,(IX+3)      Pick up the new tens digit */
+    VERIFY(0x8A67, 0xDD);
     FETCH(0x8A67); FETCH(0x8A68);
     IMM(0x8A69); IC(0x8A69, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A69]); A = RD(ea); }
 L8A6A: /* 35434 CP 54            Was it '5' before? */
+    VERIFY(0x8A6A, 0xFE);
     FETCH(0x8A6A);
     IMM(0x8A6B); cp8(mem[(uint16_t)0x8A6B]);
 L8A6C: /* 35436 JR NZ,35499      Jump if not */
+    VERIFY(0x8A6C, 0x20);
     FETCH(0x8A6C);
     IMM(0x8A6D);
     if (!(F&FZ)) { JRTAKEN(0x8A6D); goto L8AAB; }
 L8A6E: /* 35438 LD (IX+3),48     Set the tens digit of the minute to '0' */
+    VERIFY(0x8A6E, 0xDD);
     FETCH(0x8A6E); FETCH(0x8A6F);
     IMM(0x8A70); IMM(0x8A71); IC(0x8A71, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A70]); WR(ea, mem[0x8A71]); }
 L8A72: /* 35442 LD A,(IX+0)      Pick up the tens digit of the hour */
+    VERIFY(0x8A72, 0xDD);
     FETCH(0x8A72); FETCH(0x8A73);
     IMM(0x8A74); IC(0x8A74, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A74]); A = RD(ea); }
 L8A75: /* 35445 CP 49            Is it currently '1'? */
+    VERIFY(0x8A75, 0xFE);
     FETCH(0x8A75);
     IMM(0x8A76); cp8(mem[(uint16_t)0x8A76]);
 L8A77: /* 35447 JR NZ,35481      Jump if not */
+    VERIFY(0x8A77, 0x20);
     FETCH(0x8A77);
     IMM(0x8A78);
     if (!(F&FZ)) { JRTAKEN(0x8A78); goto L8A99; }
 L8A79: /* 35449 INC (IX+1)       Increment the units digit of the hour */
+    VERIFY(0x8A79, 0xDD);
     FETCH(0x8A79); FETCH(0x8A7A);
     IMM(0x8A7B); IC(0x8A7B, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A7B]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L8A7C: /* 35452 LD A,(IX+1)      Pick up the new units digit */
+    VERIFY(0x8A7C, 0xDD);
     FETCH(0x8A7C); FETCH(0x8A7D);
     IMM(0x8A7E); IC(0x8A7E, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A7E]); A = RD(ea); }
 L8A7F: /* 35455 CP 51            Was it '2' before? */
+    VERIFY(0x8A7F, 0xFE);
     FETCH(0x8A7F);
     IMM(0x8A80); cp8(mem[(uint16_t)0x8A80]);
 L8A81: /* 35457 JR NZ,35499      Jump if not */
+    VERIFY(0x8A81, 0x20);
     FETCH(0x8A81);
     IMM(0x8A82);
     if (!(F&FZ)) { JRTAKEN(0x8A82); goto L8AAB; }
 L8A83: /* 35459 LD A,(IX+5)      Pick up the 'a' or 'p' of 'am/pm' */
+    VERIFY(0x8A83, 0xDD);
     FETCH(0x8A83); FETCH(0x8A84);
     IMM(0x8A85); IC(0x8A85, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A85]); A = RD(ea); }
 L8A86: /* 35462 CP 112           Is it 'p'? */
+    VERIFY(0x8A86, 0xFE);
     FETCH(0x8A86);
     IMM(0x8A87); cp8(mem[(uint16_t)0x8A87]);
 L8A88: /* 35464 JP Z,34762       If so, quit the game (it's 1am) */
+    VERIFY(0x8A88, 0xCA);
     FETCH(0x8A88);
     IMM(0x8A89); IMM(0x8A8A);
     if ((F&FZ)) goto L87CA;
 L8A8B: /* 35467 LD (IX+0),32     Set the tens digit of the hour to ' ' (space) */
+    VERIFY(0x8A8B, 0xDD);
     FETCH(0x8A8B); FETCH(0x8A8C);
     IMM(0x8A8D); IMM(0x8A8E); IC(0x8A8E, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A8D]); WR(ea, mem[0x8A8E]); }
 L8A8F: /* 35471 LD (IX+1),49     Set the units digit of the hour to '1' */
+    VERIFY(0x8A8F, 0xDD);
     FETCH(0x8A8F); FETCH(0x8A90);
     IMM(0x8A91); IMM(0x8A92); IC(0x8A92, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A91]); WR(ea, mem[0x8A92]); }
 L8A93: /* 35475 LD (IX+5),112    Change the 'a' of 'am' to 'p' */
+    VERIFY(0x8A93, 0xDD);
     FETCH(0x8A93); FETCH(0x8A94);
     IMM(0x8A95); IMM(0x8A96); IC(0x8A96, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A95]); WR(ea, mem[0x8A96]); }
 L8A97: /* 35479 JR 35499          */
+    VERIFY(0x8A97, 0x18);
     FETCH(0x8A97);
     IMM(0x8A98); JRTAKEN(0x8A98);
     goto L8AAB;
 L8A99: /* 35481 INC (IX+1)       Increment the units digit of the hour */
+    VERIFY(0x8A99, 0xDD);
     FETCH(0x8A99); FETCH(0x8A9A);
     IMM(0x8A9B); IC(0x8A9B, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A9B]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L8A9C: /* 35484 LD A,(IX+1)      Pick up the new units digit */
+    VERIFY(0x8A9C, 0xDD);
     FETCH(0x8A9C); FETCH(0x8A9D);
     IMM(0x8A9E); IC(0x8A9E, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8A9E]); A = RD(ea); }
 L8A9F: /* 35487 CP 58            Was it '9' before? */
+    VERIFY(0x8A9F, 0xFE);
     FETCH(0x8A9F);
     IMM(0x8AA0); cp8(mem[(uint16_t)0x8AA0]);
 L8AA1: /* 35489 JR NZ,35499      Jump if not */
+    VERIFY(0x8AA1, 0x20);
     FETCH(0x8AA1);
     IMM(0x8AA2);
     if (!(F&FZ)) { JRTAKEN(0x8AA2); goto L8AAB; }
 L8AA3: /* 35491 LD (IX+1),48     Set the units digit of the hour to '0' */
+    VERIFY(0x8AA3, 0xDD);
     FETCH(0x8AA3); FETCH(0x8AA4);
     IMM(0x8AA5); IMM(0x8AA6); IC(0x8AA6, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8AA5]); WR(ea, mem[0x8AA6]); }
 L8AA7: /* 35495 LD (IX+0),49     Set the tens digit of the hour to '1' */
+    VERIFY(0x8AA7, 0xDD);
     FETCH(0x8AA7); FETCH(0x8AA8);
     IMM(0x8AA9); IMM(0x8AAA); IC(0x8AAA, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8AA9]); WR(ea, mem[0x8AAA]); }
 L8AAB: /* 35499 LD BC,65278      {Read keys SHIFT-Z-X-C-V */
+    VERIFY(0x8AAB, 0x01);
     FETCH(0x8AAB);
     IMM(0x8AAC); IMM(0x8AAD); BC = RD16IMM(0x8AAC);
 L8AAE: /* 35502 IN A,(C)         } */
+    VERIFY(0x8AAE, 0xED);
     FETCH(0x8AAE); FETCH(0x8AAF);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8AB0: /* 35504 LD E,A           Save the result in #REGe */
+    VERIFY(0x8AB0, 0x5F);
     FETCH(0x8AB0);
     E = A;
 L8AB1: /* 35505 LD B,127         {Read keys B-N-M-SS-SPACE */
+    VERIFY(0x8AB1, 0x06);
     FETCH(0x8AB1);
     IMM(0x8AB2); B = mem[(uint16_t)0x8AB2];
 L8AB3: /* 35507 IN A,(C)         } */
+    VERIFY(0x8AB3, 0xED);
     FETCH(0x8AB3); FETCH(0x8AB4);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8AB5: /* 35509 OR E             Combine the results */
+    VERIFY(0x8AB5, 0xB3);
     FETCH(0x8AB5);
     or8(E);
 L8AB6: /* 35510 AND 1            Are SHIFT and SPACE being pressed? */
+    VERIFY(0x8AB6, 0xE6);
     FETCH(0x8AB6);
     IMM(0x8AB7); and8(mem[(uint16_t)0x8AB7]);
 L8AB8: /* 35512 JP Z,34762       If so, quit the game */
+    VERIFY(0x8AB8, 0xCA);
     FETCH(0x8AB8);
     IMM(0x8AB9); IMM(0x8ABA);
     if ((F&FZ)) goto L87CA;
 L8ABB: /* 35515 LD A,(34272)     {Increment the inactivity timer at #R34272 */
+    VERIFY(0x8ABB, 0x3A);
     FETCH(0x8ABB);
     { IMM(0x8ABC); IMM(0x8ABD); uint16_t ea = RD16IMM(0x8ABC);
     A = RD(ea); }
 L8ABE: /* 35518 INC A             */
+    VERIFY(0x8ABE, 0x3C);
     FETCH(0x8ABE);
     A = inc8(A);
 L8ABF: /* 35519 LD (34272),A     } */
+    VERIFY(0x8ABF, 0x32);
     FETCH(0x8ABF);
     { IMM(0x8AC0); IMM(0x8AC1); uint16_t ea = RD16IMM(0x8AC0);
     WR(ea, A); }
 L8AC2: /* 35522 JR Z,35537       Jump if the inactivity timer is now 0 (no keys have been */
+    VERIFY(0x8AC2, 0x28);
     FETCH(0x8AC2);
     IMM(0x8AC3);
     if ((F&FZ)) { JRTAKEN(0x8AC3); goto L8AD1; }
 L8AC4: /* 35524 LD B,253         {Read keys A-S-D-F-G */
+    VERIFY(0x8AC4, 0x06);
     FETCH(0x8AC4);
     IMM(0x8AC5); B = mem[(uint16_t)0x8AC5];
 L8AC6: /* 35526 IN A,(C)         } */
+    VERIFY(0x8AC6, 0xED);
     FETCH(0x8AC6); FETCH(0x8AC7);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8AC8: /* 35528 AND 31           {Are any of these keys being pressed? */
+    VERIFY(0x8AC8, 0xE6);
     FETCH(0x8AC8);
     IMM(0x8AC9); and8(mem[(uint16_t)0x8AC9]);
 L8ACA: /* 35530 CP 31            } */
+    VERIFY(0x8ACA, 0xFE);
     FETCH(0x8ACA);
     IMM(0x8ACB); cp8(mem[(uint16_t)0x8ACB]);
 L8ACC: /* 35532 JR Z,35607       Jump if not */
+    VERIFY(0x8ACC, 0x28);
     FETCH(0x8ACC);
     IMM(0x8ACD);
     if ((F&FZ)) { JRTAKEN(0x8ACD); goto L8B17; }
 L8ACE: /* 35534 LD DE,0          Prepare the delay counters in #REGd and #REGe for the */
+    VERIFY(0x8ACE, 0x11);
     FETCH(0x8ACE);
     IMM(0x8ACF); IMM(0x8AD0); DE = RD16IMM(0x8ACF);
 
 /* ---- PAUSE ---- */
 L8AD1: /* 35537 LD B,2           {Read every half-row of keys except A-S-D-F-G */
+    VERIFY(0x8AD1, 0x06);
     FETCH(0x8AD1);
     IMM(0x8AD2); B = mem[(uint16_t)0x8AD2];
 L8AD3: /* 35539 IN A,(C)         } */
+    VERIFY(0x8AD3, 0xED);
     FETCH(0x8AD3); FETCH(0x8AD4);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8AD5: /* 35541 AND 31           {Are any of these keys being pressed? */
+    VERIFY(0x8AD5, 0xE6);
     FETCH(0x8AD5);
     IMM(0x8AD6); and8(mem[(uint16_t)0x8AD6]);
 L8AD7: /* 35543 CP 31            } */
+    VERIFY(0x8AD7, 0xFE);
     FETCH(0x8AD7);
     IMM(0x8AD8); cp8(mem[(uint16_t)0x8AD8]);
 
 /* ---- SEE39936 ---- */
 L8AD9: /* 35545 JR NZ,35591      If so, resume the game */
+    VERIFY(0x8AD9, 0x20);
     FETCH(0x8AD9);
     IMM(0x8ADA);
     if (!(F&FZ)) { JRTAKEN(0x8ADA); goto L8B07; }
 L8ADB: /* 35547 INC E            Increment the delay counter in #REGe */
+    VERIFY(0x8ADB, 0x1C);
     FETCH(0x8ADB);
     E = inc8(E);
 L8ADC: /* 35548 JR NZ,35537      Jump back unless it's zero */
+    VERIFY(0x8ADC, 0x20);
     FETCH(0x8ADC);
     IMM(0x8ADD);
     if (!(F&FZ)) { JRTAKEN(0x8ADD); goto L8AD1; }
 L8ADE: /* 35550 INC D            Increment the delay counter in #REGd */
+    VERIFY(0x8ADE, 0x14);
     FETCH(0x8ADE);
     D = inc8(D);
 L8ADF: /* 35551 JR NZ,35537      Jump back unless it's zero */
+    VERIFY(0x8ADF, 0x20);
     FETCH(0x8ADF);
     IMM(0x8AE0);
     if (!(F&FZ)) { JRTAKEN(0x8AE0); goto L8AD1; }
 L8AE1: /* 35553 LD A,(34275)     Pick up the WRITETYPER key counter from #R34275 */
+    VERIFY(0x8AE1, 0x3A);
     FETCH(0x8AE1);
     { IMM(0x8AE2); IMM(0x8AE3); uint16_t ea = RD16IMM(0x8AE2);
     A = RD(ea); }
 L8AE4: /* 35556 CP 10            Has WRITETYPER been keyed in yet? */
+    VERIFY(0x8AE4, 0xFE);
     FETCH(0x8AE4);
     IMM(0x8AE5); cp8(mem[(uint16_t)0x8AE5]);
 L8AE6: /* 35558 CALL NZ,35563    If not, cycle the INK and PAPER colours */
+    VERIFY(0x8AE6, 0xC4);
     FETCH(0x8AE6);
     IMM(0x8AE7); IMM(0x8AE8);
     if (!(F&FZ)) { IC(0x8AE8, 1); PUSHW(0x8AE9); goto L8AEB; }
 L8AE9: /* 35561 JR 35537         Jump back to the beginning of the pause loop */
+    VERIFY(0x8AE9, 0x18);
     FETCH(0x8AE9);
     IMM(0x8AEA); JRTAKEN(0x8AEA);
     goto L8AD1;
 
 /* ---- CYCLEATTRS ---- */
 L8AEB: /* 35563 LD HL,22528      Point #REGhl at the first byte of the attribute file */
+    VERIFY(0x8AEB, 0x21);
     FETCH(0x8AEB);
     IMM(0x8AEC); IMM(0x8AED); HL = RD16IMM(0x8AEC);
 L8AEE: /* 35566 LD A,(HL)        Pick up this byte */
+    VERIFY(0x8AEE, 0x7E);
     FETCH(0x8AEE);
     A = RD(HL);
 L8AEF: /* 35567 AND 7            Keep only bits 0-2 (the INK colour) */
+    VERIFY(0x8AEF, 0xE6);
     FETCH(0x8AEF);
     IMM(0x8AF0); and8(mem[(uint16_t)0x8AF0]);
 L8AF1: /* 35569 OUT (254),A      Set the border colour to match */
+    VERIFY(0x8AF1, 0xD3);
     FETCH(0x8AF1);
     IMM(0x8AF2); OUTP((uint16_t)((mem[(uint16_t)0x8AF2]) | (A << 8)), A);
 L8AF3: /* 35571 LD A,(HL)        Pick up an attribute file byte */
+    VERIFY(0x8AF3, 0x7E);
     FETCH(0x8AF3);
     A = RD(HL);
 L8AF4: /* 35572 ADD A,3          {Cycle the INK colour forward by three */
+    VERIFY(0x8AF4, 0xC6);
     FETCH(0x8AF4);
     IMM(0x8AF5); add8(mem[(uint16_t)0x8AF5]);
 L8AF6: /* 35574 AND 7            } */
+    VERIFY(0x8AF6, 0xE6);
     FETCH(0x8AF6);
     IMM(0x8AF7); and8(mem[(uint16_t)0x8AF7]);
 L8AF8: /* 35576 LD D,A           Save the new INK colour in #REGd */
+    VERIFY(0x8AF8, 0x57);
     FETCH(0x8AF8);
     D = A;
 L8AF9: /* 35577 LD A,(HL)        Pick up the attribute file byte again */
+    VERIFY(0x8AF9, 0x7E);
     FETCH(0x8AF9);
     A = RD(HL);
 L8AFA: /* 35578 ADD A,24         {Cycle the PAPER colour forward by three (and turn off */
+    VERIFY(0x8AFA, 0xC6);
     FETCH(0x8AFA);
     IMM(0x8AFB); add8(mem[(uint16_t)0x8AFB]);
 L8AFC: /* 35580 AND 184          any BRIGHT colours)} */
+    VERIFY(0x8AFC, 0xE6);
     FETCH(0x8AFC);
     IMM(0x8AFD); and8(mem[(uint16_t)0x8AFD]);
 L8AFE: /* 35582 OR D             Merge in the new INK colour */
+    VERIFY(0x8AFE, 0xB2);
     FETCH(0x8AFE);
     or8(D);
 L8AFF: /* 35583 LD (HL),A        Save the new attribute byte */
+    VERIFY(0x8AFF, 0x77);
     FETCH(0x8AFF);
     WR(HL, A);
 L8B00: /* 35584 INC HL           Point #REGhl at the next byte in the attribute file */
+    VERIFY(0x8B00, 0x23);
     FETCH(0x8B00);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L8B01: /* 35585 LD A,H           {Have we reached the end of the attribute file yet? */
+    VERIFY(0x8B01, 0x7C);
     FETCH(0x8B01);
     A = H;
 L8B02: /* 35586 CP 91            } */
+    VERIFY(0x8B02, 0xFE);
     FETCH(0x8B02);
     IMM(0x8B03); cp8(mem[(uint16_t)0x8B03]);
 L8B04: /* 35588 JR NZ,35571      If not, jump back to modify the next byte */
+    VERIFY(0x8B04, 0x20);
     FETCH(0x8B04);
     IMM(0x8B05);
     if (!(F&FZ)) { JRTAKEN(0x8B05); goto L8AF3; }
 L8B06: /* 35590 RET               */
+    VERIFY(0x8B06, 0xC9);
     FETCH(0x8B06);
     POPPC(); goto dispatch;
 
 /* ---- ENDPAUSE ---- */
 L8B07: /* 35591 LD HL,39424      {Copy the attribute bytes from #R39424 to the bottom */
+    VERIFY(0x8B07, 0x21);
     FETCH(0x8B07);
     IMM(0x8B08); IMM(0x8B09); HL = RD16IMM(0x8B08);
 L8B0A: /* 35594 LD DE,23040      third of the screen */
+    VERIFY(0x8B0A, 0x11);
     FETCH(0x8B0A);
     IMM(0x8B0B); IMM(0x8B0C); DE = RD16IMM(0x8B0B);
 L8B0D: /* 35597 LD BC,256         */
+    VERIFY(0x8B0D, 0x01);
     FETCH(0x8B0D);
     IMM(0x8B0E); IMM(0x8B0F); BC = RD16IMM(0x8B0E);
 L8B10: /* 35600 LDIR             } */
+    VERIFY(0x8B10, 0xED);
     FETCH(0x8B10); FETCH(0x8B11);
     if (ldi_rep(+1)) goto L8B10;
 L8B12: /* 35602 LD A,(32990)     Pick up the border colour for the current room from */
+    VERIFY(0x8B12, 0x3A);
     FETCH(0x8B12);
     { IMM(0x8B13); IMM(0x8B14); uint16_t ea = RD16IMM(0x8B13);
     A = RD(ea); }
 L8B15: /* 35605 OUT (254),A      Restore the border colour */
+    VERIFY(0x8B15, 0xD3);
     FETCH(0x8B15);
     IMM(0x8B16); OUTP((uint16_t)((mem[(uint16_t)0x8B16]) | (A << 8)), A);
 L8B17: /* 35607 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x8B17, 0x3A);
     FETCH(0x8B17);
     { IMM(0x8B18); IMM(0x8B19); uint16_t ea = RD16IMM(0x8B18);
     A = RD(ea); }
 L8B1A: /* 35610 CP 255           Has Willy landed after falling from too great a height, */
+    VERIFY(0x8B1A, 0xFE);
     FETCH(0x8B1A);
     IMM(0x8B1B); cp8(mem[(uint16_t)0x8B1B]);
 L8B1C: /* 35612 JP Z,35841       If so, lose a life */
+    VERIFY(0x8B1C, 0xCA);
     FETCH(0x8B1C);
     IMM(0x8B1D); IMM(0x8B1E);
     if ((F&FZ)) goto L8C01;
 L8B1F: /* 35615 LD B,191         Prepare #REGb for reading keys H-J-K-L-ENTER */
+    VERIFY(0x8B1F, 0x06);
     FETCH(0x8B1F);
     IMM(0x8B20); B = mem[(uint16_t)0x8B20];
 L8B21: /* 35617 LD HL,34274      Point #REGhl at the music flags at #R34274 */
+    VERIFY(0x8B21, 0x21);
     FETCH(0x8B21);
     IMM(0x8B22); IMM(0x8B23); HL = RD16IMM(0x8B22);
 L8B24: /* 35620 IN A,(C)         Read keys H-J-K-L-ENTER; note that if the game has just */
+    VERIFY(0x8B24, 0xED);
     FETCH(0x8B24); FETCH(0x8B25);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8B26: /* 35622 AND 31           {Are any of these keys being pressed? */
+    VERIFY(0x8B26, 0xE6);
     FETCH(0x8B26);
     IMM(0x8B27); and8(mem[(uint16_t)0x8B27]);
 L8B28: /* 35624 CP 31            } */
+    VERIFY(0x8B28, 0xFE);
     FETCH(0x8B28);
     IMM(0x8B29); cp8(mem[(uint16_t)0x8B29]);
 L8B2A: /* 35626 JR Z,35638       Jump if not */
+    VERIFY(0x8B2A, 0x28);
     FETCH(0x8B2A);
     IMM(0x8B2B);
     if ((F&FZ)) { JRTAKEN(0x8B2B); goto L8B36; }
 L8B2C: /* 35628 BIT 0,(HL)       Were any of these keys being pressed the last time we */
+    VERIFY(0x8B2C, 0xCB);
     FETCH(0x8B2C); FETCH(0x8B2D);
     { uint8_t v = RD(HL); IC(HL, 1); bit(0, v); }
 L8B2E: /* 35630 JR NZ,35640      Jump if so */
+    VERIFY(0x8B2E, 0x20);
     FETCH(0x8B2E);
     IMM(0x8B2F);
     if (!(F&FZ)) { JRTAKEN(0x8B2F); goto L8B38; }
 L8B30: /* 35632 LD A,(HL)        {Set bit 0 (the keypress flag) and flip bit 1 (the */
+    VERIFY(0x8B30, 0x7E);
     FETCH(0x8B30);
     A = RD(HL);
 L8B31: /* 35633 XOR 3            in-game music flag) at #R34274 */
+    VERIFY(0x8B31, 0xEE);
     FETCH(0x8B31);
     IMM(0x8B32); xor8(mem[(uint16_t)0x8B32]);
 L8B33: /* 35635 LD (HL),A        } */
+    VERIFY(0x8B33, 0x77);
     FETCH(0x8B33);
     WR(HL, A);
 L8B34: /* 35636 JR 35640          */
+    VERIFY(0x8B34, 0x18);
     FETCH(0x8B34);
     IMM(0x8B35); JRTAKEN(0x8B35);
     goto L8B38;
 L8B36: /* 35638 RES 0,(HL)       Reset bit 0 (the keypress flag) at #R34274 */
+    VERIFY(0x8B36, 0xCB);
     FETCH(0x8B36); FETCH(0x8B37);
     { uint8_t v = RD(HL); IC(HL, 1); WR(HL, (uint8_t)(v & ~(1u << 0))); }
 L8B38: /* 35640 BIT 1,(HL)       Has the in-game music been switched off? */
+    VERIFY(0x8B38, 0xCB);
     FETCH(0x8B38); FETCH(0x8B39);
     { uint8_t v = RD(HL); IC(HL, 1); bit(1, v); }
 L8B3A: /* 35642 JR NZ,35696      Jump if so */
+    VERIFY(0x8B3A, 0x20);
     FETCH(0x8B3A);
     IMM(0x8B3B);
     if (!(F&FZ)) { JRTAKEN(0x8B3B); goto L8B70; }
 L8B3C: /* 35644 XOR A            {Reset the inactivity timer at #R34272 (the game does */
+    VERIFY(0x8B3C, 0xAF);
     FETCH(0x8B3C);
     xor8(A);
 L8B3D: /* 35645 LD (34272),A     not automatically pause after a period of inactivity if */
+    VERIFY(0x8B3D, 0x32);
     FETCH(0x8B3D);
     { IMM(0x8B3E); IMM(0x8B3F); uint16_t ea = RD16IMM(0x8B3E);
     WR(ea, A); }
 L8B40: /* 35648 LD A,(34273)     {Increment the in-game music note index at #R34273 */
+    VERIFY(0x8B40, 0x3A);
     FETCH(0x8B40);
     { IMM(0x8B41); IMM(0x8B42); uint16_t ea = RD16IMM(0x8B41);
     A = RD(ea); }
 L8B43: /* 35651 INC A             */
+    VERIFY(0x8B43, 0x3C);
     FETCH(0x8B43);
     A = inc8(A);
 L8B44: /* 35652 LD (34273),A     } */
+    VERIFY(0x8B44, 0x32);
     FETCH(0x8B44);
     { IMM(0x8B45); IMM(0x8B46); uint16_t ea = RD16IMM(0x8B45);
     WR(ea, A); }
 L8B47: /* 35655 AND 126          {Point #REGhl at the appropriate entry in the tune data */
+    VERIFY(0x8B47, 0xE6);
     FETCH(0x8B47);
     IMM(0x8B48); and8(mem[(uint16_t)0x8B48]);
 L8B49: /* 35657 RRCA             table at #R34399 */
+    VERIFY(0x8B49, 0x0F);
     FETCH(0x8B49);
     rrca();
 L8B4A: /* 35658 LD E,A            */
+    VERIFY(0x8B4A, 0x5F);
     FETCH(0x8B4A);
     E = A;
 L8B4B: /* 35659 LD D,0            */
+    VERIFY(0x8B4B, 0x16);
     FETCH(0x8B4B);
     IMM(0x8B4C); D = mem[(uint16_t)0x8B4C];
 L8B4D: /* 35661 LD HL,34399       */
+    VERIFY(0x8B4D, 0x21);
     FETCH(0x8B4D);
     IMM(0x8B4E); IMM(0x8B4F); HL = RD16IMM(0x8B4E);
 L8B50: /* 35664 ADD HL,DE        } */
+    VERIFY(0x8B50, 0x19);
     FETCH(0x8B50);
     IR(7);
     HL = add16(HL, DE);
 L8B51: /* 35665 LD A,(34252)     Pick up the number of lives remaining (0-7) from #R34252 */
+    VERIFY(0x8B51, 0x3A);
     FETCH(0x8B51);
     { IMM(0x8B52); IMM(0x8B53); uint16_t ea = RD16IMM(0x8B52);
     A = RD(ea); }
 L8B54: /* 35668 RLCA             {#REGa=28-4#REGa; this value adjusts the pitch of the */
+    VERIFY(0x8B54, 0x07);
     FETCH(0x8B54);
     rlca();
 L8B55: /* 35669 RLCA             note that is played depending on how many lives are */
+    VERIFY(0x8B55, 0x07);
     FETCH(0x8B55);
     rlca();
 L8B56: /* 35670 SUB 28           remaining (the more lives remaining, the higher the */
+    VERIFY(0x8B56, 0xD6);
     FETCH(0x8B56);
     IMM(0x8B57); sub8(mem[(uint16_t)0x8B57]);
 L8B58: /* 35672 NEG              pitch)} */
+    VERIFY(0x8B58, 0xED);
     FETCH(0x8B58); FETCH(0x8B59);
     neg();
 L8B5A: /* 35674 ADD A,(HL)       Add the entry from the tune data table for the current */
+    VERIFY(0x8B5A, 0x86);
     FETCH(0x8B5A);
     add8(RD(HL));
 L8B5B: /* 35675 LD D,A           Copy this value to #REGd (which determines the pitch of */
+    VERIFY(0x8B5B, 0x57);
     FETCH(0x8B5B);
     D = A;
 L8B5C: /* 35676 LD A,(32990)     Pick up the border colour for the current room from */
+    VERIFY(0x8B5C, 0x3A);
     FETCH(0x8B5C);
     { IMM(0x8B5D); IMM(0x8B5E); uint16_t ea = RD16IMM(0x8B5D);
     A = RD(ea); }
 L8B5F: /* 35679 LD E,D           Initialise the pitch delay counter in #REGe */
+    VERIFY(0x8B5F, 0x5A);
     FETCH(0x8B5F);
     E = D;
 L8B60: /* 35680 LD BC,3          Initialise the duration delay counters in #REGb (0) and */
+    VERIFY(0x8B60, 0x01);
     FETCH(0x8B60);
     IMM(0x8B61); IMM(0x8B62); BC = RD16IMM(0x8B61);
 L8B63: /* 35683 OUT (254),A      {Produce a note of the in-game music */
+    VERIFY(0x8B63, 0xD3);
     FETCH(0x8B63);
     IMM(0x8B64); OUTP((uint16_t)((mem[(uint16_t)0x8B64]) | (A << 8)), A);
 L8B65: /* 35685 DEC E             */
+    VERIFY(0x8B65, 0x1D);
     FETCH(0x8B65);
     E = dec8(E);
 L8B66: /* 35686 JR NZ,35691       */
+    VERIFY(0x8B66, 0x20);
     FETCH(0x8B66);
     IMM(0x8B67);
     if (!(F&FZ)) { JRTAKEN(0x8B67); goto L8B6B; }
 L8B68: /* 35688 LD E,D            */
+    VERIFY(0x8B68, 0x5A);
     FETCH(0x8B68);
     E = D;
 L8B69: /* 35689 XOR 24            */
+    VERIFY(0x8B69, 0xEE);
     FETCH(0x8B69);
     IMM(0x8B6A); xor8(mem[(uint16_t)0x8B6A]);
 L8B6B: /* 35691 DJNZ 35683        */
+    VERIFY(0x8B6B, 0x10);
     FETCH(0x8B6B);
     T(1); IMM(0x8B6C);
     if (--B) { JRTAKEN(0x8B6C); goto L8B63; }
 L8B6D: /* 35693 DEC C             */
+    VERIFY(0x8B6D, 0x0D);
     FETCH(0x8B6D);
     C = dec8(C);
 L8B6E: /* 35694 JR NZ,35683      } */
+    VERIFY(0x8B6E, 0x20);
     FETCH(0x8B6E);
     IMM(0x8B6F);
     if (!(F&FZ)) { JRTAKEN(0x8B6F); goto L8B63; }
 L8B70: /* 35696 LD BC,61438      {Read keys 6-7-8-9-0 */
+    VERIFY(0x8B70, 0x01);
     Z80C_HOOK(0x8B70);
     FETCH(0x8B70);
     IMM(0x8B71); IMM(0x8B72); BC = RD16IMM(0x8B71);
 L8B73: /* 35699 IN A,(C)         } */
+    VERIFY(0x8B73, 0xED);
     FETCH(0x8B73); FETCH(0x8B74);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8B75: /* 35701 BIT 1,A          Is '9' (the activator key) being pressed? */
+    VERIFY(0x8B75, 0xCB);
     FETCH(0x8B75); FETCH(0x8B76);
     bit(1, A);
 L8B77: /* 35703 JP NZ,35735      Jump if not */
+    VERIFY(0x8B77, 0xC2);
     FETCH(0x8B77);
     IMM(0x8B78); IMM(0x8B79);
     if (!(F&FZ)) goto L8B97;
 L8B7A: /* 35706 AND 16           {Keep only bit 4 (corresponding to the '6' key), flip */
+    VERIFY(0x8B7A, 0xE6);
     FETCH(0x8B7A);
     IMM(0x8B7B); and8(mem[(uint16_t)0x8B7B]);
 L8B7C: /* 35708 XOR 16           it, and move it into bit 5 */
+    VERIFY(0x8B7C, 0xEE);
     FETCH(0x8B7C);
     IMM(0x8B7D); xor8(mem[(uint16_t)0x8B7D]);
 L8B7E: /* 35710 RLCA             } */
+    VERIFY(0x8B7E, 0x07);
     FETCH(0x8B7E);
     rlca();
 L8B7F: /* 35711 LD D,A           Now bit 5 of #REGd is set if '6' is being pressed */
+    VERIFY(0x8B7F, 0x57);
     FETCH(0x8B7F);
     D = A;
 L8B80: /* 35712 LD A,(34275)     Pick up the WRITETYPER key counter from #R34275 */
+    VERIFY(0x8B80, 0x3A);
     FETCH(0x8B80);
     { IMM(0x8B81); IMM(0x8B82); uint16_t ea = RD16IMM(0x8B81);
     A = RD(ea); }
 L8B83: /* 35715 CP 10            Has WRITETYPER been keyed in yet? */
+    VERIFY(0x8B83, 0xFE);
     FETCH(0x8B83);
     IMM(0x8B84); cp8(mem[(uint16_t)0x8B84]);
 L8B85: /* 35717 JP NZ,35735      Jump if not */
+    VERIFY(0x8B85, 0xC2);
     FETCH(0x8B85);
     IMM(0x8B86); IMM(0x8B87);
     if (!(F&FZ)) goto L8B97;
 L8B88: /* 35720 LD BC,63486      {Read keys 1-2-3-4-5 */
+    VERIFY(0x8B88, 0x01);
     FETCH(0x8B88);
     IMM(0x8B89); IMM(0x8B8A); BC = RD16IMM(0x8B89);
 L8B8B: /* 35723 IN A,(C)         } */
+    VERIFY(0x8B8B, 0xED);
     FETCH(0x8B8B); FETCH(0x8B8C);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8B8D: /* 35725 CPL              {Keep only bits 0-4 and flip them */
+    VERIFY(0x8B8D, 0x2F);
     FETCH(0x8B8D);
     cpl();
 L8B8E: /* 35726 AND 31           } */
+    VERIFY(0x8B8E, 0xE6);
     FETCH(0x8B8E);
     IMM(0x8B8F); and8(mem[(uint16_t)0x8B8F]);
 L8B90: /* 35728 OR D             Copy bit 5 of #REGd into #REGa; now #REGa holds the */
+    VERIFY(0x8B90, 0xB2);
     FETCH(0x8B90);
     or8(D);
 L8B91: /* 35729 LD (33824),A     Store the room number at #R33824 */
+    VERIFY(0x8B91, 0x32);
     FETCH(0x8B91);
     { IMM(0x8B92); IMM(0x8B93); uint16_t ea = RD16IMM(0x8B92);
     WR(ea, A); }
 L8B94: /* 35732 JP 35090         Teleport into the room */
+    VERIFY(0x8B94, 0xC3);
     FETCH(0x8B94);
     IMM(0x8B95); IMM(0x8B96);
     goto L8912;
 L8B97: /* 35735 LD A,(34275)     Pick up the WRITETYPER key counter from #R34275 */
+    VERIFY(0x8B97, 0x3A);
     FETCH(0x8B97);
     { IMM(0x8B98); IMM(0x8B99); uint16_t ea = RD16IMM(0x8B98);
     A = RD(ea); }
 L8B9A: /* 35738 CP 10            Has WRITETYPER been keyed in yet? */
+    VERIFY(0x8B9A, 0xFE);
     FETCH(0x8B9A);
     IMM(0x8B9B); cp8(mem[(uint16_t)0x8B9B]);
 L8B9C: /* 35740 JP Z,35245       If so, jump back to the start of the main loop */
+    VERIFY(0x8B9C, 0xCA);
     FETCH(0x8B9C);
     IMM(0x8B9D); IMM(0x8B9E);
     if ((F&FZ)) goto L89AD;
 L8B9F: /* 35743 LD A,(33824)     Pick up the current room number from #R33824 */
+    VERIFY(0x8B9F, 0x3A);
     FETCH(0x8B9F);
     { IMM(0x8BA0); IMM(0x8BA1); uint16_t ea = RD16IMM(0x8BA0);
     A = RD(ea); }
 L8BA2: /* 35746 CP 28            Are we in #R56320(First Landing)? */
+    VERIFY(0x8BA2, 0xFE);
     FETCH(0x8BA2);
     IMM(0x8BA3); cp8(mem[(uint16_t)0x8BA3]);
 L8BA4: /* 35748 JP NZ,35245      If not, jump back to the start of the main loop */
+    VERIFY(0x8BA4, 0xC2);
     FETCH(0x8BA4);
     IMM(0x8BA5); IMM(0x8BA6);
     if (!(F&FZ)) goto L89AD;
 L8BA7: /* 35751 LD A,(34255)     Pick up Willy's y-coordinate from #R34255 */
+    VERIFY(0x8BA7, 0x3A);
     FETCH(0x8BA7);
     { IMM(0x8BA8); IMM(0x8BA9); uint16_t ea = RD16IMM(0x8BA8);
     A = RD(ea); }
 L8BAA: /* 35754 CP 208           Is Willy on the floor at the bottom of the staircase? */
+    VERIFY(0x8BAA, 0xFE);
     FETCH(0x8BAA);
     IMM(0x8BAB); cp8(mem[(uint16_t)0x8BAB]);
 L8BAC: /* 35756 JP NZ,35245      If not, jump back to the start of the main loop */
+    VERIFY(0x8BAC, 0xC2);
     FETCH(0x8BAC);
     IMM(0x8BAD); IMM(0x8BAE);
     if (!(F&FZ)) goto L89AD;
 L8BAF: /* 35759 LD A,(34275)     Pick up the WRITETYPER key counter (0-9) from #R34275 */
+    VERIFY(0x8BAF, 0x3A);
     FETCH(0x8BAF);
     { IMM(0x8BB0); IMM(0x8BB1); uint16_t ea = RD16IMM(0x8BB0);
     A = RD(ea); }
 L8BB2: /* 35762 RLCA             {Point #REGix at the corresponding entry in the */
+    VERIFY(0x8BB2, 0x07);
     FETCH(0x8BB2);
     rlca();
 L8BB3: /* 35763 LD E,A           WRITETYPER table at #R34279 */
+    VERIFY(0x8BB3, 0x5F);
     FETCH(0x8BB3);
     E = A;
 L8BB4: /* 35764 LD D,0            */
+    VERIFY(0x8BB4, 0x16);
     FETCH(0x8BB4);
     IMM(0x8BB5); D = mem[(uint16_t)0x8BB5];
 L8BB6: /* 35766 LD IX,34279       */
+    VERIFY(0x8BB6, 0xDD);
     FETCH(0x8BB6); FETCH(0x8BB7);
     IMM(0x8BB8); IMM(0x8BB9); IX = RD16IMM(0x8BB8);
 L8BBA: /* 35770 ADD IX,DE        } */
+    VERIFY(0x8BBA, 0xDD);
     FETCH(0x8BBA); FETCH(0x8BBB);
     IR(7); IX = add16(IX, DE);
 L8BBC: /* 35772 LD BC,64510      {Read keys Q-W-E-R-T */
+    VERIFY(0x8BBC, 0x01);
     FETCH(0x8BBC);
     IMM(0x8BBD); IMM(0x8BBE); BC = RD16IMM(0x8BBD);
 L8BBF: /* 35775 IN A,(C)         } */
+    VERIFY(0x8BBF, 0xED);
     FETCH(0x8BBF); FETCH(0x8BC0);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8BC1: /* 35777 AND 31           Keep only bits 0-4 */
+    VERIFY(0x8BC1, 0xE6);
     FETCH(0x8BC1);
     IMM(0x8BC2); and8(mem[(uint16_t)0x8BC2]);
 L8BC3: /* 35779 CP (IX+0)        Does this match the first byte of the entry in the */
+    VERIFY(0x8BC3, 0xDD);
     FETCH(0x8BC3); FETCH(0x8BC4);
     IMM(0x8BC5); IC(0x8BC5, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8BC5]); cp8(RD(ea)); }
 L8BC6: /* 35782 JR Z,35802       Jump if so */
+    VERIFY(0x8BC6, 0x28);
     FETCH(0x8BC6);
     IMM(0x8BC7);
     if ((F&FZ)) { JRTAKEN(0x8BC7); goto L8BDA; }
 L8BC8: /* 35784 CP 31            Are any of the keys Q-W-E-R-T being pressed? */
+    VERIFY(0x8BC8, 0xFE);
     FETCH(0x8BC8);
     IMM(0x8BC9); cp8(mem[(uint16_t)0x8BC9]);
 L8BCA: /* 35786 JP Z,35245       If not, jump back to the start of the main loop */
+    VERIFY(0x8BCA, 0xCA);
     FETCH(0x8BCA);
     IMM(0x8BCB); IMM(0x8BCC);
     if ((F&FZ)) goto L89AD;
 L8BCD: /* 35789 CP (IX-2)        Does the keyboard reading match the first byte of the */
+    VERIFY(0x8BCD, 0xDD);
     FETCH(0x8BCD); FETCH(0x8BCE);
     IMM(0x8BCF); IC(0x8BCF, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8BCF]); cp8(RD(ea)); }
 L8BD0: /* 35792 JP Z,35245       If so, jump back to the start of the main loop */
+    VERIFY(0x8BD0, 0xCA);
     FETCH(0x8BD0);
     IMM(0x8BD1); IMM(0x8BD2);
     if ((F&FZ)) goto L89AD;
 L8BD3: /* 35795 XOR A            {Reset the WRITETYPER key counter at #R34275 to 0 (an */
+    VERIFY(0x8BD3, 0xAF);
     FETCH(0x8BD3);
     xor8(A);
 L8BD4: /* 35796 LD (34275),A     incorrect key was pressed)} */
+    VERIFY(0x8BD4, 0x32);
     FETCH(0x8BD4);
     { IMM(0x8BD5); IMM(0x8BD6); uint16_t ea = RD16IMM(0x8BD5);
     WR(ea, A); }
 L8BD7: /* 35799 JP 35245         Jump back to the start of the main loop */
+    VERIFY(0x8BD7, 0xC3);
     FETCH(0x8BD7);
     IMM(0x8BD8); IMM(0x8BD9);
     goto L89AD;
 L8BDA: /* 35802 LD B,223         {Read keys Y-U-I-O-P */
+    VERIFY(0x8BDA, 0x06);
     FETCH(0x8BDA);
     IMM(0x8BDB); B = mem[(uint16_t)0x8BDB];
 L8BDC: /* 35804 IN A,(C)         } */
+    VERIFY(0x8BDC, 0xED);
     FETCH(0x8BDC); FETCH(0x8BDD);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8BDE: /* 35806 AND 31           Keep only bits 0-4 */
+    VERIFY(0x8BDE, 0xE6);
     FETCH(0x8BDE);
     IMM(0x8BDF); and8(mem[(uint16_t)0x8BDF]);
 L8BE0: /* 35808 CP (IX+1)        Does this match the second byte of the entry in the */
+    VERIFY(0x8BE0, 0xDD);
     FETCH(0x8BE0); FETCH(0x8BE1);
     IMM(0x8BE2); IC(0x8BE2, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8BE2]); cp8(RD(ea)); }
 L8BE3: /* 35811 JR Z,35831       If so, jump to increment the WRITETYPER key counter */
+    VERIFY(0x8BE3, 0x28);
     FETCH(0x8BE3);
     IMM(0x8BE4);
     if ((F&FZ)) { JRTAKEN(0x8BE4); goto L8BF7; }
 L8BE5: /* 35813 CP 31            Are any of the keys Y-U-I-O-P being pressed? */
+    VERIFY(0x8BE5, 0xFE);
     FETCH(0x8BE5);
     IMM(0x8BE6); cp8(mem[(uint16_t)0x8BE6]);
 L8BE7: /* 35815 JP Z,35245       If not, jump back to the start of the main loop */
+    VERIFY(0x8BE7, 0xCA);
     FETCH(0x8BE7);
     IMM(0x8BE8); IMM(0x8BE9);
     if ((F&FZ)) goto L89AD;
 L8BEA: /* 35818 CP (IX-1)        Does the keyboard reading match the second byte of the */
+    VERIFY(0x8BEA, 0xDD);
     FETCH(0x8BEA); FETCH(0x8BEB);
     IMM(0x8BEC); IC(0x8BEC, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8BEC]); cp8(RD(ea)); }
 L8BED: /* 35821 JP Z,35245       If so, jump back to the start of the main loop */
+    VERIFY(0x8BED, 0xCA);
     FETCH(0x8BED);
     IMM(0x8BEE); IMM(0x8BEF);
     if ((F&FZ)) goto L89AD;
 L8BF0: /* 35824 XOR A            {Reset the WRITETYPER key counter at #R34275 to 0 (an */
+    VERIFY(0x8BF0, 0xAF);
     FETCH(0x8BF0);
     xor8(A);
 L8BF1: /* 35825 LD (34275),A     incorrect key was pressed)} */
+    VERIFY(0x8BF1, 0x32);
     FETCH(0x8BF1);
     { IMM(0x8BF2); IMM(0x8BF3); uint16_t ea = RD16IMM(0x8BF2);
     WR(ea, A); }
 L8BF4: /* 35828 JP 35245         Jump back to the start of the main loop */
+    VERIFY(0x8BF4, 0xC3);
     FETCH(0x8BF4);
     IMM(0x8BF5); IMM(0x8BF6);
     goto L89AD;
 L8BF7: /* 35831 LD A,(34275)     {Increment the WRITETYPER key counter at #R34275 */
+    VERIFY(0x8BF7, 0x3A);
     FETCH(0x8BF7);
     { IMM(0x8BF8); IMM(0x8BF9); uint16_t ea = RD16IMM(0x8BF8);
     A = RD(ea); }
 L8BFA: /* 35834 INC A             */
+    VERIFY(0x8BFA, 0x3C);
     FETCH(0x8BFA);
     A = inc8(A);
 L8BFB: /* 35835 LD (34275),A     } */
+    VERIFY(0x8BFB, 0x32);
     FETCH(0x8BFB);
     { IMM(0x8BFC); IMM(0x8BFD); uint16_t ea = RD16IMM(0x8BFC);
     WR(ea, A); }
 L8BFE: /* 35838 JP 35245         Jump back to the start of the main loop */
+    VERIFY(0x8BFE, 0xC3);
     FETCH(0x8BFE);
     IMM(0x8BFF); IMM(0x8C00);
     goto L89AD;
 
 /* ---- LOSELIFE ---- */
 L8C01: /* 35841 LD A,71          #REGa=#b71 (INK 7: PAPER 0: BRIGHT 1) */
+    VERIFY(0x8C01, 0x3E);
     FETCH(0x8C01);
     IMM(0x8C02); A = mem[(uint16_t)0x8C02];
 L8C03: /* 35843 LD HL,22528      {Fill the top two-thirds of the attribute file with the */
+    VERIFY(0x8C03, 0x21);
     FETCH(0x8C03);
     IMM(0x8C04); IMM(0x8C05); HL = RD16IMM(0x8C04);
 L8C06: /* 35846 LD DE,22529      value in #REGa */
+    VERIFY(0x8C06, 0x11);
     FETCH(0x8C06);
     IMM(0x8C07); IMM(0x8C08); DE = RD16IMM(0x8C07);
 L8C09: /* 35849 LD BC,511         */
+    VERIFY(0x8C09, 0x01);
     FETCH(0x8C09);
     IMM(0x8C0A); IMM(0x8C0B); BC = RD16IMM(0x8C0A);
 L8C0C: /* 35852 LD (HL),A         */
+    VERIFY(0x8C0C, 0x77);
     FETCH(0x8C0C);
     WR(HL, A);
 L8C0D: /* 35853 LDIR             } */
+    VERIFY(0x8C0D, 0xED);
     FETCH(0x8C0D); FETCH(0x8C0E);
     if (ldi_rep(+1)) goto L8C0D;
 L8C0F: /* 35855 LD E,A           Save the attribute byte (#b64-#b71) in #REGe for later */
+    VERIFY(0x8C0F, 0x5F);
     FETCH(0x8C0F);
     E = A;
 L8C10: /* 35856 CPL              {#REGd=63-8*(#REGe #S/AND/ 7); this value determines the */
+    VERIFY(0x8C10, 0x2F);
     FETCH(0x8C10);
     cpl();
 L8C11: /* 35857 AND 7            pitch of the short note that will be played */
+    VERIFY(0x8C11, 0xE6);
     FETCH(0x8C11);
     IMM(0x8C12); and8(mem[(uint16_t)0x8C12]);
 L8C13: /* 35859 RLCA              */
+    VERIFY(0x8C13, 0x07);
     FETCH(0x8C13);
     rlca();
 L8C14: /* 35860 RLCA              */
+    VERIFY(0x8C14, 0x07);
     FETCH(0x8C14);
     rlca();
 L8C15: /* 35861 RLCA              */
+    VERIFY(0x8C15, 0x07);
     FETCH(0x8C15);
     rlca();
 L8C16: /* 35862 OR 7              */
+    VERIFY(0x8C16, 0xF6);
     FETCH(0x8C16);
     IMM(0x8C17); or8(mem[(uint16_t)0x8C17]);
 L8C18: /* 35864 LD D,A           } */
+    VERIFY(0x8C18, 0x57);
     FETCH(0x8C18);
     D = A;
 L8C19: /* 35865 LD C,E           {#REGc=8+32*(#REGe #S/AND/ 7); this value determines the */
+    VERIFY(0x8C19, 0x4B);
     FETCH(0x8C19);
     C = E;
 L8C1A: /* 35866 RRC C            duration of the short note that will be played */
+    VERIFY(0x8C1A, 0xCB);
     FETCH(0x8C1A); FETCH(0x8C1B);
     C = rrc(C);
 L8C1C: /* 35868 RRC C             */
+    VERIFY(0x8C1C, 0xCB);
     FETCH(0x8C1C); FETCH(0x8C1D);
     C = rrc(C);
 L8C1E: /* 35870 RRC C            } */
+    VERIFY(0x8C1E, 0xCB);
     FETCH(0x8C1E); FETCH(0x8C1F);
     C = rrc(C);
 L8C20: /* 35872 OR 16            Set bit 4 of #REGa (for no apparent reason) */
+    VERIFY(0x8C20, 0xF6);
     FETCH(0x8C20);
     IMM(0x8C21); or8(mem[(uint16_t)0x8C21]);
 L8C22: /* 35874 XOR A            Set #REGa=0 (this will make the border black) */
+    VERIFY(0x8C22, 0xAF);
     FETCH(0x8C22);
     xor8(A);
 L8C23: /* 35875 OUT (254),A      {Produce a short note whose pitch is determined by #REGd */
+    VERIFY(0x8C23, 0xD3);
     FETCH(0x8C23);
     IMM(0x8C24); OUTP((uint16_t)((mem[(uint16_t)0x8C24]) | (A << 8)), A);
 L8C25: /* 35877 XOR 24           and whose duration is determined by #REGc */
+    VERIFY(0x8C25, 0xEE);
     FETCH(0x8C25);
     IMM(0x8C26); xor8(mem[(uint16_t)0x8C26]);
 L8C27: /* 35879 LD B,D            */
+    VERIFY(0x8C27, 0x42);
     FETCH(0x8C27);
     B = D;
 L8C28: /* 35880 DJNZ 35880        */
+    VERIFY(0x8C28, 0x10);
     FETCH(0x8C28);
     T(1); IMM(0x8C29);
     if (--B) { JRTAKEN(0x8C29); goto L8C28; }
 L8C2A: /* 35882 DEC C             */
+    VERIFY(0x8C2A, 0x0D);
     FETCH(0x8C2A);
     C = dec8(C);
 L8C2B: /* 35883 JR NZ,35875      } */
+    VERIFY(0x8C2B, 0x20);
     FETCH(0x8C2B);
     IMM(0x8C2C);
     if (!(F&FZ)) { JRTAKEN(0x8C2C); goto L8C23; }
 L8C2D: /* 35885 LD A,E           Restore the attribute byte (originally #b71) to #REGa */
+    VERIFY(0x8C2D, 0x7B);
     FETCH(0x8C2D);
     A = E;
 L8C2E: /* 35886 DEC A            Decrement it (effectively decrementing the INK colour) */
+    VERIFY(0x8C2E, 0x3D);
     FETCH(0x8C2E);
     A = dec8(A);
 L8C2F: /* 35887 CP 63            Have we used attribute value #b64 (INK 0) yet? */
+    VERIFY(0x8C2F, 0xFE);
     FETCH(0x8C2F);
     IMM(0x8C30); cp8(mem[(uint16_t)0x8C30]);
 L8C31: /* 35889 JR NZ,35843      If not, jump back to update the INK colour in the top */
+    VERIFY(0x8C31, 0x20);
     FETCH(0x8C31);
     IMM(0x8C32);
     if (!(F&FZ)) { JRTAKEN(0x8C32); goto L8C03; }
 L8C33: /* 35891 LD HL,34252      {Pick up the number of lives remaining from #R34252 */
+    VERIFY(0x8C33, 0x21);
     FETCH(0x8C33);
     IMM(0x8C34); IMM(0x8C35); HL = RD16IMM(0x8C34);
 L8C36: /* 35894 LD A,(HL)        } */
+    VERIFY(0x8C36, 0x7E);
     FETCH(0x8C36);
     A = RD(HL);
 L8C37: /* 35895 OR A             Are there any lives remaining? */
+    VERIFY(0x8C37, 0xB7);
     FETCH(0x8C37);
     or8(A);
 L8C38: /* 35896 JP Z,35914       If not, display the game over sequence */
+    VERIFY(0x8C38, 0xCA);
     FETCH(0x8C38);
     IMM(0x8C39); IMM(0x8C3A);
     if ((F&FZ)) goto L8C4A;
 L8C3B: /* 35899 DEC (HL)         Decrease the number of lives remaining by one */
+    VERIFY(0x8C3B, 0x35);
     FETCH(0x8C3B);
     { uint8_t v = RD(HL); IC(HL, 1); WR(HL, dec8(v)); }
 L8C3C: /* 35900 LD HL,34263      {Restore Willy's state upon entry to the room by copying */
+    VERIFY(0x8C3C, 0x21);
     FETCH(0x8C3C);
     IMM(0x8C3D); IMM(0x8C3E); HL = RD16IMM(0x8C3D);
 L8C3F: /* 35903 LD DE,34255      the seven bytes at #R34263 back into #GBUF34255,34261 */
+    VERIFY(0x8C3F, 0x11);
     FETCH(0x8C3F);
     IMM(0x8C40); IMM(0x8C41); DE = RD16IMM(0x8C40);
 L8C42: /* 35906 LD BC,7           */
+    VERIFY(0x8C42, 0x01);
     FETCH(0x8C42);
     IMM(0x8C43); IMM(0x8C44); BC = RD16IMM(0x8C43);
 L8C45: /* 35909 LDIR             } */
+    VERIFY(0x8C45, 0xED);
     FETCH(0x8C45); FETCH(0x8C46);
     if (ldi_rep(+1)) goto L8C45;
 L8C47: /* 35911 JP 35090         Reinitialise the room and resume the game */
+    VERIFY(0x8C47, 0xC3);
     FETCH(0x8C47);
     IMM(0x8C48); IMM(0x8C49);
     goto L8912;
 
 /* ---- GAMEOVER ---- */
 L8C4A: /* 35914 LD HL,16384      {Clear the top two-thirds of the display file */
+    VERIFY(0x8C4A, 0x21);
     Z80C_HOOK(0x8C4A);
     FETCH(0x8C4A);
     IMM(0x8C4B); IMM(0x8C4C); HL = RD16IMM(0x8C4B);
 L8C4D: /* 35917 LD DE,16385       */
+    VERIFY(0x8C4D, 0x11);
     FETCH(0x8C4D);
     IMM(0x8C4E); IMM(0x8C4F); DE = RD16IMM(0x8C4E);
 L8C50: /* 35920 LD BC,4095        */
+    VERIFY(0x8C50, 0x01);
     FETCH(0x8C50);
     IMM(0x8C51); IMM(0x8C52); BC = RD16IMM(0x8C51);
 L8C53: /* 35923 LD (HL),0         */
+    VERIFY(0x8C53, 0x36);
     FETCH(0x8C53);
     IMM(0x8C54); WR(HL, mem[(uint16_t)0x8C54]);
 L8C55: /* 35925 LDIR             } */
+    VERIFY(0x8C55, 0xED);
     FETCH(0x8C55); FETCH(0x8C56);
     if (ldi_rep(+1)) goto L8C55;
 L8C57: /* 35927 XOR A            {Initialise the temporary game status buffer variable at */
+    VERIFY(0x8C57, 0xAF);
     FETCH(0x8C57);
     xor8(A);
 L8C58: /* 35928 LD (34276),A     #R34276; this variable will determine the distance of */
+    VERIFY(0x8C58, 0x32);
     FETCH(0x8C58);
     { IMM(0x8C59); IMM(0x8C5A); uint16_t ea = RD16IMM(0x8C59);
     WR(ea, A); }
 L8C5B: /* 35931 LD DE,40256      {Draw Willy at (12,15) */
+    VERIFY(0x8C5B, 0x11);
     FETCH(0x8C5B);
     IMM(0x8C5C); IMM(0x8C5D); DE = RD16IMM(0x8C5C);
 L8C5E: /* 35934 LD HL,18575       */
+    VERIFY(0x8C5E, 0x21);
     FETCH(0x8C5E);
     IMM(0x8C5F); IMM(0x8C60); HL = RD16IMM(0x8C5F);
 L8C61: /* 35937 LD C,0            */
+    VERIFY(0x8C61, 0x0E);
     FETCH(0x8C61);
     IMM(0x8C62); C = mem[(uint16_t)0x8C62];
 L8C63: /* 35939 CALL 37974       } */
+    VERIFY(0x8C63, 0xCD);
     FETCH(0x8C63);
     IMM(0x8C64); IMM(0x8C65); IC(0x8C65, 1);
     PUSHW(0x8C66); goto L9456;
 L8C66: /* 35942 LD DE,40032      {Draw the barrel underneath Willy at (14,15) */
+    VERIFY(0x8C66, 0x11);
     FETCH(0x8C66);
     IMM(0x8C67); IMM(0x8C68); DE = RD16IMM(0x8C67);
 L8C69: /* 35945 LD HL,18639       */
+    VERIFY(0x8C69, 0x21);
     FETCH(0x8C69);
     IMM(0x8C6A); IMM(0x8C6B); HL = RD16IMM(0x8C6A);
 L8C6C: /* 35948 LD C,0            */
+    VERIFY(0x8C6C, 0x0E);
     FETCH(0x8C6C);
     IMM(0x8C6D); C = mem[(uint16_t)0x8C6D];
 L8C6E: /* 35950 CALL 37974       } */
+    VERIFY(0x8C6E, 0xCD);
     FETCH(0x8C6E);
     IMM(0x8C6F); IMM(0x8C70); IC(0x8C70, 1);
     PUSHW(0x8C71); goto L9456;
 L8C71: /* 35953 LD A,(34276)     Pick up the distance variable from #R34276 */
+    VERIFY(0x8C71, 0x3A);
     FETCH(0x8C71);
     { IMM(0x8C72); IMM(0x8C73); uint16_t ea = RD16IMM(0x8C72);
     A = RD(ea); }
 L8C74: /* 35956 LD C,A           {Point #REGbc at the corresponding entry in the screen */
+    VERIFY(0x8C74, 0x4F);
     FETCH(0x8C74);
     C = A;
 L8C75: /* 35957 LD B,130         buffer address lookup table at #R33280} */
+    VERIFY(0x8C75, 0x06);
     FETCH(0x8C75);
     IMM(0x8C76); B = mem[(uint16_t)0x8C76];
 L8C77: /* 35959 LD A,(BC)        {Point #REGhl at the corresponding location in the */
+    VERIFY(0x8C77, 0x0A);
     FETCH(0x8C77);
     A = RD(BC);
 L8C78: /* 35960 OR 15            display file */
+    VERIFY(0x8C78, 0xF6);
     FETCH(0x8C78);
     IMM(0x8C79); or8(mem[(uint16_t)0x8C79]);
 L8C7A: /* 35962 LD L,A            */
+    VERIFY(0x8C7A, 0x6F);
     FETCH(0x8C7A);
     L = A;
 L8C7B: /* 35963 INC BC            */
+    VERIFY(0x8C7B, 0x03);
     FETCH(0x8C7B);
     IR(2);
     BC = (uint16_t)(BC + 1);
 L8C7C: /* 35964 LD A,(BC)         */
+    VERIFY(0x8C7C, 0x0A);
     FETCH(0x8C7C);
     A = RD(BC);
 L8C7D: /* 35965 SUB 32            */
+    VERIFY(0x8C7D, 0xD6);
     FETCH(0x8C7D);
     IMM(0x8C7E); sub8(mem[(uint16_t)0x8C7E]);
 L8C7F: /* 35967 LD H,A           } */
+    VERIFY(0x8C7F, 0x67);
     FETCH(0x8C7F);
     H = A;
 L8C80: /* 35968 LD DE,40000      {Draw the foot at this location, without erasing the */
+    VERIFY(0x8C80, 0x11);
     FETCH(0x8C80);
     IMM(0x8C81); IMM(0x8C82); DE = RD16IMM(0x8C81);
 L8C83: /* 35971 LD C,0           foot at the previous location; this leaves the portion */
+    VERIFY(0x8C83, 0x0E);
     FETCH(0x8C83);
     IMM(0x8C84); C = mem[(uint16_t)0x8C84];
 L8C85: /* 35973 CALL 37974       of the foot sprite that's above the ankle in place, and */
+    VERIFY(0x8C85, 0xCD);
     FETCH(0x8C85);
     IMM(0x8C86); IMM(0x8C87); IC(0x8C87, 1);
     PUSHW(0x8C88); goto L9456;
 L8C88: /* 35976 LD A,(34276)     Pick up the distance variable from #R34276 */
+    VERIFY(0x8C88, 0x3A);
     FETCH(0x8C88);
     { IMM(0x8C89); IMM(0x8C8A); uint16_t ea = RD16IMM(0x8C89);
     A = RD(ea); }
 L8C8B: /* 35979 CPL              #REGa=#b255-#REGa */
+    VERIFY(0x8C8B, 0x2F);
     FETCH(0x8C8B);
     cpl();
 L8C8C: /* 35980 LD E,A           Store this value (#b63-#b255) in #REGe; it determines */
+    VERIFY(0x8C8C, 0x5F);
     FETCH(0x8C8C);
     E = A;
 L8C8D: /* 35981 XOR A            #REGa=0 (black border) */
+    VERIFY(0x8C8D, 0xAF);
     FETCH(0x8C8D);
     xor8(A);
 L8C8E: /* 35982 LD BC,64         #REGc=#b64; this value determines the duration of the */
+    VERIFY(0x8C8E, 0x01);
     FETCH(0x8C8E);
     IMM(0x8C8F); IMM(0x8C90); BC = RD16IMM(0x8C8F);
 L8C91: /* 35985 OUT (254),A      {Produce a short note whose pitch is determined by #REGe */
+    VERIFY(0x8C91, 0xD3);
     FETCH(0x8C91);
     IMM(0x8C92); OUTP((uint16_t)((mem[(uint16_t)0x8C92]) | (A << 8)), A);
 L8C93: /* 35987 XOR 24            */
+    VERIFY(0x8C93, 0xEE);
     FETCH(0x8C93);
     IMM(0x8C94); xor8(mem[(uint16_t)0x8C94]);
 L8C95: /* 35989 LD B,E            */
+    VERIFY(0x8C95, 0x43);
     FETCH(0x8C95);
     B = E;
 L8C96: /* 35990 DJNZ 35990        */
+    VERIFY(0x8C96, 0x10);
     FETCH(0x8C96);
     T(1); IMM(0x8C97);
     if (--B) { JRTAKEN(0x8C97); goto L8C96; }
 L8C98: /* 35992 DEC C             */
+    VERIFY(0x8C98, 0x0D);
     FETCH(0x8C98);
     C = dec8(C);
 L8C99: /* 35993 JR NZ,35985      } */
+    VERIFY(0x8C99, 0x20);
     FETCH(0x8C99);
     IMM(0x8C9A);
     if (!(F&FZ)) { JRTAKEN(0x8C9A); goto L8C91; }
 L8C9B: /* 35995 LD HL,22528      {Prepare #REGbc, #REGde and #REGhl for setting the */
+    VERIFY(0x8C9B, 0x21);
     FETCH(0x8C9B);
     IMM(0x8C9C); IMM(0x8C9D); HL = RD16IMM(0x8C9C);
 L8C9E: /* 35998 LD DE,22529      attribute bytes in the top two-thirds of the screen */
+    VERIFY(0x8C9E, 0x11);
     FETCH(0x8C9E);
     IMM(0x8C9F); IMM(0x8CA0); DE = RD16IMM(0x8C9F);
 L8CA1: /* 36001 LD BC,511        } */
+    VERIFY(0x8CA1, 0x01);
     FETCH(0x8CA1);
     IMM(0x8CA2); IMM(0x8CA3); BC = RD16IMM(0x8CA2);
 L8CA4: /* 36004 LD A,(34276)     Pick up the distance variable from #R34276 */
+    VERIFY(0x8CA4, 0x3A);
     FETCH(0x8CA4);
     { IMM(0x8CA5); IMM(0x8CA6); uint16_t ea = RD16IMM(0x8CA5);
     A = RD(ea); }
 L8CA7: /* 36007 AND 12           Keep only bits 2 and 3 */
+    VERIFY(0x8CA7, 0xE6);
     FETCH(0x8CA7);
     IMM(0x8CA8); and8(mem[(uint16_t)0x8CA8]);
 L8CA9: /* 36009 RLCA             Shift bits 2 and 3 into bits 3 and 4; these bits */
+    VERIFY(0x8CA9, 0x07);
     FETCH(0x8CA9);
     rlca();
 L8CAA: /* 36010 OR 71            Set bits 0-2 (INK 7) and 6 (BRIGHT 1) */
+    VERIFY(0x8CAA, 0xF6);
     FETCH(0x8CAA);
     IMM(0x8CAB); or8(mem[(uint16_t)0x8CAB]);
 L8CAC: /* 36012 LD (HL),A        {Copy this attribute value into the top two-thirds of */
+    VERIFY(0x8CAC, 0x77);
     FETCH(0x8CAC);
     WR(HL, A);
 L8CAD: /* 36013 LDIR             the screen} */
+    VERIFY(0x8CAD, 0xED);
     FETCH(0x8CAD); FETCH(0x8CAE);
     if (ldi_rep(+1)) goto L8CAD;
 L8CAF: /* 36015 AND 250          Reset bits 0 and 2, and retain all other bits */
+    VERIFY(0x8CAF, 0xE6);
     FETCH(0x8CAF);
     IMM(0x8CB0); and8(mem[(uint16_t)0x8CB0]);
 L8CB1: /* 36017 OR 2             Set bit 1 (INK 2) */
+    VERIFY(0x8CB1, 0xF6);
     FETCH(0x8CB1);
     IMM(0x8CB2); or8(mem[(uint16_t)0x8CB2]);
 L8CB3: /* 36019 LD (22991),A     {Copy this attribute value to the cells at (14,15), */
+    VERIFY(0x8CB3, 0x32);
     FETCH(0x8CB3);
     { IMM(0x8CB4); IMM(0x8CB5); uint16_t ea = RD16IMM(0x8CB4);
     WR(ea, A); }
 L8CB6: /* 36022 LD (22992),A     (14,16), (15,15) and (15,16) (where the barrel is, so */
+    VERIFY(0x8CB6, 0x32);
     FETCH(0x8CB6);
     { IMM(0x8CB7); IMM(0x8CB8); uint16_t ea = RD16IMM(0x8CB7);
     WR(ea, A); }
 L8CB9: /* 36025 LD (23023),A     that it remains red) */
+    VERIFY(0x8CB9, 0x32);
     FETCH(0x8CB9);
     { IMM(0x8CBA); IMM(0x8CBB); uint16_t ea = RD16IMM(0x8CBA);
     WR(ea, A); }
 L8CBC: /* 36028 LD (23024),A     } */
+    VERIFY(0x8CBC, 0x32);
     FETCH(0x8CBC);
     { IMM(0x8CBD); IMM(0x8CBE); uint16_t ea = RD16IMM(0x8CBD);
     WR(ea, A); }
 L8CBF: /* 36031 LD A,(34276)     {Add 4 to the distance variable at #R34276; this will */
+    VERIFY(0x8CBF, 0x3A);
     FETCH(0x8CBF);
     { IMM(0x8CC0); IMM(0x8CC1); uint16_t ea = RD16IMM(0x8CC0);
     A = RD(ea); }
 L8CC2: /* 36034 ADD A,4          move the foot sprite down two pixel rows */
+    VERIFY(0x8CC2, 0xC6);
     FETCH(0x8CC2);
     IMM(0x8CC3); add8(mem[(uint16_t)0x8CC3]);
 L8CC4: /* 36036 LD (34276),A     } */
+    VERIFY(0x8CC4, 0x32);
     FETCH(0x8CC4);
     { IMM(0x8CC5); IMM(0x8CC6); uint16_t ea = RD16IMM(0x8CC5);
     WR(ea, A); }
 L8CC7: /* 36039 CP 196           Has the foot met the barrel yet? */
+    VERIFY(0x8CC7, 0xFE);
     FETCH(0x8CC7);
     IMM(0x8CC8); cp8(mem[(uint16_t)0x8CC8]);
 L8CC9: /* 36041 JR NZ,35953      Jump back if not */
+    VERIFY(0x8CC9, 0x20);
     FETCH(0x8CC9);
     IMM(0x8CCA);
     if (!(F&FZ)) { JRTAKEN(0x8CCA); goto L8C71; }
 L8CCB: /* 36043 LD IX,34164      {Print "Game" (see #R34164) at (6,10) */
+    VERIFY(0x8CCB, 0xDD);
     FETCH(0x8CCB); FETCH(0x8CCC);
     IMM(0x8CCD); IMM(0x8CCE); IX = RD16IMM(0x8CCD);
 L8CCF: /* 36047 LD C,4            */
+    VERIFY(0x8CCF, 0x0E);
     FETCH(0x8CCF);
     IMM(0x8CD0); C = mem[(uint16_t)0x8CD0];
 L8CD1: /* 36049 LD DE,16586       */
+    VERIFY(0x8CD1, 0x11);
     FETCH(0x8CD1);
     IMM(0x8CD2); IMM(0x8CD3); DE = RD16IMM(0x8CD2);
 L8CD4: /* 36052 CALL 38528       } */
+    VERIFY(0x8CD4, 0xCD);
     FETCH(0x8CD4);
     IMM(0x8CD5); IMM(0x8CD6); IC(0x8CD6, 1);
     PUSHW(0x8CD7); goto L9680;
 L8CD7: /* 36055 LD IX,34168      {Print "Over" (see #R34168) at (6,18) */
+    VERIFY(0x8CD7, 0xDD);
     FETCH(0x8CD7); FETCH(0x8CD8);
     IMM(0x8CD9); IMM(0x8CDA); IX = RD16IMM(0x8CD9);
 L8CDB: /* 36059 LD C,4            */
+    VERIFY(0x8CDB, 0x0E);
     FETCH(0x8CDB);
     IMM(0x8CDC); C = mem[(uint16_t)0x8CDC];
 L8CDD: /* 36061 LD DE,16594       */
+    VERIFY(0x8CDD, 0x11);
     FETCH(0x8CDD);
     IMM(0x8CDE); IMM(0x8CDF); DE = RD16IMM(0x8CDE);
 L8CE0: /* 36064 CALL 38528       } */
+    VERIFY(0x8CE0, 0xCD);
     FETCH(0x8CE0);
     IMM(0x8CE1); IMM(0x8CE2); IC(0x8CE2, 1);
     PUSHW(0x8CE3); goto L9680;
 L8CE3: /* 36067 LD BC,0          {Prepare the delay counters for the following loop; the */
+    VERIFY(0x8CE3, 0x01);
     FETCH(0x8CE3);
     IMM(0x8CE4); IMM(0x8CE5); BC = RD16IMM(0x8CE4);
 L8CE6: /* 36070 LD D,6           counter in #REGc will also determine the INK colours to */
+    VERIFY(0x8CE6, 0x16);
     FETCH(0x8CE6);
     IMM(0x8CE7); D = mem[(uint16_t)0x8CE7];
 L8CE8: /* 36072 DJNZ 36072       Delay for about a millisecond */
+    VERIFY(0x8CE8, 0x10);
     FETCH(0x8CE8);
     T(1); IMM(0x8CE9);
     if (--B) { JRTAKEN(0x8CE9); goto L8CE8; }
 L8CEA: /* 36074 LD A,C           {Change the INK colour of the "G" in "Game" at (6,10) */
+    VERIFY(0x8CEA, 0x79);
     FETCH(0x8CEA);
     A = C;
 L8CEB: /* 36075 AND 7             */
+    VERIFY(0x8CEB, 0xE6);
     FETCH(0x8CEB);
     IMM(0x8CEC); and8(mem[(uint16_t)0x8CEC]);
 L8CED: /* 36077 OR 64             */
+    VERIFY(0x8CED, 0xF6);
     FETCH(0x8CED);
     IMM(0x8CEE); or8(mem[(uint16_t)0x8CEE]);
 L8CEF: /* 36079 LD (22730),A     } */
+    VERIFY(0x8CEF, 0x32);
     FETCH(0x8CEF);
     { IMM(0x8CF0); IMM(0x8CF1); uint16_t ea = RD16IMM(0x8CF0);
     WR(ea, A); }
 L8CF2: /* 36082 INC A            {Change the INK colour of the "a" in "Game" at (6,11) */
+    VERIFY(0x8CF2, 0x3C);
     FETCH(0x8CF2);
     A = inc8(A);
 L8CF3: /* 36083 AND 7             */
+    VERIFY(0x8CF3, 0xE6);
     FETCH(0x8CF3);
     IMM(0x8CF4); and8(mem[(uint16_t)0x8CF4]);
 L8CF5: /* 36085 OR 64             */
+    VERIFY(0x8CF5, 0xF6);
     FETCH(0x8CF5);
     IMM(0x8CF6); or8(mem[(uint16_t)0x8CF6]);
 L8CF7: /* 36087 LD (22731),A     } */
+    VERIFY(0x8CF7, 0x32);
     FETCH(0x8CF7);
     { IMM(0x8CF8); IMM(0x8CF9); uint16_t ea = RD16IMM(0x8CF8);
     WR(ea, A); }
 L8CFA: /* 36090 INC A            {Change the INK colour of the "m" in "Game" at (6,12) */
+    VERIFY(0x8CFA, 0x3C);
     FETCH(0x8CFA);
     A = inc8(A);
 L8CFB: /* 36091 AND 7             */
+    VERIFY(0x8CFB, 0xE6);
     FETCH(0x8CFB);
     IMM(0x8CFC); and8(mem[(uint16_t)0x8CFC]);
 L8CFD: /* 36093 OR 64             */
+    VERIFY(0x8CFD, 0xF6);
     FETCH(0x8CFD);
     IMM(0x8CFE); or8(mem[(uint16_t)0x8CFE]);
 L8CFF: /* 36095 LD (22732),A     } */
+    VERIFY(0x8CFF, 0x32);
     FETCH(0x8CFF);
     { IMM(0x8D00); IMM(0x8D01); uint16_t ea = RD16IMM(0x8D00);
     WR(ea, A); }
 L8D02: /* 36098 INC A            {Change the INK colour of the "e" in "Game" at (6,13) */
+    VERIFY(0x8D02, 0x3C);
     FETCH(0x8D02);
     A = inc8(A);
 L8D03: /* 36099 AND 7             */
+    VERIFY(0x8D03, 0xE6);
     FETCH(0x8D03);
     IMM(0x8D04); and8(mem[(uint16_t)0x8D04]);
 L8D05: /* 36101 OR 64             */
+    VERIFY(0x8D05, 0xF6);
     FETCH(0x8D05);
     IMM(0x8D06); or8(mem[(uint16_t)0x8D06]);
 L8D07: /* 36103 LD (22733),A     } */
+    VERIFY(0x8D07, 0x32);
     FETCH(0x8D07);
     { IMM(0x8D08); IMM(0x8D09); uint16_t ea = RD16IMM(0x8D08);
     WR(ea, A); }
 L8D0A: /* 36106 INC A            {Change the INK colour of the "O" in "Over" at (6,18) */
+    VERIFY(0x8D0A, 0x3C);
     FETCH(0x8D0A);
     A = inc8(A);
 L8D0B: /* 36107 AND 7             */
+    VERIFY(0x8D0B, 0xE6);
     FETCH(0x8D0B);
     IMM(0x8D0C); and8(mem[(uint16_t)0x8D0C]);
 L8D0D: /* 36109 OR 64             */
+    VERIFY(0x8D0D, 0xF6);
     FETCH(0x8D0D);
     IMM(0x8D0E); or8(mem[(uint16_t)0x8D0E]);
 L8D0F: /* 36111 LD (22738),A     } */
+    VERIFY(0x8D0F, 0x32);
     FETCH(0x8D0F);
     { IMM(0x8D10); IMM(0x8D11); uint16_t ea = RD16IMM(0x8D10);
     WR(ea, A); }
 L8D12: /* 36114 INC A            {Change the INK colour of the "v" in "Over" at (6,19) */
+    VERIFY(0x8D12, 0x3C);
     FETCH(0x8D12);
     A = inc8(A);
 L8D13: /* 36115 AND 7             */
+    VERIFY(0x8D13, 0xE6);
     FETCH(0x8D13);
     IMM(0x8D14); and8(mem[(uint16_t)0x8D14]);
 L8D15: /* 36117 OR 64             */
+    VERIFY(0x8D15, 0xF6);
     FETCH(0x8D15);
     IMM(0x8D16); or8(mem[(uint16_t)0x8D16]);
 L8D17: /* 36119 LD (22739),A     } */
+    VERIFY(0x8D17, 0x32);
     FETCH(0x8D17);
     { IMM(0x8D18); IMM(0x8D19); uint16_t ea = RD16IMM(0x8D18);
     WR(ea, A); }
 L8D1A: /* 36122 INC A            {Change the INK colour of the "e" in "Over" at (6,20) */
+    VERIFY(0x8D1A, 0x3C);
     FETCH(0x8D1A);
     A = inc8(A);
 L8D1B: /* 36123 AND 7             */
+    VERIFY(0x8D1B, 0xE6);
     FETCH(0x8D1B);
     IMM(0x8D1C); and8(mem[(uint16_t)0x8D1C]);
 L8D1D: /* 36125 OR 64             */
+    VERIFY(0x8D1D, 0xF6);
     FETCH(0x8D1D);
     IMM(0x8D1E); or8(mem[(uint16_t)0x8D1E]);
 L8D1F: /* 36127 LD (22740),A     } */
+    VERIFY(0x8D1F, 0x32);
     FETCH(0x8D1F);
     { IMM(0x8D20); IMM(0x8D21); uint16_t ea = RD16IMM(0x8D20);
     WR(ea, A); }
 L8D22: /* 36130 INC A            {Change the INK colour of the "r" in "Over" at (6,21) */
+    VERIFY(0x8D22, 0x3C);
     FETCH(0x8D22);
     A = inc8(A);
 L8D23: /* 36131 AND 7             */
+    VERIFY(0x8D23, 0xE6);
     FETCH(0x8D23);
     IMM(0x8D24); and8(mem[(uint16_t)0x8D24]);
 L8D25: /* 36133 OR 64             */
+    VERIFY(0x8D25, 0xF6);
     FETCH(0x8D25);
     IMM(0x8D26); or8(mem[(uint16_t)0x8D26]);
 L8D27: /* 36135 LD (22741),A     } */
+    VERIFY(0x8D27, 0x32);
     FETCH(0x8D27);
     { IMM(0x8D28); IMM(0x8D29); uint16_t ea = RD16IMM(0x8D28);
     WR(ea, A); }
 L8D2A: /* 36138 DEC C            Decrement the counter in #REGc */
+    VERIFY(0x8D2A, 0x0D);
     FETCH(0x8D2A);
     C = dec8(C);
 L8D2B: /* 36139 JR NZ,36072      Jump back unless it's zero */
+    VERIFY(0x8D2B, 0x20);
     FETCH(0x8D2B);
     IMM(0x8D2C);
     if (!(F&FZ)) { JRTAKEN(0x8D2C); goto L8CE8; }
 L8D2D: /* 36141 DEC D            Decrement the counter in #REGd (initially 6) */
+    VERIFY(0x8D2D, 0x15);
     FETCH(0x8D2D);
     D = dec8(D);
 L8D2E: /* 36142 JR NZ,36072      Jump back unless it's zero */
+    VERIFY(0x8D2E, 0x20);
     FETCH(0x8D2E);
     IMM(0x8D2F);
     if (!(F&FZ)) { JRTAKEN(0x8D2F); goto L8CE8; }
 L8D30: /* 36144 JP 34762         Display the title screen and play the theme tune */
+    VERIFY(0x8D30, 0xC3);
     FETCH(0x8D30);
     IMM(0x8D31); IMM(0x8D32);
     goto L87CA;
 
 /* ---- DRAWROOM ---- */
 L8D33: /* 36147 CALL 36203       Fill the buffer at #R24064 with attribute bytes for the */
+    VERIFY(0x8D33, 0xCD);
     FETCH(0x8D33);
     IMM(0x8D34); IMM(0x8D35); IC(0x8D35, 1);
     PUSHW(0x8D36); goto L8D6B;
 L8D36: /* 36150 LD IX,24064      Point #REGix at the first byte of the attribute buffer */
+    VERIFY(0x8D36, 0xDD);
     FETCH(0x8D36); FETCH(0x8D37);
     IMM(0x8D38); IMM(0x8D39); IX = RD16IMM(0x8D38);
 L8D3A: /* 36154 LD A,112         {Set the operand of the '#S/LD D/,n' instruction at */
+    VERIFY(0x8D3A, 0x3E);
     FETCH(0x8D3A);
     IMM(0x8D3B); A = mem[(uint16_t)0x8D3B];
 L8D3C: /* 36156 LD (36189),A     #R36188 (below) to #n112} */
+    VERIFY(0x8D3C, 0x32);
     FETCH(0x8D3C);
     { IMM(0x8D3D); IMM(0x8D3E); uint16_t ea = RD16IMM(0x8D3D);
     WR(ea, A); }
 L8D3F: /* 36159 CALL 36171       Draw the tiles for the top half of the room to the */
+    VERIFY(0x8D3F, 0xCD);
     FETCH(0x8D3F);
     IMM(0x8D40); IMM(0x8D41); IC(0x8D41, 1);
     PUSHW(0x8D42); goto L8D4B;
 L8D42: /* 36162 LD IX,24320      Point #REGix at byte 256 of the attribute buffer at */
+    VERIFY(0x8D42, 0xDD);
     FETCH(0x8D42); FETCH(0x8D43);
     IMM(0x8D44); IMM(0x8D45); IX = RD16IMM(0x8D44);
 L8D46: /* 36166 LD A,120         {Set the operand of the '#S/LD D/,n' instruction at */
+    VERIFY(0x8D46, 0x3E);
     FETCH(0x8D46);
     IMM(0x8D47); A = mem[(uint16_t)0x8D47];
 L8D48: /* 36168 LD (36189),A     #R36188 (below) to #n120} */
+    VERIFY(0x8D48, 0x32);
     FETCH(0x8D48);
     { IMM(0x8D49); IMM(0x8D4A); uint16_t ea = RD16IMM(0x8D49);
     WR(ea, A); }
 L8D4B: /* 36171 LD C,0           #REGc will count 256 tiles */
+    VERIFY(0x8D4B, 0x0E);
     FETCH(0x8D4B);
     IMM(0x8D4C); C = mem[(uint16_t)0x8D4C];
 L8D4D: /* 36173 LD E,C           #REGe holds the LSB of the screen buffer address */
+    VERIFY(0x8D4D, 0x59);
     FETCH(0x8D4D);
     E = C;
 L8D4E: /* 36174 LD A,(IX+0)      Pick up an attribute byte from the buffer at #R24064; */
+    VERIFY(0x8D4E, 0xDD);
     FETCH(0x8D4E); FETCH(0x8D4F);
     IMM(0x8D50); IC(0x8D50, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8D50]); A = RD(ea); }
 L8D51: /* 36177 LD HL,32928      {Move #REGhl through the attribute bytes and graphic */
+    VERIFY(0x8D51, 0x21);
     FETCH(0x8D51);
     IMM(0x8D52); IMM(0x8D53); HL = RD16IMM(0x8D52);
 L8D54: /* 36180 LD BC,54         data of the background, floor, wall, nasty, ramp and */
+    VERIFY(0x8D54, 0x01);
     FETCH(0x8D54);
     IMM(0x8D55); IMM(0x8D56); BC = RD16IMM(0x8D55);
 L8D57: /* 36183 CPIR             conveyor tiles starting at #R32928 until we find a byte */
+    VERIFY(0x8D57, 0xED);
     FETCH(0x8D57); FETCH(0x8D58);
     if (cpi_rep(+1)) goto L8D57;
 L8D59: /* 36185 LD C,E           Restore the value of the tile counter in #REGc */
+    VERIFY(0x8D59, 0x4B);
     FETCH(0x8D59);
     C = E;
 L8D5A: /* 36186 LD B,8           There are eight bytes in the tile */
+    VERIFY(0x8D5A, 0x06);
     FETCH(0x8D5A);
     IMM(0x8D5B); B = mem[(uint16_t)0x8D5B];
 
 /* ---- BUFMSB ---- */
 L8D5C: /* 36188 LD D,0           This instruction is set to either '#S/LD D/,#n112' or */
+    VERIFY(0x8D5C, 0x16);
     FETCH(0x8D5C);
     IMM(0x8D5D); D = mem[(uint16_t)0x8D5D];
 L8D5E: /* 36190 LD A,(HL)        {Copy the tile graphic data to the screen buffer at */
+    VERIFY(0x8D5E, 0x7E);
     FETCH(0x8D5E);
     A = RD(HL);
 L8D5F: /* 36191 LD (DE),A        #R28672 */
+    VERIFY(0x8D5F, 0x12);
     FETCH(0x8D5F);
     WR(DE, A);
 L8D60: /* 36192 INC HL            */
+    VERIFY(0x8D60, 0x23);
     FETCH(0x8D60);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L8D61: /* 36193 INC D             */
+    VERIFY(0x8D61, 0x14);
     FETCH(0x8D61);
     D = inc8(D);
 L8D62: /* 36194 DJNZ 36190       } */
+    VERIFY(0x8D62, 0x10);
     FETCH(0x8D62);
     T(1); IMM(0x8D63);
     if (--B) { JRTAKEN(0x8D63); goto L8D5E; }
 L8D64: /* 36196 INC IX           Move #REGix along to the next byte in the attribute */
+    VERIFY(0x8D64, 0xDD);
     FETCH(0x8D64); FETCH(0x8D65);
     IR(2); IX = (uint16_t)(IX + 1);
 L8D66: /* 36198 INC C            Have we drawn 256 tiles yet? */
+    VERIFY(0x8D66, 0x0C);
     FETCH(0x8D66);
     C = inc8(C);
 L8D67: /* 36199 JP NZ,36173      If not, jump back to draw the next one */
+    VERIFY(0x8D67, 0xC2);
     FETCH(0x8D67);
     IMM(0x8D68); IMM(0x8D69);
     if (!(F&FZ)) goto L8D4D;
 L8D6A: /* 36202 RET               */
+    VERIFY(0x8D6A, 0xC9);
     FETCH(0x8D6A);
     POPPC(); goto dispatch;
 
 /* ---- ROOMATTRS ---- */
 L8D6B: /* 36203 LD HL,32768      Point #REGhl at the first room layout byte at #R32768 */
+    VERIFY(0x8D6B, 0x21);
     FETCH(0x8D6B);
     IMM(0x8D6C); IMM(0x8D6D); HL = RD16IMM(0x8D6C);
 L8D6E: /* 36206 LD IX,24064      Point #REGix at the first byte of the attribute buffer */
+    VERIFY(0x8D6E, 0xDD);
     FETCH(0x8D6E); FETCH(0x8D6F);
     IMM(0x8D70); IMM(0x8D71); IX = RD16IMM(0x8D70);
 L8D72: /* 36210 LD A,(HL)        Pick up a room layout byte */
+    VERIFY(0x8D72, 0x7E);
     FETCH(0x8D72);
     A = RD(HL);
 L8D73: /* 36211 RLCA             {Move bits 6 and 7 into bits 0 and 1 */
+    VERIFY(0x8D73, 0x07);
     FETCH(0x8D73);
     rlca();
 L8D74: /* 36212 RLCA             } */
+    VERIFY(0x8D74, 0x07);
     FETCH(0x8D74);
     rlca();
 L8D75: /* 36213 CALL 36288       Copy the attribute byte for this tile into the buffer at */
+    VERIFY(0x8D75, 0xCD);
     FETCH(0x8D75);
     IMM(0x8D76); IMM(0x8D77); IC(0x8D77, 1);
     PUSHW(0x8D78); goto L8DC0;
 L8D78: /* 36216 LD A,(HL)        Pick up the room layout byte again */
+    VERIFY(0x8D78, 0x7E);
     FETCH(0x8D78);
     A = RD(HL);
 L8D79: /* 36217 RRCA             {Move bits 4 and 5 into bits 0 and 1 */
+    VERIFY(0x8D79, 0x0F);
     FETCH(0x8D79);
     rrca();
 L8D7A: /* 36218 RRCA              */
+    VERIFY(0x8D7A, 0x0F);
     FETCH(0x8D7A);
     rrca();
 L8D7B: /* 36219 RRCA              */
+    VERIFY(0x8D7B, 0x0F);
     FETCH(0x8D7B);
     rrca();
 L8D7C: /* 36220 RRCA             } */
+    VERIFY(0x8D7C, 0x0F);
     FETCH(0x8D7C);
     rrca();
 L8D7D: /* 36221 CALL 36288       Copy the attribute byte for this tile into the buffer at */
+    VERIFY(0x8D7D, 0xCD);
     FETCH(0x8D7D);
     IMM(0x8D7E); IMM(0x8D7F); IC(0x8D7F, 1);
     PUSHW(0x8D80); goto L8DC0;
 L8D80: /* 36224 LD A,(HL)        Pick up the room layout byte again */
+    VERIFY(0x8D80, 0x7E);
     FETCH(0x8D80);
     A = RD(HL);
 L8D81: /* 36225 RRCA             {Move bits 2 and 3 into bits 0 and 1 */
+    VERIFY(0x8D81, 0x0F);
     FETCH(0x8D81);
     rrca();
 L8D82: /* 36226 RRCA             } */
+    VERIFY(0x8D82, 0x0F);
     FETCH(0x8D82);
     rrca();
 L8D83: /* 36227 CALL 36288       Copy the attribute byte for this tile into the buffer at */
+    VERIFY(0x8D83, 0xCD);
     FETCH(0x8D83);
     IMM(0x8D84); IMM(0x8D85); IC(0x8D85, 1);
     PUSHW(0x8D86); goto L8DC0;
 L8D86: /* 36230 LD A,(HL)        Pick up the room layout byte again; this time the */
+    VERIFY(0x8D86, 0x7E);
     FETCH(0x8D86);
     A = RD(HL);
 L8D87: /* 36231 CALL 36288       Copy the attribute byte for this tile into the buffer at */
+    VERIFY(0x8D87, 0xCD);
     FETCH(0x8D87);
     IMM(0x8D88); IMM(0x8D89); IC(0x8D89, 1);
     PUSHW(0x8D8A); goto L8DC0;
 L8D8A: /* 36234 INC HL           Point #REGhl at the next room layout byte */
+    VERIFY(0x8D8A, 0x23);
     FETCH(0x8D8A);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L8D8B: /* 36235 LD A,L           {Have we processed all 128 room layout bytes yet? */
+    VERIFY(0x8D8B, 0x7D);
     FETCH(0x8D8B);
     A = L;
 L8D8C: /* 36236 AND 128          } */
+    VERIFY(0x8D8C, 0xE6);
     FETCH(0x8D8C);
     IMM(0x8D8D); and8(mem[(uint16_t)0x8D8D]);
 L8D8E: /* 36238 JR Z,36210       If not, jump back to process the next one */
+    VERIFY(0x8D8E, 0x28);
     FETCH(0x8D8E);
     IMM(0x8D8F);
     if ((F&FZ)) { JRTAKEN(0x8D8F); goto L8D72; }
 L8D90: /* 36240 LD A,(32985)     Pick up the length of the conveyor from #R32985 */
+    VERIFY(0x8D90, 0x3A);
     FETCH(0x8D90);
     { IMM(0x8D91); IMM(0x8D92); uint16_t ea = RD16IMM(0x8D91);
     A = RD(ea); }
 L8D93: /* 36243 OR A             Is there a conveyor in the room? */
+    VERIFY(0x8D93, 0xB7);
     FETCH(0x8D93);
     or8(A);
 L8D94: /* 36244 JR Z,36257       Jump if not */
+    VERIFY(0x8D94, 0x28);
     FETCH(0x8D94);
     IMM(0x8D95);
     if ((F&FZ)) { JRTAKEN(0x8D95); goto L8DA1; }
 L8D96: /* 36246 LD HL,(32983)    Pick up the address of the conveyor's location in the */
+    VERIFY(0x8D96, 0x2A);
     FETCH(0x8D96);
     { IMM(0x8D97); IMM(0x8D98); uint16_t ea = RD16IMM(0x8D97);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L8D99: /* 36249 LD B,A           #REGb will count the conveyor tiles */
+    VERIFY(0x8D99, 0x47);
     FETCH(0x8D99);
     B = A;
 L8D9A: /* 36250 LD A,(32973)     Pick up the attribute byte for the conveyor tile from */
+    VERIFY(0x8D9A, 0x3A);
     FETCH(0x8D9A);
     { IMM(0x8D9B); IMM(0x8D9C); uint16_t ea = RD16IMM(0x8D9B);
     A = RD(ea); }
 L8D9D: /* 36253 LD (HL),A        {Copy the attribute bytes for the conveyor tiles into */
+    VERIFY(0x8D9D, 0x77);
     FETCH(0x8D9D);
     WR(HL, A);
 L8D9E: /* 36254 INC HL           the buffer at #R24064 */
+    VERIFY(0x8D9E, 0x23);
     FETCH(0x8D9E);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L8D9F: /* 36255 DJNZ 36253       } */
+    VERIFY(0x8D9F, 0x10);
     FETCH(0x8D9F);
     T(1); IMM(0x8DA0);
     if (--B) { JRTAKEN(0x8DA0); goto L8D9D; }
 L8DA1: /* 36257 LD A,(32989)     Pick up the length of the ramp from #R32989 */
+    VERIFY(0x8DA1, 0x3A);
     FETCH(0x8DA1);
     { IMM(0x8DA2); IMM(0x8DA3); uint16_t ea = RD16IMM(0x8DA2);
     A = RD(ea); }
 L8DA4: /* 36260 OR A             Is there a ramp in the room? */
+    VERIFY(0x8DA4, 0xB7);
     FETCH(0x8DA4);
     or8(A);
 L8DA5: /* 36261 RET Z            Return if not */
+    VERIFY(0x8DA5, 0xC8);
     FETCH(0x8DA5);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L8DA6: /* 36262 LD HL,(32987)    Pick up the address of the ramp's location in the */
+    VERIFY(0x8DA6, 0x2A);
     FETCH(0x8DA6);
     { IMM(0x8DA7); IMM(0x8DA8); uint16_t ea = RD16IMM(0x8DA7);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L8DA9: /* 36265 LD A,(32986)     {Pick up the ramp direction from #R32986; #REGa=0 (ramp */
+    VERIFY(0x8DA9, 0x3A);
     FETCH(0x8DA9);
     { IMM(0x8DAA); IMM(0x8DAB); uint16_t ea = RD16IMM(0x8DAA);
     A = RD(ea); }
 L8DAC: /* 36268 AND 1            goes up to the left) or 1 (ramp goes up to the right)} */
+    VERIFY(0x8DAC, 0xE6);
     FETCH(0x8DAC);
     IMM(0x8DAD); and8(mem[(uint16_t)0x8DAD]);
 L8DAE: /* 36270 RLCA             {Now #REGde=-33 (ramp goes up to the left) or -31 (ramp */
+    VERIFY(0x8DAE, 0x07);
     FETCH(0x8DAE);
     rlca();
 L8DAF: /* 36271 ADD A,223        goes up to the right) */
+    VERIFY(0x8DAF, 0xC6);
     FETCH(0x8DAF);
     IMM(0x8DB0); add8(mem[(uint16_t)0x8DB0]);
 L8DB1: /* 36273 LD E,A            */
+    VERIFY(0x8DB1, 0x5F);
     FETCH(0x8DB1);
     E = A;
 L8DB2: /* 36274 LD D,255         } */
+    VERIFY(0x8DB2, 0x16);
     FETCH(0x8DB2);
     IMM(0x8DB3); D = mem[(uint16_t)0x8DB3];
 L8DB4: /* 36276 LD A,(32989)     Pick up the length of the ramp from #R32989 */
+    VERIFY(0x8DB4, 0x3A);
     FETCH(0x8DB4);
     { IMM(0x8DB5); IMM(0x8DB6); uint16_t ea = RD16IMM(0x8DB5);
     A = RD(ea); }
 L8DB7: /* 36279 LD B,A           #REGb will count the ramp tiles */
+    VERIFY(0x8DB7, 0x47);
     FETCH(0x8DB7);
     B = A;
 L8DB8: /* 36280 LD A,(32964)     Pick up the attribute byte for the ramp tile from */
+    VERIFY(0x8DB8, 0x3A);
     FETCH(0x8DB8);
     { IMM(0x8DB9); IMM(0x8DBA); uint16_t ea = RD16IMM(0x8DB9);
     A = RD(ea); }
 L8DBB: /* 36283 LD (HL),A        {Copy the attribute bytes for the ramp tiles into the */
+    VERIFY(0x8DBB, 0x77);
     FETCH(0x8DBB);
     WR(HL, A);
 L8DBC: /* 36284 ADD HL,DE        buffer at #R24064 */
+    VERIFY(0x8DBC, 0x19);
     FETCH(0x8DBC);
     IR(7);
     HL = add16(HL, DE);
 L8DBD: /* 36285 DJNZ 36283       } */
+    VERIFY(0x8DBD, 0x10);
     FETCH(0x8DBD);
     T(1); IMM(0x8DBE);
     if (--B) { JRTAKEN(0x8DBE); goto L8DBB; }
 L8DBF: /* 36287 RET               */
+    VERIFY(0x8DBF, 0xC9);
     FETCH(0x8DBF);
     POPPC(); goto dispatch;
 
 /* ---- ROOMATTR ---- */
 L8DC0: /* 36288 AND 3            Keep only bits 0 and 1; #REGa=0 (background), 1 (floor), */
+    VERIFY(0x8DC0, 0xE6);
     FETCH(0x8DC0);
     IMM(0x8DC1); and8(mem[(uint16_t)0x8DC1]);
 L8DC2: /* 36290 LD C,A           {Multiply by 9 and add #b160; now #REGa=#b160 */
+    VERIFY(0x8DC2, 0x4F);
     FETCH(0x8DC2);
     C = A;
 L8DC3: /* 36291 RLCA             (background), #b169 (floor), #b178 (wall) or #b187 */
+    VERIFY(0x8DC3, 0x07);
     FETCH(0x8DC3);
     rlca();
 L8DC4: /* 36292 RLCA             (nasty) */
+    VERIFY(0x8DC4, 0x07);
     FETCH(0x8DC4);
     rlca();
 L8DC5: /* 36293 RLCA              */
+    VERIFY(0x8DC5, 0x07);
     FETCH(0x8DC5);
     rlca();
 L8DC6: /* 36294 ADD A,C           */
+    VERIFY(0x8DC6, 0x81);
     FETCH(0x8DC6);
     add8(C);
 L8DC7: /* 36295 ADD A,160        } */
+    VERIFY(0x8DC7, 0xC6);
     FETCH(0x8DC7);
     IMM(0x8DC8); add8(mem[(uint16_t)0x8DC8]);
 L8DC9: /* 36297 LD E,A           {Point #REGde at the attribute byte for the background, */
+    VERIFY(0x8DC9, 0x5F);
     FETCH(0x8DC9);
     E = A;
 L8DCA: /* 36298 LD D,128         floor, wall or nasty tile (see #R32928)} */
+    VERIFY(0x8DCA, 0x16);
     FETCH(0x8DCA);
     IMM(0x8DCB); D = mem[(uint16_t)0x8DCB];
 L8DCC: /* 36300 LD A,(DE)        {Copy the attribute byte into the buffer at #R24064 */
+    VERIFY(0x8DCC, 0x1A);
     FETCH(0x8DCC);
     A = RD(DE);
 L8DCD: /* 36301 LD (IX+0),A      } */
+    VERIFY(0x8DCD, 0xDD);
     FETCH(0x8DCD); FETCH(0x8DCE);
     IMM(0x8DCF); IC(0x8DCF, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x8DCF]); WR(ea, A); }
 L8DD0: /* 36304 INC IX           Move #REGix along to the next byte in the attribute */
+    VERIFY(0x8DD0, 0xDD);
     FETCH(0x8DD0); FETCH(0x8DD1);
     IR(2); IX = (uint16_t)(IX + 1);
 L8DD2: /* 36306 RET               */
+    VERIFY(0x8DD2, 0xC9);
     FETCH(0x8DD2);
     POPPC(); goto dispatch;
 
 /* ---- MOVEWILLY ---- */
 L8DD3: /* 36307 LD A,(34262)     Pick up the rope status indicator from #R34262 */
+    VERIFY(0x8DD3, 0x3A);
     FETCH(0x8DD3);
     { IMM(0x8DD4); IMM(0x8DD5); uint16_t ea = RD16IMM(0x8DD4);
     A = RD(ea); }
 L8DD6: /* 36310 DEC A            {Is Willy on a rope? */
+    VERIFY(0x8DD6, 0x3D);
     FETCH(0x8DD6);
     A = dec8(A);
 L8DD7: /* 36311 BIT 7,A          } */
+    VERIFY(0x8DD7, 0xCB);
     FETCH(0x8DD7); FETCH(0x8DD8);
     bit(7, A);
 L8DD9: /* 36313 JP Z,36564       Jump if so */
+    VERIFY(0x8DD9, 0xCA);
     FETCH(0x8DD9);
     IMM(0x8DDA); IMM(0x8DDB);
     if ((F&FZ)) goto L8ED4;
 L8DDC: /* 36316 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x8DDC, 0x3A);
     FETCH(0x8DDC);
     { IMM(0x8DDD); IMM(0x8DDE); uint16_t ea = RD16IMM(0x8DDD);
     A = RD(ea); }
 L8DDF: /* 36319 CP 1             Is Willy jumping? */
+    VERIFY(0x8DDF, 0xFE);
     FETCH(0x8DDF);
     IMM(0x8DE0); cp8(mem[(uint16_t)0x8DE0]);
 L8DE1: /* 36321 JR NZ,36406      Jump if not */
+    VERIFY(0x8DE1, 0x20);
     FETCH(0x8DE1);
     IMM(0x8DE2);
     if (!(F&FZ)) { JRTAKEN(0x8DE2); goto L8E36; }
 L8DE3: /* 36323 LD A,(34261)     Pick up the jumping animation counter (0-17) from */
+    VERIFY(0x8DE3, 0x3A);
     FETCH(0x8DE3);
     { IMM(0x8DE4); IMM(0x8DE5); uint16_t ea = RD16IMM(0x8DE4);
     A = RD(ea); }
 L8DE6: /* 36326 AND 254          Discard bit 0 */
+    VERIFY(0x8DE6, 0xE6);
     FETCH(0x8DE6);
     IMM(0x8DE7); and8(mem[(uint16_t)0x8DE7]);
 L8DE8: /* 36328 SUB 8            Now -8<=#REGa<=8 (and #REGa is even) */
+    VERIFY(0x8DE8, 0xD6);
     FETCH(0x8DE8);
     IMM(0x8DE9); sub8(mem[(uint16_t)0x8DE9]);
 L8DEA: /* 36330 LD HL,34255      {Adjust Willy's y-coordinate at #R34255 depending on */
+    VERIFY(0x8DEA, 0x21);
     FETCH(0x8DEA);
     IMM(0x8DEB); IMM(0x8DEC); HL = RD16IMM(0x8DEB);
 L8DED: /* 36333 ADD A,(HL)       where Willy is in the jump */
+    VERIFY(0x8DED, 0x86);
     FETCH(0x8DED);
     add8(RD(HL));
 L8DEE: /* 36334 LD (HL),A        } */
+    VERIFY(0x8DEE, 0x77);
     FETCH(0x8DEE);
     WR(HL, A);
 L8DEF: /* 36335 CP 240           Is the new value negative (above the top of the screen)? */
+    VERIFY(0x8DEF, 0xFE);
     FETCH(0x8DEF);
     IMM(0x8DF0); cp8(mem[(uint16_t)0x8DF0]);
 L8DF1: /* 36337 JP NC,38064      If so, move Willy into the room above */
+    VERIFY(0x8DF1, 0xD2);
     FETCH(0x8DF1);
     IMM(0x8DF2); IMM(0x8DF3);
     if (!(F&FC)) goto L94B0;
 L8DF4: /* 36340 CALL 36508       Adjust Willy's attribute buffer location at #R34259 */
+    VERIFY(0x8DF4, 0xCD);
     FETCH(0x8DF4);
     IMM(0x8DF5); IMM(0x8DF6); IC(0x8DF6, 1);
     PUSHW(0x8DF7); goto L8E9C;
 L8DF7: /* 36343 LD A,(32946)     Pick up the attribute byte of the wall tile for the */
+    VERIFY(0x8DF7, 0x3A);
     FETCH(0x8DF7);
     { IMM(0x8DF8); IMM(0x8DF9); uint16_t ea = RD16IMM(0x8DF8);
     A = RD(ea); }
 L8DFA: /* 36346 CP (HL)          Is the top-left cell of Willy's sprite overlapping a */
+    VERIFY(0x8DFA, 0xBE);
     FETCH(0x8DFA);
     cp8(RD(HL));
 L8DFB: /* 36347 JP Z,36540       Jump if so */
+    VERIFY(0x8DFB, 0xCA);
     FETCH(0x8DFB);
     IMM(0x8DFC); IMM(0x8DFD);
     if ((F&FZ)) goto L8EBC;
 L8DFE: /* 36350 INC HL           Point #REGhl at the top-right cell occupied by Willy's */
+    VERIFY(0x8DFE, 0x23);
     FETCH(0x8DFE);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L8DFF: /* 36351 CP (HL)          Is the top-right cell of Willy's sprite overlapping a */
+    VERIFY(0x8DFF, 0xBE);
     FETCH(0x8DFF);
     cp8(RD(HL));
 L8E00: /* 36352 JP Z,36540       Jump if so */
+    VERIFY(0x8E00, 0xCA);
     FETCH(0x8E00);
     IMM(0x8E01); IMM(0x8E02);
     if ((F&FZ)) goto L8EBC;
 L8E03: /* 36355 LD A,(34261)     {Increment the jumping animation counter at #R34261 */
+    VERIFY(0x8E03, 0x3A);
     FETCH(0x8E03);
     { IMM(0x8E04); IMM(0x8E05); uint16_t ea = RD16IMM(0x8E04);
     A = RD(ea); }
 L8E06: /* 36358 INC A             */
+    VERIFY(0x8E06, 0x3C);
     FETCH(0x8E06);
     A = inc8(A);
 L8E07: /* 36359 LD (34261),A     } */
+    VERIFY(0x8E07, 0x32);
     FETCH(0x8E07);
     { IMM(0x8E08); IMM(0x8E09); uint16_t ea = RD16IMM(0x8E08);
     WR(ea, A); }
 L8E0A: /* 36362 SUB 8            #REGa=J-8, where J (1-18) is the new value of the */
+    VERIFY(0x8E0A, 0xD6);
     FETCH(0x8E0A);
     IMM(0x8E0B); sub8(mem[(uint16_t)0x8E0B]);
 L8E0C: /* 36364 JP P,36369       Jump if J>=8 */
+    VERIFY(0x8E0C, 0xF2);
     FETCH(0x8E0C);
     IMM(0x8E0D); IMM(0x8E0E);
     if (!(F&FS)) goto L8E11;
 L8E0F: /* 36367 NEG              #REGa=8-J (1<=J<=7, 1<=#REGa<=7) */
+    VERIFY(0x8E0F, 0xED);
     FETCH(0x8E0F); FETCH(0x8E10);
     neg();
 L8E11: /* 36369 INC A            #REGa=1+ABS(J-8) */
+    VERIFY(0x8E11, 0x3C);
     FETCH(0x8E11);
     A = inc8(A);
 L8E12: /* 36370 RLCA             {#REGd=8*(1+ABS(J-8)); this value determines the pitch */
+    VERIFY(0x8E12, 0x07);
     FETCH(0x8E12);
     rlca();
 L8E13: /* 36371 RLCA             of the jumping sound effect (rising as Willy rises, */
+    VERIFY(0x8E13, 0x07);
     FETCH(0x8E13);
     rlca();
 L8E14: /* 36372 RLCA             falling as Willy falls) */
+    VERIFY(0x8E14, 0x07);
     FETCH(0x8E14);
     rlca();
 L8E15: /* 36373 LD D,A           } */
+    VERIFY(0x8E15, 0x57);
     FETCH(0x8E15);
     D = A;
 L8E16: /* 36374 LD C,32          This value determines the duration of the jumping sound */
+    VERIFY(0x8E16, 0x0E);
     FETCH(0x8E16);
     IMM(0x8E17); C = mem[(uint16_t)0x8E17];
 L8E18: /* 36376 LD A,(32990)     Pick up the border colour for the current room from */
+    VERIFY(0x8E18, 0x3A);
     FETCH(0x8E18);
     { IMM(0x8E19); IMM(0x8E1A); uint16_t ea = RD16IMM(0x8E19);
     A = RD(ea); }
 L8E1B: /* 36379 OUT (254),A      {Make a jumping sound effect */
+    VERIFY(0x8E1B, 0xD3);
     FETCH(0x8E1B);
     IMM(0x8E1C); OUTP((uint16_t)((mem[(uint16_t)0x8E1C]) | (A << 8)), A);
 L8E1D: /* 36381 XOR 24            */
+    VERIFY(0x8E1D, 0xEE);
     FETCH(0x8E1D);
     IMM(0x8E1E); xor8(mem[(uint16_t)0x8E1E]);
 L8E1F: /* 36383 LD B,D            */
+    VERIFY(0x8E1F, 0x42);
     FETCH(0x8E1F);
     B = D;
 L8E20: /* 36384 DJNZ 36384        */
+    VERIFY(0x8E20, 0x10);
     FETCH(0x8E20);
     T(1); IMM(0x8E21);
     if (--B) { JRTAKEN(0x8E21); goto L8E20; }
 L8E22: /* 36386 DEC C             */
+    VERIFY(0x8E22, 0x0D);
     FETCH(0x8E22);
     C = dec8(C);
 L8E23: /* 36387 JR NZ,36379      } */
+    VERIFY(0x8E23, 0x20);
     FETCH(0x8E23);
     IMM(0x8E24);
     if (!(F&FZ)) { JRTAKEN(0x8E24); goto L8E1B; }
 L8E25: /* 36389 LD A,(34261)     Pick up the jumping animation counter (1-18) from */
+    VERIFY(0x8E25, 0x3A);
     FETCH(0x8E25);
     { IMM(0x8E26); IMM(0x8E27); uint16_t ea = RD16IMM(0x8E26);
     A = RD(ea); }
 L8E28: /* 36392 CP 18            Has Willy reached the end of the jump? */
+    VERIFY(0x8E28, 0xFE);
     FETCH(0x8E28);
     IMM(0x8E29); cp8(mem[(uint16_t)0x8E29]);
 L8E2A: /* 36394 JP Z,36528       Jump if so */
+    VERIFY(0x8E2A, 0xCA);
     FETCH(0x8E2A);
     IMM(0x8E2B); IMM(0x8E2C);
     if ((F&FZ)) goto L8EB0;
 L8E2D: /* 36397 CP 16            Is the jumping animation counter now 16? */
+    VERIFY(0x8E2D, 0xFE);
     FETCH(0x8E2D);
     IMM(0x8E2E); cp8(mem[(uint16_t)0x8E2E]);
 L8E2F: /* 36399 JR Z,36406       Jump if so */
+    VERIFY(0x8E2F, 0x28);
     FETCH(0x8E2F);
     IMM(0x8E30);
     if ((F&FZ)) { JRTAKEN(0x8E30); goto L8E36; }
 L8E31: /* 36401 CP 13            Is the jumping animation counter now 13? */
+    VERIFY(0x8E31, 0xFE);
     FETCH(0x8E31);
     IMM(0x8E32); cp8(mem[(uint16_t)0x8E32]);
 L8E33: /* 36403 JP NZ,36796      Jump if not */
+    VERIFY(0x8E33, 0xC2);
     FETCH(0x8E33);
     IMM(0x8E34); IMM(0x8E35);
     if (!(F&FZ)) goto L8FBC;
 L8E36: /* 36406 LD A,(34255)     Pick up Willy's y-coordinate from #R34255 */
+    VERIFY(0x8E36, 0x3A);
     FETCH(0x8E36);
     { IMM(0x8E37); IMM(0x8E38); uint16_t ea = RD16IMM(0x8E37);
     A = RD(ea); }
 L8E39: /* 36409 AND 14           Is Willy either on a ramp, or occupying only four cells? */
+    VERIFY(0x8E39, 0xE6);
     FETCH(0x8E39);
     IMM(0x8E3A); and8(mem[(uint16_t)0x8E3A]);
 L8E3B: /* 36411 JR NZ,36450      Jump if not */
+    VERIFY(0x8E3B, 0x20);
     FETCH(0x8E3B);
     IMM(0x8E3C);
     if (!(F&FZ)) { JRTAKEN(0x8E3C); goto L8E62; }
 L8E3D: /* 36413 LD HL,(34259)    Pick up Willy's attribute buffer coordinates from */
+    VERIFY(0x8E3D, 0x2A);
     FETCH(0x8E3D);
     { IMM(0x8E3E); IMM(0x8E3F); uint16_t ea = RD16IMM(0x8E3E);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L8E40: /* 36416 LD DE,64         {Point #REGhl at the left-hand cell below Willy's sprite */
+    VERIFY(0x8E40, 0x11);
     FETCH(0x8E40);
     IMM(0x8E41); IMM(0x8E42); DE = RD16IMM(0x8E41);
 L8E43: /* 36419 ADD HL,DE        } */
+    VERIFY(0x8E43, 0x19);
     FETCH(0x8E43);
     IR(7);
     HL = add16(HL, DE);
 L8E44: /* 36420 BIT 1,H          Is this location below the floor of the current room? */
+    VERIFY(0x8E44, 0xCB);
     FETCH(0x8E44); FETCH(0x8E45);
     bit(1, H);
 L8E46: /* 36422 JP NZ,38098      If so, move Willy into the room below */
+    VERIFY(0x8E46, 0xC2);
     FETCH(0x8E46);
     IMM(0x8E47); IMM(0x8E48);
     if (!(F&FZ)) goto L94D2;
 L8E49: /* 36425 LD A,(32955)     Pick up the attribute byte of the nasty tile for the */
+    VERIFY(0x8E49, 0x3A);
     FETCH(0x8E49);
     { IMM(0x8E4A); IMM(0x8E4B); uint16_t ea = RD16IMM(0x8E4A);
     A = RD(ea); }
 L8E4C: /* 36428 CP (HL)          Does the left-hand cell below Willy's sprite contain a */
+    VERIFY(0x8E4C, 0xBE);
     FETCH(0x8E4C);
     cp8(RD(HL));
 L8E4D: /* 36429 JR Z,36450       Jump if so */
+    VERIFY(0x8E4D, 0x28);
     FETCH(0x8E4D);
     IMM(0x8E4E);
     if ((F&FZ)) { JRTAKEN(0x8E4E); goto L8E62; }
 L8E4F: /* 36431 INC HL           Point #REGhl at the right-hand cell below Willy's sprite */
+    VERIFY(0x8E4F, 0x23);
     FETCH(0x8E4F);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L8E50: /* 36432 LD A,(32955)     Pick up the attribute byte of the nasty tile for the */
+    VERIFY(0x8E50, 0x3A);
     FETCH(0x8E50);
     { IMM(0x8E51); IMM(0x8E52); uint16_t ea = RD16IMM(0x8E51);
     A = RD(ea); }
 L8E53: /* 36435 CP (HL)          Does the right-hand cell below Willy's sprite contain a */
+    VERIFY(0x8E53, 0xBE);
     FETCH(0x8E53);
     cp8(RD(HL));
 L8E54: /* 36436 JR Z,36450       Jump if so */
+    VERIFY(0x8E54, 0x28);
     FETCH(0x8E54);
     IMM(0x8E55);
     if ((F&FZ)) { JRTAKEN(0x8E55); goto L8E62; }
 L8E56: /* 36438 LD A,(32928)     Pick up the attribute byte of the background tile for */
+    VERIFY(0x8E56, 0x3A);
     FETCH(0x8E56);
     { IMM(0x8E57); IMM(0x8E58); uint16_t ea = RD16IMM(0x8E57);
     A = RD(ea); }
 L8E59: /* 36441 CP (HL)          Set the zero flag if the right-hand cell below Willy's */
+    VERIFY(0x8E59, 0xBE);
     FETCH(0x8E59);
     cp8(RD(HL));
 L8E5A: /* 36442 DEC HL           Point #REGhl at the left-hand cell below Willy's sprite */
+    VERIFY(0x8E5A, 0x2B);
     FETCH(0x8E5A);
     IR(2);
     HL = (uint16_t)(HL - 1);
 L8E5B: /* 36443 JP NZ,36564      Jump if the right-hand cell below Willy's sprite is not */
+    VERIFY(0x8E5B, 0xC2);
     FETCH(0x8E5B);
     IMM(0x8E5C); IMM(0x8E5D);
     if (!(F&FZ)) goto L8ED4;
 L8E5E: /* 36446 CP (HL)          Is the left-hand cell below Willy's sprite empty? */
+    VERIFY(0x8E5E, 0xBE);
     FETCH(0x8E5E);
     cp8(RD(HL));
 L8E5F: /* 36447 JP NZ,36564      Jump if not */
+    VERIFY(0x8E5F, 0xC2);
     FETCH(0x8E5F);
     IMM(0x8E60); IMM(0x8E61);
     if (!(F&FZ)) goto L8ED4;
 L8E62: /* 36450 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x8E62, 0x3A);
     FETCH(0x8E62);
     { IMM(0x8E63); IMM(0x8E64); uint16_t ea = RD16IMM(0x8E63);
     A = RD(ea); }
 L8E65: /* 36453 CP 1             Is Willy jumping? */
+    VERIFY(0x8E65, 0xFE);
     FETCH(0x8E65);
     IMM(0x8E66); cp8(mem[(uint16_t)0x8E66]);
 L8E67: /* 36455 JP Z,36796       Jump if so */
+    VERIFY(0x8E67, 0xCA);
     FETCH(0x8E67);
     IMM(0x8E68); IMM(0x8E69);
     if ((F&FZ)) goto L8FBC;
 L8E6A: /* 36458 LD HL,34256      {Reset bit 1 at #R34256: Willy is not moving left or */
+    VERIFY(0x8E6A, 0x21);
     FETCH(0x8E6A);
     IMM(0x8E6B); IMM(0x8E6C); HL = RD16IMM(0x8E6B);
 L8E6D: /* 36461 RES 1,(HL)       right} */
+    VERIFY(0x8E6D, 0xCB);
     FETCH(0x8E6D); FETCH(0x8E6E);
     { uint8_t v = RD(HL); IC(HL, 1); WR(HL, (uint8_t)(v & ~(1u << 1))); }
 L8E6F: /* 36463 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x8E6F, 0x3A);
     FETCH(0x8E6F);
     { IMM(0x8E70); IMM(0x8E71); uint16_t ea = RD16IMM(0x8E70);
     A = RD(ea); }
 L8E72: /* 36466 OR A             Is Willy already falling? */
+    VERIFY(0x8E72, 0xB7);
     FETCH(0x8E72);
     or8(A);
 L8E73: /* 36467 JP Z,36534       Jump if not */
+    VERIFY(0x8E73, 0xCA);
     FETCH(0x8E73);
     IMM(0x8E74); IMM(0x8E75);
     if ((F&FZ)) goto L8EB6;
 L8E76: /* 36470 INC A            Increment the airborne status indicator */
+    VERIFY(0x8E76, 0x3C);
     FETCH(0x8E76);
     A = inc8(A);
 L8E77: /* 36471 CP 16            Is it 16 now? */
+    VERIFY(0x8E77, 0xFE);
     FETCH(0x8E77);
     IMM(0x8E78); cp8(mem[(uint16_t)0x8E78]);
 L8E79: /* 36473 JR NZ,36477      Jump if not */
+    VERIFY(0x8E79, 0x20);
     FETCH(0x8E79);
     IMM(0x8E7A);
     if (!(F&FZ)) { JRTAKEN(0x8E7A); goto L8E7D; }
 L8E7B: /* 36475 LD A,12          Decrease the airborne status indicator from #b16 to #b12 */
+    VERIFY(0x8E7B, 0x3E);
     FETCH(0x8E7B);
     IMM(0x8E7C); A = mem[(uint16_t)0x8E7C];
 L8E7D: /* 36477 LD (34257),A     Update the airborne status indicator at #R34257 */
+    VERIFY(0x8E7D, 0x32);
     FETCH(0x8E7D);
     { IMM(0x8E7E); IMM(0x8E7F); uint16_t ea = RD16IMM(0x8E7E);
     WR(ea, A); }
 L8E80: /* 36480 RLCA             {#REGd=16*#REGa; this value determines the pitch of the */
+    VERIFY(0x8E80, 0x07);
     FETCH(0x8E80);
     rlca();
 L8E81: /* 36481 RLCA             falling sound effect */
+    VERIFY(0x8E81, 0x07);
     FETCH(0x8E81);
     rlca();
 L8E82: /* 36482 RLCA              */
+    VERIFY(0x8E82, 0x07);
     FETCH(0x8E82);
     rlca();
 L8E83: /* 36483 RLCA              */
+    VERIFY(0x8E83, 0x07);
     FETCH(0x8E83);
     rlca();
 L8E84: /* 36484 LD D,A           } */
+    VERIFY(0x8E84, 0x57);
     FETCH(0x8E84);
     D = A;
 L8E85: /* 36485 LD C,32          This value determines the duration of the falling sound */
+    VERIFY(0x8E85, 0x0E);
     FETCH(0x8E85);
     IMM(0x8E86); C = mem[(uint16_t)0x8E86];
 L8E87: /* 36487 LD A,(32990)     Pick up the border colour for the current room from */
+    VERIFY(0x8E87, 0x3A);
     FETCH(0x8E87);
     { IMM(0x8E88); IMM(0x8E89); uint16_t ea = RD16IMM(0x8E88);
     A = RD(ea); }
 L8E8A: /* 36490 OUT (254),A      {Make a falling sound effect */
+    VERIFY(0x8E8A, 0xD3);
     FETCH(0x8E8A);
     IMM(0x8E8B); OUTP((uint16_t)((mem[(uint16_t)0x8E8B]) | (A << 8)), A);
 L8E8C: /* 36492 XOR 24            */
+    VERIFY(0x8E8C, 0xEE);
     FETCH(0x8E8C);
     IMM(0x8E8D); xor8(mem[(uint16_t)0x8E8D]);
 L8E8E: /* 36494 LD B,D            */
+    VERIFY(0x8E8E, 0x42);
     FETCH(0x8E8E);
     B = D;
 L8E8F: /* 36495 DJNZ 36495        */
+    VERIFY(0x8E8F, 0x10);
     FETCH(0x8E8F);
     T(1); IMM(0x8E90);
     if (--B) { JRTAKEN(0x8E90); goto L8E8F; }
 L8E91: /* 36497 DEC C             */
+    VERIFY(0x8E91, 0x0D);
     FETCH(0x8E91);
     C = dec8(C);
 L8E92: /* 36498 JR NZ,36490      } */
+    VERIFY(0x8E92, 0x20);
     FETCH(0x8E92);
     IMM(0x8E93);
     if (!(F&FZ)) { JRTAKEN(0x8E93); goto L8E8A; }
 L8E94: /* 36500 LD A,(34255)     {Add 8 to Willy's y-coordinate at #R34255; this moves */
+    VERIFY(0x8E94, 0x3A);
     FETCH(0x8E94);
     { IMM(0x8E95); IMM(0x8E96); uint16_t ea = RD16IMM(0x8E95);
     A = RD(ea); }
 L8E97: /* 36503 ADD A,8          Willy downwards by 4 pixels */
+    VERIFY(0x8E97, 0xC6);
     FETCH(0x8E97);
     IMM(0x8E98); add8(mem[(uint16_t)0x8E98]);
 L8E99: /* 36505 LD (34255),A     } */
+    VERIFY(0x8E99, 0x32);
     FETCH(0x8E99);
     { IMM(0x8E9A); IMM(0x8E9B); uint16_t ea = RD16IMM(0x8E9A);
     WR(ea, A); }
 L8E9C: /* 36508 AND 240          {#REGl=16*Y, where Y is Willy's screen y-coordinate */
+    VERIFY(0x8E9C, 0xE6);
     FETCH(0x8E9C);
     IMM(0x8E9D); and8(mem[(uint16_t)0x8E9D]);
 L8E9E: /* 36510 LD L,A           (0-14)} */
+    VERIFY(0x8E9E, 0x6F);
     FETCH(0x8E9E);
     L = A;
 L8E9F: /* 36511 XOR A            Clear #REGa and the carry flag */
+    VERIFY(0x8E9F, 0xAF);
     FETCH(0x8E9F);
     xor8(A);
 L8EA0: /* 36512 RL L             Now #REGl=32*(Y-8*INT(Y/8)), and the carry flag is set */
+    VERIFY(0x8EA0, 0xCB);
     FETCH(0x8EA0); FETCH(0x8EA1);
     L = rl(L);
 L8EA2: /* 36514 ADC A,92         {#REGh=#b92 or #b93 (MSB of the address of Willy's */
+    VERIFY(0x8EA2, 0xCE);
     FETCH(0x8EA2);
     IMM(0x8EA3); adc8(mem[(uint16_t)0x8EA3]);
 L8EA4: /* 36516 LD H,A           location in the attribute buffer)} */
+    VERIFY(0x8EA4, 0x67);
     FETCH(0x8EA4);
     H = A;
 L8EA5: /* 36517 LD A,(34259)     {Pick up Willy's screen x-coordinate (0-30) from bits */
+    VERIFY(0x8EA5, 0x3A);
     FETCH(0x8EA5);
     { IMM(0x8EA6); IMM(0x8EA7); uint16_t ea = RD16IMM(0x8EA6);
     A = RD(ea); }
 L8EA8: /* 36520 AND 31           0-4 at #R34259} */
+    VERIFY(0x8EA8, 0xE6);
     FETCH(0x8EA8);
     IMM(0x8EA9); and8(mem[(uint16_t)0x8EA9]);
 L8EAA: /* 36522 OR L             {Now #REGl holds the LSB of Willy's attribute buffer */
+    VERIFY(0x8EAA, 0xB5);
     FETCH(0x8EAA);
     or8(L);
 L8EAB: /* 36523 LD L,A           address} */
+    VERIFY(0x8EAB, 0x6F);
     FETCH(0x8EAB);
     L = A;
 L8EAC: /* 36524 LD (34259),HL    Store Willy's updated attribute buffer location at */
+    VERIFY(0x8EAC, 0x22);
     FETCH(0x8EAC);
     { IMM(0x8EAD); IMM(0x8EAE); uint16_t ea = RD16IMM(0x8EAD);
     WR(ea, L); WR((uint16_t)(ea + 1), H); }
 L8EAF: /* 36527 RET               */
+    VERIFY(0x8EAF, 0xC9);
     FETCH(0x8EAF);
     POPPC(); goto dispatch;
 L8EB0: /* 36528 LD A,6           {Set the airborne status indicator at #R34257 to #b6: */
+    VERIFY(0x8EB0, 0x3E);
     FETCH(0x8EB0);
     IMM(0x8EB1); A = mem[(uint16_t)0x8EB1];
 L8EB2: /* 36530 LD (34257),A     Willy will continue to fall unless he's landed on a wall */
+    VERIFY(0x8EB2, 0x32);
     FETCH(0x8EB2);
     { IMM(0x8EB3); IMM(0x8EB4); uint16_t ea = RD16IMM(0x8EB3);
     WR(ea, A); }
 L8EB5: /* 36533 RET               */
+    VERIFY(0x8EB5, 0xC9);
     FETCH(0x8EB5);
     POPPC(); goto dispatch;
 L8EB6: /* 36534 LD A,2           {Set the airborne status indicator at #R34257 to #b2 */
+    VERIFY(0x8EB6, 0x3E);
     FETCH(0x8EB6);
     IMM(0x8EB7); A = mem[(uint16_t)0x8EB7];
 L8EB8: /* 36536 LD (34257),A     } */
+    VERIFY(0x8EB8, 0x32);
     FETCH(0x8EB8);
     { IMM(0x8EB9); IMM(0x8EBA); uint16_t ea = RD16IMM(0x8EB9);
     WR(ea, A); }
 L8EBB: /* 36539 RET               */
+    VERIFY(0x8EBB, 0xC9);
     FETCH(0x8EBB);
     POPPC(); goto dispatch;
 L8EBC: /* 36540 LD A,(34255)     {Adjust Willy's y-coordinate at #R34255 so that the top */
+    VERIFY(0x8EBC, 0x3A);
     FETCH(0x8EBC);
     { IMM(0x8EBD); IMM(0x8EBE); uint16_t ea = RD16IMM(0x8EBD);
     A = RD(ea); }
 L8EBF: /* 36543 ADD A,16         row of cells of his sprite is just below the wall tile */
+    VERIFY(0x8EBF, 0xC6);
     FETCH(0x8EBF);
     IMM(0x8EC0); add8(mem[(uint16_t)0x8EC0]);
 L8EC1: /* 36545 AND 240           */
+    VERIFY(0x8EC1, 0xE6);
     FETCH(0x8EC1);
     IMM(0x8EC2); and8(mem[(uint16_t)0x8EC2]);
 L8EC3: /* 36547 LD (34255),A     } */
+    VERIFY(0x8EC3, 0x32);
     FETCH(0x8EC3);
     { IMM(0x8EC4); IMM(0x8EC5); uint16_t ea = RD16IMM(0x8EC4);
     WR(ea, A); }
 L8EC6: /* 36550 CALL 36508       Adjust Willy's attribute buffer location at #R34259 to */
+    VERIFY(0x8EC6, 0xCD);
     FETCH(0x8EC6);
     IMM(0x8EC7); IMM(0x8EC8); IC(0x8EC8, 1);
     PUSHW(0x8EC9); goto L8E9C;
 L8EC9: /* 36553 LD A,2           {Set the airborne status indicator at #R34257 to #b2: */
+    VERIFY(0x8EC9, 0x3E);
     FETCH(0x8EC9);
     IMM(0x8ECA); A = mem[(uint16_t)0x8ECA];
 L8ECB: /* 36555 LD (34257),A     Willy has started falling} */
+    VERIFY(0x8ECB, 0x32);
     FETCH(0x8ECB);
     { IMM(0x8ECC); IMM(0x8ECD); uint16_t ea = RD16IMM(0x8ECC);
     WR(ea, A); }
 L8ECE: /* 36558 LD HL,34256      {Reset bit 1 at #R34256: Willy is not moving left or */
+    VERIFY(0x8ECE, 0x21);
     FETCH(0x8ECE);
     IMM(0x8ECF); IMM(0x8ED0); HL = RD16IMM(0x8ECF);
 L8ED1: /* 36561 RES 1,(HL)       right} */
+    VERIFY(0x8ED1, 0xCB);
     FETCH(0x8ED1); FETCH(0x8ED2);
     { uint8_t v = RD(HL); IC(HL, 1); WR(HL, (uint8_t)(v & ~(1u << 1))); }
 L8ED3: /* 36563 RET               */
+    VERIFY(0x8ED3, 0xC9);
     FETCH(0x8ED3);
     POPPC(); goto dispatch;
 
 /* ---- MOVEWILLY2 ---- */
 L8ED4: /* 36564 LD E,255         Initialise #REGe to #b255 (all bits set); it will be */
+    VERIFY(0x8ED4, 0x1E);
     FETCH(0x8ED4);
     IMM(0x8ED5); E = mem[(uint16_t)0x8ED5];
 L8ED6: /* 36566 LD A,(34262)     Pick up the rope status indicator from #R34262 */
+    VERIFY(0x8ED6, 0x3A);
     FETCH(0x8ED6);
     { IMM(0x8ED7); IMM(0x8ED8); uint16_t ea = RD16IMM(0x8ED7);
     A = RD(ea); }
 L8ED9: /* 36569 DEC A            {Is Willy on a rope? */
+    VERIFY(0x8ED9, 0x3D);
     FETCH(0x8ED9);
     A = dec8(A);
 L8EDA: /* 36570 BIT 7,A          } */
+    VERIFY(0x8EDA, 0xCB);
     FETCH(0x8EDA); FETCH(0x8EDB);
     bit(7, A);
 L8EDC: /* 36572 JR Z,36602       Jump if so */
+    VERIFY(0x8EDC, 0x28);
     FETCH(0x8EDC);
     IMM(0x8EDD);
     if ((F&FZ)) { JRTAKEN(0x8EDD); goto L8EFA; }
 L8EDE: /* 36574 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x8EDE, 0x3A);
     FETCH(0x8EDE);
     { IMM(0x8EDF); IMM(0x8EE0); uint16_t ea = RD16IMM(0x8EDF);
     A = RD(ea); }
 L8EE1: /* 36577 CP 12            Has Willy just landed after falling from too great a */
+    VERIFY(0x8EE1, 0xFE);
     FETCH(0x8EE1);
     IMM(0x8EE2); cp8(mem[(uint16_t)0x8EE2]);
 L8EE3: /* 36579 JP NC,37047      If so, kill him */
+    VERIFY(0x8EE3, 0xD2);
     FETCH(0x8EE3);
     IMM(0x8EE4); IMM(0x8EE5);
     if (!(F&FC)) goto L90B7;
 L8EE6: /* 36582 XOR A            {Reset the airborne status indicator at #R34257 (Willy */
+    VERIFY(0x8EE6, 0xAF);
     FETCH(0x8EE6);
     xor8(A);
 L8EE7: /* 36583 LD (34257),A     has landed safely)} */
+    VERIFY(0x8EE7, 0x32);
     FETCH(0x8EE7);
     { IMM(0x8EE8); IMM(0x8EE9); uint16_t ea = RD16IMM(0x8EE8);
     WR(ea, A); }
 L8EEA: /* 36586 LD A,(32973)     Pick up the attribute byte of the conveyor tile for the */
+    VERIFY(0x8EEA, 0x3A);
     FETCH(0x8EEA);
     { IMM(0x8EEB); IMM(0x8EEC); uint16_t ea = RD16IMM(0x8EEB);
     A = RD(ea); }
 L8EED: /* 36589 CP (HL)          Does the attribute byte of the left-hand cell below */
+    VERIFY(0x8EED, 0xBE);
     FETCH(0x8EED);
     cp8(RD(HL));
 L8EEE: /* 36590 JR Z,36596       Jump if so */
+    VERIFY(0x8EEE, 0x28);
     FETCH(0x8EEE);
     IMM(0x8EEF);
     if ((F&FZ)) { JRTAKEN(0x8EEF); goto L8EF4; }
 L8EF0: /* 36592 INC HL           Point #REGhl at the right-hand cell below Willy's sprite */
+    VERIFY(0x8EF0, 0x23);
     FETCH(0x8EF0);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L8EF1: /* 36593 CP (HL)          Does the attribute byte of the right-hand cell below */
+    VERIFY(0x8EF1, 0xBE);
     FETCH(0x8EF1);
     cp8(RD(HL));
 L8EF2: /* 36594 JR NZ,36602      Jump if not */
+    VERIFY(0x8EF2, 0x20);
     FETCH(0x8EF2);
     IMM(0x8EF3);
     if (!(F&FZ)) { JRTAKEN(0x8EF3); goto L8EFA; }
 L8EF4: /* 36596 LD A,(32982)     Pick up the direction byte of the conveyor definition */
+    VERIFY(0x8EF4, 0x3A);
     FETCH(0x8EF4);
     { IMM(0x8EF5); IMM(0x8EF6); uint16_t ea = RD16IMM(0x8EF5);
     A = RD(ea); }
 L8EF7: /* 36599 SUB 3            {Now #REGe=#b253 (bit 1 reset) if the conveyor is moving */
+    VERIFY(0x8EF7, 0xD6);
     FETCH(0x8EF7);
     IMM(0x8EF8); sub8(mem[(uint16_t)0x8EF8]);
 L8EF9: /* 36601 LD E,A           left, or #b254 (bit 0 reset) if it's moving right} */
+    VERIFY(0x8EF9, 0x5F);
     FETCH(0x8EF9);
     E = A;
 L8EFA: /* 36602 LD BC,57342      {Read keys P-O-I-U-Y (right, left, right, left, right) */
+    VERIFY(0x8EFA, 0x01);
     FETCH(0x8EFA);
     IMM(0x8EFB); IMM(0x8EFC); BC = RD16IMM(0x8EFB);
 L8EFD: /* 36605 IN A,(C)         into bits 0-4 of #REGa} */
+    VERIFY(0x8EFD, 0xED);
     FETCH(0x8EFD); FETCH(0x8EFE);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8EFF: /* 36607 AND 31           {Set bit 5 and reset bits 6 and 7 */
+    VERIFY(0x8EFF, 0xE6);
     FETCH(0x8EFF);
     IMM(0x8F00); and8(mem[(uint16_t)0x8F00]);
 L8F01: /* 36609 OR 32            } */
+    VERIFY(0x8F01, 0xF6);
     FETCH(0x8F01);
     IMM(0x8F02); or8(mem[(uint16_t)0x8F02]);
 L8F03: /* 36611 AND E            Reset bit 0 if the conveyor is moving right, or bit 1 if */
+    VERIFY(0x8F03, 0xA3);
     FETCH(0x8F03);
     and8(E);
 L8F04: /* 36612 LD E,A           Save the result in #REGe */
+    VERIFY(0x8F04, 0x5F);
     FETCH(0x8F04);
     E = A;
 L8F05: /* 36613 LD A,(34271)     Pick up the game mode indicator (0, 1 or 2) from #R34271 */
+    VERIFY(0x8F05, 0x3A);
     FETCH(0x8F05);
     { IMM(0x8F06); IMM(0x8F07); uint16_t ea = RD16IMM(0x8F06);
     A = RD(ea); }
 L8F08: /* 36616 AND 2            {Now #REGa=1 if Willy is running to the toilet, 0 */
+    VERIFY(0x8F08, 0xE6);
     FETCH(0x8F08);
     IMM(0x8F09); and8(mem[(uint16_t)0x8F09]);
 L8F0A: /* 36618 RRCA             otherwise} */
+    VERIFY(0x8F0A, 0x0F);
     FETCH(0x8F0A);
     rrca();
 L8F0B: /* 36619 XOR E            {Flip bit 0 of #REGe if Willy is running to the toilet, */
+    VERIFY(0x8F0B, 0xAB);
     FETCH(0x8F0B);
     xor8(E);
 L8F0C: /* 36620 LD E,A           forcing him to move right (unless he's jumped onto the */
+    VERIFY(0x8F0C, 0x5F);
     FETCH(0x8F0C);
     E = A;
 L8F0D: /* 36621 LD BC,64510      {Read keys Q-W-E-R-T (left, right, left, right, left) */
+    VERIFY(0x8F0D, 0x01);
     FETCH(0x8F0D);
     IMM(0x8F0E); IMM(0x8F0F); BC = RD16IMM(0x8F0E);
 L8F10: /* 36624 IN A,(C)         into bits 0-4 of #REGa} */
+    VERIFY(0x8F10, 0xED);
     FETCH(0x8F10); FETCH(0x8F11);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8F12: /* 36626 AND 31           {Keep only bits 0-4, shift them into bits 1-5, and set */
+    VERIFY(0x8F12, 0xE6);
     FETCH(0x8F12);
     IMM(0x8F13); and8(mem[(uint16_t)0x8F13]);
 L8F14: /* 36628 RLC A            bit 0 */
+    VERIFY(0x8F14, 0xCB);
     FETCH(0x8F14); FETCH(0x8F15);
     A = rlc(A);
 L8F16: /* 36630 OR 1             } */
+    VERIFY(0x8F16, 0xF6);
     FETCH(0x8F16);
     IMM(0x8F17); or8(mem[(uint16_t)0x8F17]);
 L8F18: /* 36632 AND E            {Merge this keyboard reading into bits 1-5 of #REGe */
+    VERIFY(0x8F18, 0xA3);
     FETCH(0x8F18);
     and8(E);
 L8F19: /* 36633 LD E,A           } */
+    VERIFY(0x8F19, 0x5F);
     FETCH(0x8F19);
     E = A;
 L8F1A: /* 36634 LD B,231         {Read keys 1-2-3-4-5 ('5' is left) and 0-9-8-7-6 (jump, */
+    VERIFY(0x8F1A, 0x06);
     FETCH(0x8F1A);
     IMM(0x8F1B); B = mem[(uint16_t)0x8F1B];
 L8F1C: /* 36636 IN A,(C)         nothing, right, right, left) into bits 0-4 of #REGa} */
+    VERIFY(0x8F1C, 0xED);
     FETCH(0x8F1C); FETCH(0x8F1D);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8F1E: /* 36638 RRCA             {Rotate the result right and set bits 0-2 and 4-7; this */
+    VERIFY(0x8F1E, 0x0F);
     FETCH(0x8F1E);
     rrca();
 L8F1F: /* 36639 OR 247           ignores every key except '5' and '6' (left)} */
+    VERIFY(0x8F1F, 0xF6);
     FETCH(0x8F1F);
     IMM(0x8F20); or8(mem[(uint16_t)0x8F20]);
 L8F21: /* 36641 AND E            {Merge this reading of the '5' and '6' keys into bit 3 */
+    VERIFY(0x8F21, 0xA3);
     FETCH(0x8F21);
     and8(E);
 L8F22: /* 36642 LD E,A           of #REGe} */
+    VERIFY(0x8F22, 0x5F);
     FETCH(0x8F22);
     E = A;
 L8F23: /* 36643 LD B,239         {Read keys 0-9-8-7-6 (jump, nothing, right, right, left) */
+    VERIFY(0x8F23, 0x06);
     FETCH(0x8F23);
     IMM(0x8F24); B = mem[(uint16_t)0x8F24];
 L8F25: /* 36645 IN A,(C)         into bits 0-4 of #REGa} */
+    VERIFY(0x8F25, 0xED);
     FETCH(0x8F25); FETCH(0x8F26);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8F27: /* 36647 OR 251           Set bits 0, 1 and 3-7; this ignores every key except '8' */
+    VERIFY(0x8F27, 0xF6);
     FETCH(0x8F27);
     IMM(0x8F28); or8(mem[(uint16_t)0x8F28]);
 L8F29: /* 36649 AND E            {Merge this reading of the '8' key into bit 2 of #REGe */
+    VERIFY(0x8F29, 0xA3);
     FETCH(0x8F29);
     and8(E);
 L8F2A: /* 36650 LD E,A           } */
+    VERIFY(0x8F2A, 0x5F);
     FETCH(0x8F2A);
     E = A;
 L8F2B: /* 36651 IN A,(C)         Read keys 0-9-8-7-6 (jump, nothing, right, right, left) */
+    VERIFY(0x8F2B, 0xED);
     FETCH(0x8F2B); FETCH(0x8F2C);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8F2D: /* 36653 RRCA             {Rotate the result right and set bits 0, 1 and 3-7; this */
+    VERIFY(0x8F2D, 0x0F);
     FETCH(0x8F2D);
     rrca();
 L8F2E: /* 36654 OR 251           ignores every key except '7' (right)} */
+    VERIFY(0x8F2E, 0xF6);
     FETCH(0x8F2E);
     IMM(0x8F2F); or8(mem[(uint16_t)0x8F2F]);
 L8F30: /* 36656 AND E            {Merge this reading of the '7' key into bit 2 of #REGe */
+    VERIFY(0x8F30, 0xA3);
     FETCH(0x8F30);
     and8(E);
 L8F31: /* 36657 LD E,A           } */
+    VERIFY(0x8F31, 0x5F);
     FETCH(0x8F31);
     E = A;
 L8F32: /* 36658 LD A,(34254)     Collect the Kempston joystick indicator from #R34254 */
+    VERIFY(0x8F32, 0x3A);
     FETCH(0x8F32);
     { IMM(0x8F33); IMM(0x8F34); uint16_t ea = RD16IMM(0x8F33);
     A = RD(ea); }
 L8F35: /* 36661 OR A             Is the joystick connected? */
+    VERIFY(0x8F35, 0xB7);
     FETCH(0x8F35);
     or8(A);
 L8F36: /* 36662 JR Z,36674       Jump if not */
+    VERIFY(0x8F36, 0x28);
     FETCH(0x8F36);
     IMM(0x8F37);
     if ((F&FZ)) { JRTAKEN(0x8F37); goto L8F42; }
 L8F38: /* 36664 LD BC,31         {Collect input from the joystick */
+    VERIFY(0x8F38, 0x01);
     FETCH(0x8F38);
     IMM(0x8F39); IMM(0x8F3A); BC = RD16IMM(0x8F39);
 L8F3B: /* 36667 IN A,(C)         } */
+    VERIFY(0x8F3B, 0xED);
     FETCH(0x8F3B); FETCH(0x8F3C);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8F3D: /* 36669 AND 3            {Keep only bits 0 (right) and 1 (left) and flip them */
+    VERIFY(0x8F3D, 0xE6);
     FETCH(0x8F3D);
     IMM(0x8F3E); and8(mem[(uint16_t)0x8F3E]);
 L8F3F: /* 36671 CPL              } */
+    VERIFY(0x8F3F, 0x2F);
     FETCH(0x8F3F);
     cpl();
 L8F40: /* 36672 AND E            {Merge this reading of the joystick right and left */
+    VERIFY(0x8F40, 0xA3);
     FETCH(0x8F40);
     and8(E);
 L8F41: /* 36673 LD E,A           buttons into bits 0 and 1 of #REGe} */
+    VERIFY(0x8F41, 0x5F);
     FETCH(0x8F41);
     E = A;
 L8F42: /* 36674 LD C,0           Initialise #REGc to 0 (no movement) */
+    VERIFY(0x8F42, 0x0E);
     FETCH(0x8F42);
     IMM(0x8F43); C = mem[(uint16_t)0x8F43];
 L8F44: /* 36676 LD A,E           Copy the movement bits into #REGa */
+    VERIFY(0x8F44, 0x7B);
     FETCH(0x8F44);
     A = E;
 L8F45: /* 36677 AND 42           Keep only bits 1, 3 and 5 (the 'left' bits) */
+    VERIFY(0x8F45, 0xE6);
     FETCH(0x8F45);
     IMM(0x8F46); and8(mem[(uint16_t)0x8F46]);
 L8F47: /* 36679 CP 42            Are any of these bits reset? */
+    VERIFY(0x8F47, 0xFE);
     FETCH(0x8F47);
     IMM(0x8F48); cp8(mem[(uint16_t)0x8F48]);
 L8F49: /* 36681 JR Z,36689       Jump if not */
+    VERIFY(0x8F49, 0x28);
     FETCH(0x8F49);
     IMM(0x8F4A);
     if ((F&FZ)) { JRTAKEN(0x8F4A); goto L8F51; }
 L8F4B: /* 36683 LD C,4           Set bit 2 of #REGc: Willy is moving left */
+    VERIFY(0x8F4B, 0x0E);
     FETCH(0x8F4B);
     IMM(0x8F4C); C = mem[(uint16_t)0x8F4C];
 L8F4D: /* 36685 XOR A            {Reset the inactivity timer at #R34272 */
+    VERIFY(0x8F4D, 0xAF);
     FETCH(0x8F4D);
     xor8(A);
 L8F4E: /* 36686 LD (34272),A     } */
+    VERIFY(0x8F4E, 0x32);
     FETCH(0x8F4E);
     { IMM(0x8F4F); IMM(0x8F50); uint16_t ea = RD16IMM(0x8F4F);
     WR(ea, A); }
 L8F51: /* 36689 LD A,E           Copy the movement bits into #REGa */
+    VERIFY(0x8F51, 0x7B);
     FETCH(0x8F51);
     A = E;
 L8F52: /* 36690 AND 21           Keep only bits 0, 2 and 4 (the 'right' bits) */
+    VERIFY(0x8F52, 0xE6);
     FETCH(0x8F52);
     IMM(0x8F53); and8(mem[(uint16_t)0x8F53]);
 L8F54: /* 36692 CP 21            Are any of these bits reset? */
+    VERIFY(0x8F54, 0xFE);
     FETCH(0x8F54);
     IMM(0x8F55); cp8(mem[(uint16_t)0x8F55]);
 L8F56: /* 36694 JR Z,36702       Jump if not */
+    VERIFY(0x8F56, 0x28);
     FETCH(0x8F56);
     IMM(0x8F57);
     if ((F&FZ)) { JRTAKEN(0x8F57); goto L8F5E; }
 L8F58: /* 36696 SET 3,C          Set bit 3 of #REGc: Willy is moving right */
+    VERIFY(0x8F58, 0xCB);
     FETCH(0x8F58); FETCH(0x8F59);
     C = (uint8_t)(C | (1u << 3));
 L8F5A: /* 36698 XOR A            {Reset the inactivity timer at #R34272 */
+    VERIFY(0x8F5A, 0xAF);
     FETCH(0x8F5A);
     xor8(A);
 L8F5B: /* 36699 LD (34272),A     } */
+    VERIFY(0x8F5B, 0x32);
     FETCH(0x8F5B);
     { IMM(0x8F5C); IMM(0x8F5D); uint16_t ea = RD16IMM(0x8F5C);
     WR(ea, A); }
 L8F5E: /* 36702 LD A,(34256)     Pick up Willy's direction and movement flags from */
+    VERIFY(0x8F5E, 0x3A);
     FETCH(0x8F5E);
     { IMM(0x8F5F); IMM(0x8F60); uint16_t ea = RD16IMM(0x8F5F);
     A = RD(ea); }
 L8F61: /* 36705 ADD A,C          {Point #REGhl at the entry in the left-right movement */
+    VERIFY(0x8F61, 0x81);
     FETCH(0x8F61);
     add8(C);
 L8F62: /* 36706 LD C,A           table at #R33825 that corresponds to the direction Willy */
+    VERIFY(0x8F62, 0x4F);
     FETCH(0x8F62);
     C = A;
 L8F63: /* 36707 LD B,0           is facing, and the direction in which he is being moved */
+    VERIFY(0x8F63, 0x06);
     FETCH(0x8F63);
     IMM(0x8F64); B = mem[(uint16_t)0x8F64];
 L8F65: /* 36709 LD HL,33825      or trying to move */
+    VERIFY(0x8F65, 0x21);
     FETCH(0x8F65);
     IMM(0x8F66); IMM(0x8F67); HL = RD16IMM(0x8F66);
 L8F68: /* 36712 ADD HL,BC        } */
+    VERIFY(0x8F68, 0x09);
     FETCH(0x8F68);
     IR(7);
     HL = add16(HL, BC);
 L8F69: /* 36713 LD A,(HL)        {Update Willy's direction and movement flags at #R34256 */
+    VERIFY(0x8F69, 0x7E);
     FETCH(0x8F69);
     A = RD(HL);
 L8F6A: /* 36714 LD (34256),A     with the entry from the left-right movement table} */
+    VERIFY(0x8F6A, 0x32);
     FETCH(0x8F6A);
     { IMM(0x8F6B); IMM(0x8F6C); uint16_t ea = RD16IMM(0x8F6B);
     WR(ea, A); }
 L8F6D: /* 36717 LD BC,32510      {Read keys SHIFT-Z-X-C-V and B-N-M-SS-SPACE */
+    VERIFY(0x8F6D, 0x01);
     FETCH(0x8F6D);
     IMM(0x8F6E); IMM(0x8F6F); BC = RD16IMM(0x8F6E);
 L8F70: /* 36720 IN A,(C)         } */
+    VERIFY(0x8F70, 0xED);
     FETCH(0x8F70); FETCH(0x8F71);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8F72: /* 36722 AND 31           {Are any of these keys being pressed? */
+    VERIFY(0x8F72, 0xE6);
     FETCH(0x8F72);
     IMM(0x8F73); and8(mem[(uint16_t)0x8F73]);
 L8F74: /* 36724 CP 31            } */
+    VERIFY(0x8F74, 0xFE);
     FETCH(0x8F74);
     IMM(0x8F75); cp8(mem[(uint16_t)0x8F75]);
 L8F76: /* 36726 JR NZ,36751      Jump if so */
+    VERIFY(0x8F76, 0x20);
     FETCH(0x8F76);
     IMM(0x8F77);
     if (!(F&FZ)) { JRTAKEN(0x8F77); goto L8F8F; }
 L8F78: /* 36728 LD B,239         {Read keys 6-7-8-9-0 */
+    VERIFY(0x8F78, 0x06);
     FETCH(0x8F78);
     IMM(0x8F79); B = mem[(uint16_t)0x8F79];
 L8F7A: /* 36730 IN A,(C)         } */
+    VERIFY(0x8F7A, 0xED);
     FETCH(0x8F7A); FETCH(0x8F7B);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8F7C: /* 36732 BIT 0,A          Is '0' being pressed? */
+    VERIFY(0x8F7C, 0xCB);
     FETCH(0x8F7C); FETCH(0x8F7D);
     bit(0, A);
 L8F7E: /* 36734 JR Z,36751       Jump if so */
+    VERIFY(0x8F7E, 0x28);
     FETCH(0x8F7E);
     IMM(0x8F7F);
     if ((F&FZ)) { JRTAKEN(0x8F7F); goto L8F8F; }
 L8F80: /* 36736 LD A,(34254)     Collect the Kempston joystick indicator from #R34254 */
+    VERIFY(0x8F80, 0x3A);
     FETCH(0x8F80);
     { IMM(0x8F81); IMM(0x8F82); uint16_t ea = RD16IMM(0x8F81);
     A = RD(ea); }
 L8F83: /* 36739 OR A             Is the joystick connected? */
+    VERIFY(0x8F83, 0xB7);
     FETCH(0x8F83);
     or8(A);
 L8F84: /* 36740 JR Z,36796       Jump if not */
+    VERIFY(0x8F84, 0x28);
     FETCH(0x8F84);
     IMM(0x8F85);
     if ((F&FZ)) { JRTAKEN(0x8F85); goto L8FBC; }
 L8F86: /* 36742 LD BC,31         {Collect input from the joystick */
+    VERIFY(0x8F86, 0x01);
     FETCH(0x8F86);
     IMM(0x8F87); IMM(0x8F88); BC = RD16IMM(0x8F87);
 L8F89: /* 36745 IN A,(C)         } */
+    VERIFY(0x8F89, 0xED);
     FETCH(0x8F89); FETCH(0x8F8A);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L8F8B: /* 36747 BIT 4,A          Is the fire button being pressed? */
+    VERIFY(0x8F8B, 0xCB);
     FETCH(0x8F8B); FETCH(0x8F8C);
     bit(4, A);
 L8F8D: /* 36749 JR Z,36796       Jump if not */
+    VERIFY(0x8F8D, 0x28);
     FETCH(0x8F8D);
     IMM(0x8F8E);
     if ((F&FZ)) { JRTAKEN(0x8F8E); goto L8FBC; }
 L8F8F: /* 36751 LD A,(34271)     Pick up the game mode indicator from #R34271 */
+    VERIFY(0x8F8F, 0x3A);
     FETCH(0x8F8F);
     { IMM(0x8F90); IMM(0x8F91); uint16_t ea = RD16IMM(0x8F90);
     A = RD(ea); }
 L8F92: /* 36754 BIT 1,A          Is Willy running to the toilet? */
+    VERIFY(0x8F92, 0xCB);
     FETCH(0x8F92); FETCH(0x8F93);
     bit(1, A);
 L8F94: /* 36756 JR NZ,36796      Jump if so */
+    VERIFY(0x8F94, 0x20);
     FETCH(0x8F94);
     IMM(0x8F95);
     if (!(F&FZ)) { JRTAKEN(0x8F95); goto L8FBC; }
 L8F96: /* 36758 XOR A            {Initialise the jumping animation counter at #R34261 to */
+    VERIFY(0x8F96, 0xAF);
     FETCH(0x8F96);
     xor8(A);
 L8F97: /* 36759 LD (34261),A     0} */
+    VERIFY(0x8F97, 0x32);
     FETCH(0x8F97);
     { IMM(0x8F98); IMM(0x8F99); uint16_t ea = RD16IMM(0x8F98);
     WR(ea, A); }
 L8F9A: /* 36762 LD (34272),A     Reset the inactivity timer at #R34272 */
+    VERIFY(0x8F9A, 0x32);
     FETCH(0x8F9A);
     { IMM(0x8F9B); IMM(0x8F9C); uint16_t ea = RD16IMM(0x8F9B);
     WR(ea, A); }
 L8F9D: /* 36765 INC A            {Set the airborne status indicator at #R34257 to #b1: */
+    VERIFY(0x8F9D, 0x3C);
     FETCH(0x8F9D);
     A = inc8(A);
 L8F9E: /* 36766 LD (34257),A     Willy is jumping} */
+    VERIFY(0x8F9E, 0x32);
     FETCH(0x8F9E);
     { IMM(0x8F9F); IMM(0x8FA0); uint16_t ea = RD16IMM(0x8F9F);
     WR(ea, A); }
 L8FA1: /* 36769 LD A,(34262)     Pick up the rope status indicator from #R34262 */
+    VERIFY(0x8FA1, 0x3A);
     FETCH(0x8FA1);
     { IMM(0x8FA2); IMM(0x8FA3); uint16_t ea = RD16IMM(0x8FA2);
     A = RD(ea); }
 L8FA4: /* 36772 DEC A            {Is Willy on a rope? */
+    VERIFY(0x8FA4, 0x3D);
     FETCH(0x8FA4);
     A = dec8(A);
 L8FA5: /* 36773 BIT 7,A          } */
+    VERIFY(0x8FA5, 0xCB);
     FETCH(0x8FA5); FETCH(0x8FA6);
     bit(7, A);
 L8FA7: /* 36775 JR NZ,36796      Jump if not */
+    VERIFY(0x8FA7, 0x20);
     FETCH(0x8FA7);
     IMM(0x8FA8);
     if (!(F&FZ)) { JRTAKEN(0x8FA8); goto L8FBC; }
 L8FA9: /* 36777 LD A,240         {Set the rope status indicator at #R34262 to #b240 */
+    VERIFY(0x8FA9, 0x3E);
     FETCH(0x8FA9);
     IMM(0x8FAA); A = mem[(uint16_t)0x8FAA];
 L8FAB: /* 36779 LD (34262),A     } */
+    VERIFY(0x8FAB, 0x32);
     FETCH(0x8FAB);
     { IMM(0x8FAC); IMM(0x8FAD); uint16_t ea = RD16IMM(0x8FAC);
     WR(ea, A); }
 L8FAE: /* 36782 LD A,(34255)     {Round down Willy's y-coordinate at #R34255 to the */
+    VERIFY(0x8FAE, 0x3A);
     FETCH(0x8FAE);
     { IMM(0x8FAF); IMM(0x8FB0); uint16_t ea = RD16IMM(0x8FAF);
     A = RD(ea); }
 L8FB1: /* 36785 AND 240          nearest multiple of 16; this might move him upwards a */
+    VERIFY(0x8FB1, 0xE6);
     FETCH(0x8FB1);
     IMM(0x8FB2); and8(mem[(uint16_t)0x8FB2]);
 L8FB3: /* 36787 LD (34255),A     little, but ensures that his actual pixel y-coordinate */
+    VERIFY(0x8FB3, 0x32);
     FETCH(0x8FB3);
     { IMM(0x8FB4); IMM(0x8FB5); uint16_t ea = RD16IMM(0x8FB4);
     WR(ea, A); }
 L8FB6: /* 36790 LD HL,34256      {Set bit 1 at #R34256: during this jump off the rope, */
+    VERIFY(0x8FB6, 0x21);
     FETCH(0x8FB6);
     IMM(0x8FB7); IMM(0x8FB8); HL = RD16IMM(0x8FB7);
 L8FB9: /* 36793 SET 1,(HL)       Willy will move in the direction he's facing} */
+    VERIFY(0x8FB9, 0xCB);
     FETCH(0x8FB9); FETCH(0x8FBA);
     { uint8_t v = RD(HL); IC(HL, 1); WR(HL, (uint8_t)(v | (1u << 1))); }
 L8FBB: /* 36795 RET               */
+    VERIFY(0x8FBB, 0xC9);
     FETCH(0x8FBB);
     POPPC(); goto dispatch;
 
 /* ---- MOVEWILLY3 ---- */
 L8FBC: /* 36796 LD A,(34256)     Pick up Willy's direction and movement flags from */
+    VERIFY(0x8FBC, 0x3A);
     FETCH(0x8FBC);
     { IMM(0x8FBD); IMM(0x8FBE); uint16_t ea = RD16IMM(0x8FBD);
     A = RD(ea); }
 L8FBF: /* 36799 AND 2            Is Willy moving left or right? */
+    VERIFY(0x8FBF, 0xE6);
     FETCH(0x8FBF);
     IMM(0x8FC0); and8(mem[(uint16_t)0x8FC0]);
 L8FC1: /* 36801 RET Z            Return if not */
+    VERIFY(0x8FC1, 0xC8);
     FETCH(0x8FC1);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L8FC2: /* 36802 LD A,(34262)     Pick up the rope status indicator from #R34262 */
+    VERIFY(0x8FC2, 0x3A);
     FETCH(0x8FC2);
     { IMM(0x8FC3); IMM(0x8FC4); uint16_t ea = RD16IMM(0x8FC3);
     A = RD(ea); }
 L8FC5: /* 36805 DEC A            {Is Willy on a rope? */
+    VERIFY(0x8FC5, 0x3D);
     FETCH(0x8FC5);
     A = dec8(A);
 L8FC6: /* 36806 BIT 7,A          } */
+    VERIFY(0x8FC6, 0xCB);
     FETCH(0x8FC6); FETCH(0x8FC7);
     bit(7, A);
 L8FC8: /* 36808 RET Z            Return if so (Willy's movement along a rope is handled */
+    VERIFY(0x8FC8, 0xC8);
     FETCH(0x8FC8);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L8FC9: /* 36809 LD A,(34256)     Pick up Willy's direction and movement flags from */
+    VERIFY(0x8FC9, 0x3A);
     FETCH(0x8FC9);
     { IMM(0x8FCA); IMM(0x8FCB); uint16_t ea = RD16IMM(0x8FCA);
     A = RD(ea); }
 L8FCC: /* 36812 AND 1            Is Willy facing right? */
+    VERIFY(0x8FCC, 0xE6);
     FETCH(0x8FCC);
     IMM(0x8FCD); and8(mem[(uint16_t)0x8FCD]);
 L8FCE: /* 36814 JP Z,36930       Jump if so */
+    VERIFY(0x8FCE, 0xCA);
     FETCH(0x8FCE);
     IMM(0x8FCF); IMM(0x8FD0);
     if ((F&FZ)) goto L9042;
 L8FD1: /* 36817 LD A,(34258)     Pick up Willy's animation frame from #R34258 */
+    VERIFY(0x8FD1, 0x3A);
     FETCH(0x8FD1);
     { IMM(0x8FD2); IMM(0x8FD3); uint16_t ea = RD16IMM(0x8FD2);
     A = RD(ea); }
 L8FD4: /* 36820 OR A             Is it 0? */
+    VERIFY(0x8FD4, 0xB7);
     FETCH(0x8FD4);
     or8(A);
 L8FD5: /* 36821 JR Z,36828       If so, jump to move Willy's sprite left across a cell */
+    VERIFY(0x8FD5, 0x28);
     FETCH(0x8FD5);
     IMM(0x8FD6);
     if ((F&FZ)) { JRTAKEN(0x8FD6); goto L8FDC; }
 L8FD7: /* 36823 DEC A            {Decrement Willy's animation frame at #R34258 */
+    VERIFY(0x8FD7, 0x3D);
     FETCH(0x8FD7);
     A = dec8(A);
 L8FD8: /* 36824 LD (34258),A     } */
+    VERIFY(0x8FD8, 0x32);
     FETCH(0x8FD8);
     { IMM(0x8FD9); IMM(0x8FDA); uint16_t ea = RD16IMM(0x8FD9);
     WR(ea, A); }
 L8FDB: /* 36827 RET               */
+    VERIFY(0x8FDB, 0xC9);
     FETCH(0x8FDB);
     POPPC(); goto dispatch;
 L8FDC: /* 36828 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x8FDC, 0x3A);
     FETCH(0x8FDC);
     { IMM(0x8FDD); IMM(0x8FDE); uint16_t ea = RD16IMM(0x8FDD);
     A = RD(ea); }
 L8FDF: /* 36831 LD BC,0          Prepare #REGbc for later addition */
+    VERIFY(0x8FDF, 0x01);
     FETCH(0x8FDF);
     IMM(0x8FE0); IMM(0x8FE1); BC = RD16IMM(0x8FE0);
 L8FE2: /* 36834 CP 0             Is Willy jumping? */
+    VERIFY(0x8FE2, 0xFE);
     FETCH(0x8FE2);
     IMM(0x8FE3); cp8(mem[(uint16_t)0x8FE3]);
 L8FE4: /* 36836 JR NZ,36874      Jump if so */
+    VERIFY(0x8FE4, 0x20);
     FETCH(0x8FE4);
     IMM(0x8FE5);
     if (!(F&FZ)) { JRTAKEN(0x8FE5); goto L900A; }
 L8FE6: /* 36838 LD HL,(34259)    Collect Willy's attribute buffer coordinates from */
+    VERIFY(0x8FE6, 0x2A);
     FETCH(0x8FE6);
     { IMM(0x8FE7); IMM(0x8FE8); uint16_t ea = RD16IMM(0x8FE7);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L8FE9: /* 36841 LD BC,0          Prepare #REGbc for later addition (again, redundantly) */
+    VERIFY(0x8FE9, 0x01);
     FETCH(0x8FE9);
     IMM(0x8FEA); IMM(0x8FEB); BC = RD16IMM(0x8FEA);
 L8FEC: /* 36844 LD A,(32986)     Pick up the direction byte of the ramp definition for */
+    VERIFY(0x8FEC, 0x3A);
     FETCH(0x8FEC);
     { IMM(0x8FED); IMM(0x8FEE); uint16_t ea = RD16IMM(0x8FED);
     A = RD(ea); }
 L8FEF: /* 36847 DEC A            {Now #REGa=#b31 if the ramp goes up to the left, or #b65 */
+    VERIFY(0x8FEF, 0x3D);
     FETCH(0x8FEF);
     A = dec8(A);
 L8FF0: /* 36848 OR 161           if it goes up to the right */
+    VERIFY(0x8FF0, 0xF6);
     FETCH(0x8FF0);
     IMM(0x8FF1); or8(mem[(uint16_t)0x8FF1]);
 L8FF2: /* 36850 XOR 224          } */
+    VERIFY(0x8FF2, 0xEE);
     FETCH(0x8FF2);
     IMM(0x8FF3); xor8(mem[(uint16_t)0x8FF3]);
 L8FF4: /* 36852 LD E,A           {Point #REGhl at the cell at (x-1,y+1) if the ramp goes */
+    VERIFY(0x8FF4, 0x5F);
     FETCH(0x8FF4);
     E = A;
 L8FF5: /* 36853 LD D,0           up to the left, or at the cell at (x+1,y+2) if the ramp */
+    VERIFY(0x8FF5, 0x16);
     FETCH(0x8FF5);
     IMM(0x8FF6); D = mem[(uint16_t)0x8FF6];
 L8FF7: /* 36855 ADD HL,DE        goes up to the right} */
+    VERIFY(0x8FF7, 0x19);
     FETCH(0x8FF7);
     IR(7);
     HL = add16(HL, DE);
 L8FF8: /* 36856 LD A,(32964)     Pick up the attribute byte of the ramp tile for the */
+    VERIFY(0x8FF8, 0x3A);
     FETCH(0x8FF8);
     { IMM(0x8FF9); IMM(0x8FFA); uint16_t ea = RD16IMM(0x8FF9);
     A = RD(ea); }
 L8FFB: /* 36859 CP (HL)          Is there a ramp tile in the cell pointed to by #REGhl? */
+    VERIFY(0x8FFB, 0xBE);
     FETCH(0x8FFB);
     cp8(RD(HL));
 L8FFC: /* 36860 JR NZ,36874      Jump if not */
+    VERIFY(0x8FFC, 0x20);
     FETCH(0x8FFC);
     IMM(0x8FFD);
     if (!(F&FZ)) { JRTAKEN(0x8FFD); goto L900A; }
 L8FFE: /* 36862 LD BC,32         Prepare #REGbc for later addition */
+    VERIFY(0x8FFE, 0x01);
     FETCH(0x8FFE);
     IMM(0x8FFF); IMM(0x9000); BC = RD16IMM(0x8FFF);
 L9001: /* 36865 LD A,(32986)     Pick up the direction byte of the ramp definition for */
+    VERIFY(0x9001, 0x3A);
     FETCH(0x9001);
     { IMM(0x9002); IMM(0x9003); uint16_t ea = RD16IMM(0x9002);
     A = RD(ea); }
 L9004: /* 36868 OR A             Does the ramp go up to the right? */
+    VERIFY(0x9004, 0xB7);
     FETCH(0x9004);
     or8(A);
 L9005: /* 36869 JR NZ,36874      Jump if so */
+    VERIFY(0x9005, 0x20);
     FETCH(0x9005);
     IMM(0x9006);
     if (!(F&FZ)) { JRTAKEN(0x9006); goto L900A; }
 L9007: /* 36871 LD BC,65504      #REGbc=-32 (the ramp goes up to the left) */
+    VERIFY(0x9007, 0x01);
     FETCH(0x9007);
     IMM(0x9008); IMM(0x9009); BC = RD16IMM(0x9008);
 L900A: /* 36874 LD HL,(34259)    Collect Willy's attribute buffer coordinates from */
+    VERIFY(0x900A, 0x2A);
     FETCH(0x900A);
     { IMM(0x900B); IMM(0x900C); uint16_t ea = RD16IMM(0x900B);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L900D: /* 36877 LD A,L           {Is Willy's screen x-coordinate 0 (on the far left)? */
+    VERIFY(0x900D, 0x7D);
     FETCH(0x900D);
     A = L;
 L900E: /* 36878 AND 31           } */
+    VERIFY(0x900E, 0xE6);
     FETCH(0x900E);
     IMM(0x900F); and8(mem[(uint16_t)0x900F]);
 L9010: /* 36880 JP Z,38026       If so, move Willy into the room to the left */
+    VERIFY(0x9010, 0xCA);
     FETCH(0x9010);
     IMM(0x9011); IMM(0x9012);
     if ((F&FZ)) goto L948A;
 L9013: /* 36883 ADD HL,BC        {Point #REGhl at the cell at (x-1,y+1), or at the cell */
+    VERIFY(0x9013, 0x09);
     FETCH(0x9013);
     IR(7);
     HL = add16(HL, BC);
 L9014: /* 36884 DEC HL           at (x-1,y) if Willy is on or about to step onto a ramp */
+    VERIFY(0x9014, 0x2B);
     FETCH(0x9014);
     IR(2);
     HL = (uint16_t)(HL - 1);
 L9015: /* 36885 LD DE,32         that goes up to the left, or at the cell at (x-1,y+2) if */
+    VERIFY(0x9015, 0x11);
     FETCH(0x9015);
     IMM(0x9016); IMM(0x9017); DE = RD16IMM(0x9016);
 L9018: /* 36888 ADD HL,DE        Willy is walking down a ramp} */
+    VERIFY(0x9018, 0x19);
     FETCH(0x9018);
     IR(7);
     HL = add16(HL, DE);
 L9019: /* 36889 LD A,(32946)     Pick up the attribute byte of the wall tile for the */
+    VERIFY(0x9019, 0x3A);
     FETCH(0x9019);
     { IMM(0x901A); IMM(0x901B); uint16_t ea = RD16IMM(0x901A);
     A = RD(ea); }
 L901C: /* 36892 CP (HL)          Is there a wall tile in the cell pointed to by #REGhl? */
+    VERIFY(0x901C, 0xBE);
     FETCH(0x901C);
     cp8(RD(HL));
 L901D: /* 36893 RET Z            Return if so without moving Willy (his path is blocked) */
+    VERIFY(0x901D, 0xC8);
     FETCH(0x901D);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L901E: /* 36894 LD A,(34255)     Pick up Willy's y-coordinate (Y) from #R34255 */
+    VERIFY(0x901E, 0x3A);
     FETCH(0x901E);
     { IMM(0x901F); IMM(0x9020); uint16_t ea = RD16IMM(0x901F);
     A = RD(ea); }
 L9021: /* 36897 SRA C            {Now #REGb=Y (if Willy is neither on nor about to step */
+    VERIFY(0x9021, 0xCB);
     FETCH(0x9021); FETCH(0x9022);
     C = sra(C);
 L9023: /* 36899 ADD A,C          onto a ramp), or Y+16 (if Willy is walking down a ramp), */
+    VERIFY(0x9023, 0x81);
     FETCH(0x9023);
     add8(C);
 L9024: /* 36900 LD B,A           or Y-16 (if Willy is on or about to step onto a ramp */
+    VERIFY(0x9024, 0x47);
     FETCH(0x9024);
     B = A;
 L9025: /* 36901 AND 15           Is Willy at a point in a jump (left) where his sprite */
+    VERIFY(0x9025, 0xE6);
     FETCH(0x9025);
     IMM(0x9026); and8(mem[(uint16_t)0x9026]);
 L9027: /* 36903 JR Z,36914       Jump if not (Willy's sprite is cell-aligned) */
+    VERIFY(0x9027, 0x28);
     FETCH(0x9027);
     IMM(0x9028);
     if ((F&FZ)) { JRTAKEN(0x9028); goto L9032; }
 L9029: /* 36905 LD A,(32946)     Pick up the attribute byte of the wall tile for the */
+    VERIFY(0x9029, 0x3A);
     FETCH(0x9029);
     { IMM(0x902A); IMM(0x902B); uint16_t ea = RD16IMM(0x902A);
     A = RD(ea); }
 L902C: /* 36908 ADD HL,DE        Point #REGhl at the cell at (x-1,y+2) */
+    VERIFY(0x902C, 0x19);
     FETCH(0x902C);
     IR(7);
     HL = add16(HL, DE);
 L902D: /* 36909 CP (HL)          Is there a wall tile there? */
+    VERIFY(0x902D, 0xBE);
     FETCH(0x902D);
     cp8(RD(HL));
 L902E: /* 36910 RET Z            Return if so without moving Willy (his path is blocked) */
+    VERIFY(0x902E, 0xC8);
     FETCH(0x902E);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L902F: /* 36911 OR A             {Point #REGhl at the cell at (x-1,y+1) */
+    VERIFY(0x902F, 0xB7);
     FETCH(0x902F);
     or8(A);
 L9030: /* 36912 SBC HL,DE        } */
+    VERIFY(0x9030, 0xED);
     FETCH(0x9030); FETCH(0x9031);
     IR(7);
     sbc16(DE);
 L9032: /* 36914 OR A             {Point #REGhl at the cell at (x-1,y), or at the cell at */
+    VERIFY(0x9032, 0xB7);
     FETCH(0x9032);
     or8(A);
 L9033: /* 36915 SBC HL,DE        (x-1,y-1) if Willy is on or about to step onto a ramp */
+    VERIFY(0x9033, 0xED);
     FETCH(0x9033); FETCH(0x9034);
     IR(7);
     sbc16(DE);
 L9035: /* 36917 LD (34259),HL    Save Willy's new attribute buffer coordinates (in */
+    VERIFY(0x9035, 0x22);
     FETCH(0x9035);
     { IMM(0x9036); IMM(0x9037); uint16_t ea = RD16IMM(0x9036);
     WR(ea, L); WR((uint16_t)(ea + 1), H); }
 L9038: /* 36920 LD A,B           {Save Willy's new y-coordinate at #R34255 */
+    VERIFY(0x9038, 0x78);
     FETCH(0x9038);
     A = B;
 L9039: /* 36921 LD (34255),A     } */
+    VERIFY(0x9039, 0x32);
     FETCH(0x9039);
     { IMM(0x903A); IMM(0x903B); uint16_t ea = RD16IMM(0x903A);
     WR(ea, A); }
 L903C: /* 36924 LD A,3           {Change Willy's animation frame at #R34258 from 0 to 3 */
+    VERIFY(0x903C, 0x3E);
     FETCH(0x903C);
     IMM(0x903D); A = mem[(uint16_t)0x903D];
 L903E: /* 36926 LD (34258),A     } */
+    VERIFY(0x903E, 0x32);
     FETCH(0x903E);
     { IMM(0x903F); IMM(0x9040); uint16_t ea = RD16IMM(0x903F);
     WR(ea, A); }
 L9041: /* 36929 RET               */
+    VERIFY(0x9041, 0xC9);
     FETCH(0x9041);
     POPPC(); goto dispatch;
 L9042: /* 36930 LD A,(34258)     Pick up Willy's animation frame from #R34258 */
+    VERIFY(0x9042, 0x3A);
     FETCH(0x9042);
     { IMM(0x9043); IMM(0x9044); uint16_t ea = RD16IMM(0x9043);
     A = RD(ea); }
 L9045: /* 36933 CP 3             Is it 3? */
+    VERIFY(0x9045, 0xFE);
     FETCH(0x9045);
     IMM(0x9046); cp8(mem[(uint16_t)0x9046]);
 L9047: /* 36935 JR Z,36942       If so, jump to move Willy's sprite right across a cell */
+    VERIFY(0x9047, 0x28);
     FETCH(0x9047);
     IMM(0x9048);
     if ((F&FZ)) { JRTAKEN(0x9048); goto L904E; }
 L9049: /* 36937 INC A            {Increment Willy's animation frame at #R34258 */
+    VERIFY(0x9049, 0x3C);
     FETCH(0x9049);
     A = inc8(A);
 L904A: /* 36938 LD (34258),A     } */
+    VERIFY(0x904A, 0x32);
     FETCH(0x904A);
     { IMM(0x904B); IMM(0x904C); uint16_t ea = RD16IMM(0x904B);
     WR(ea, A); }
 L904D: /* 36941 RET               */
+    VERIFY(0x904D, 0xC9);
     FETCH(0x904D);
     POPPC(); goto dispatch;
 L904E: /* 36942 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x904E, 0x3A);
     FETCH(0x904E);
     { IMM(0x904F); IMM(0x9050); uint16_t ea = RD16IMM(0x904F);
     A = RD(ea); }
 L9051: /* 36945 LD BC,0          Prepare #REGbc for later addition */
+    VERIFY(0x9051, 0x01);
     FETCH(0x9051);
     IMM(0x9052); IMM(0x9053); BC = RD16IMM(0x9052);
 L9054: /* 36948 OR A             Is Willy jumping? */
+    VERIFY(0x9054, 0xB7);
     FETCH(0x9054);
     or8(A);
 L9055: /* 36949 JR NZ,36984      Jump if so */
+    VERIFY(0x9055, 0x20);
     FETCH(0x9055);
     IMM(0x9056);
     if (!(F&FZ)) { JRTAKEN(0x9056); goto L9078; }
 L9057: /* 36951 LD HL,(34259)    Collect Willy's attribute buffer coordinates from */
+    VERIFY(0x9057, 0x2A);
     FETCH(0x9057);
     { IMM(0x9058); IMM(0x9059); uint16_t ea = RD16IMM(0x9058);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L905A: /* 36954 LD A,(32986)     Pick up the direction byte of the ramp definition for */
+    VERIFY(0x905A, 0x3A);
     FETCH(0x905A);
     { IMM(0x905B); IMM(0x905C); uint16_t ea = RD16IMM(0x905B);
     A = RD(ea); }
 L905D: /* 36957 DEC A            {Now #REGa=#b64 if the ramp goes up to the left, or #b34 */
+    VERIFY(0x905D, 0x3D);
     FETCH(0x905D);
     A = dec8(A);
 L905E: /* 36958 OR 157           if it goes up to the right */
+    VERIFY(0x905E, 0xF6);
     FETCH(0x905E);
     IMM(0x905F); or8(mem[(uint16_t)0x905F]);
 L9060: /* 36960 XOR 191          } */
+    VERIFY(0x9060, 0xEE);
     FETCH(0x9060);
     IMM(0x9061); xor8(mem[(uint16_t)0x9061]);
 L9062: /* 36962 LD E,A           {Point #REGhl at the cell at (x,y+2) if the ramp goes up */
+    VERIFY(0x9062, 0x5F);
     FETCH(0x9062);
     E = A;
 L9063: /* 36963 LD D,0           to the left, or at the cell at (x+2,y+1) if the ramp */
+    VERIFY(0x9063, 0x16);
     FETCH(0x9063);
     IMM(0x9064); D = mem[(uint16_t)0x9064];
 L9065: /* 36965 ADD HL,DE        goes up to the right} */
+    VERIFY(0x9065, 0x19);
     FETCH(0x9065);
     IR(7);
     HL = add16(HL, DE);
 L9066: /* 36966 LD A,(32964)     Pick up the attribute byte of the ramp tile for the */
+    VERIFY(0x9066, 0x3A);
     FETCH(0x9066);
     { IMM(0x9067); IMM(0x9068); uint16_t ea = RD16IMM(0x9067);
     A = RD(ea); }
 L9069: /* 36969 CP (HL)          Is there a ramp tile in the cell pointed to by #REGhl? */
+    VERIFY(0x9069, 0xBE);
     FETCH(0x9069);
     cp8(RD(HL));
 L906A: /* 36970 JR NZ,36984      Jump if not */
+    VERIFY(0x906A, 0x20);
     FETCH(0x906A);
     IMM(0x906B);
     if (!(F&FZ)) { JRTAKEN(0x906B); goto L9078; }
 L906C: /* 36972 LD BC,32         Prepare #REGbc for later addition */
+    VERIFY(0x906C, 0x01);
     FETCH(0x906C);
     IMM(0x906D); IMM(0x906E); BC = RD16IMM(0x906D);
 L906F: /* 36975 LD A,(32986)     Pick up the direction byte of the ramp definition for */
+    VERIFY(0x906F, 0x3A);
     FETCH(0x906F);
     { IMM(0x9070); IMM(0x9071); uint16_t ea = RD16IMM(0x9070);
     A = RD(ea); }
 L9072: /* 36978 OR A             Does the ramp go up to the left? */
+    VERIFY(0x9072, 0xB7);
     FETCH(0x9072);
     or8(A);
 L9073: /* 36979 JR Z,36984       Jump if so */
+    VERIFY(0x9073, 0x28);
     FETCH(0x9073);
     IMM(0x9074);
     if ((F&FZ)) { JRTAKEN(0x9074); goto L9078; }
 L9075: /* 36981 LD BC,65504      #REGbc=-32 (the ramp goes up to the right) */
+    VERIFY(0x9075, 0x01);
     FETCH(0x9075);
     IMM(0x9076); IMM(0x9077); BC = RD16IMM(0x9076);
 L9078: /* 36984 LD HL,(34259)    Collect Willy's attribute buffer coordinates from */
+    VERIFY(0x9078, 0x2A);
     FETCH(0x9078);
     { IMM(0x9079); IMM(0x907A); uint16_t ea = RD16IMM(0x9079);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L907B: /* 36987 ADD HL,BC        {Point #REGhl at the cell at (x+2,y), or at the cell at */
+    VERIFY(0x907B, 0x09);
     FETCH(0x907B);
     IR(7);
     HL = add16(HL, BC);
 L907C: /* 36988 INC HL           (x+2,y+1) if Willy is walking down a ramp, or at the */
+    VERIFY(0x907C, 0x23);
     FETCH(0x907C);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L907D: /* 36989 INC HL           cell at (x+2,y-1) if Willy is on or about to step onto a */
+    VERIFY(0x907D, 0x23);
     FETCH(0x907D);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L907E: /* 36990 LD A,L           {Is Willy's screen x-coordinate 30 (on the far right)? */
+    VERIFY(0x907E, 0x7D);
     FETCH(0x907E);
     A = L;
 L907F: /* 36991 AND 31           } */
+    VERIFY(0x907F, 0xE6);
     FETCH(0x907F);
     IMM(0x9080); and8(mem[(uint16_t)0x9080]);
 L9081: /* 36993 JP Z,38046       If so, move Willy into the room on the right */
+    VERIFY(0x9081, 0xCA);
     FETCH(0x9081);
     IMM(0x9082); IMM(0x9083);
     if ((F&FZ)) goto L949E;
 L9084: /* 36996 LD DE,32         Prepare #REGde for addition */
+    VERIFY(0x9084, 0x11);
     FETCH(0x9084);
     IMM(0x9085); IMM(0x9086); DE = RD16IMM(0x9085);
 L9087: /* 36999 LD A,(32946)     Pick up the attribute byte of the wall tile for the */
+    VERIFY(0x9087, 0x3A);
     FETCH(0x9087);
     { IMM(0x9088); IMM(0x9089); uint16_t ea = RD16IMM(0x9088);
     A = RD(ea); }
 L908A: /* 37002 ADD HL,DE        Point #REGhl at the cell at (x+2,y+1), or at the cell at */
+    VERIFY(0x908A, 0x19);
     FETCH(0x908A);
     IR(7);
     HL = add16(HL, DE);
 L908B: /* 37003 CP (HL)          Is there a wall tile in the cell pointed to by #REGhl? */
+    VERIFY(0x908B, 0xBE);
     FETCH(0x908B);
     cp8(RD(HL));
 L908C: /* 37004 RET Z            Return if so without moving Willy (his path is blocked) */
+    VERIFY(0x908C, 0xC8);
     FETCH(0x908C);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L908D: /* 37005 LD A,(34255)     Pick up Willy's y-coordinate (Y) from #R34255 */
+    VERIFY(0x908D, 0x3A);
     FETCH(0x908D);
     { IMM(0x908E); IMM(0x908F); uint16_t ea = RD16IMM(0x908E);
     A = RD(ea); }
 L9090: /* 37008 SRA C            {Now #REGb=Y (if Willy is neither on nor about to step */
+    VERIFY(0x9090, 0xCB);
     FETCH(0x9090); FETCH(0x9091);
     C = sra(C);
 L9092: /* 37010 ADD A,C          onto a ramp), or Y+16 (if Willy is walking down a ramp), */
+    VERIFY(0x9092, 0x81);
     FETCH(0x9092);
     add8(C);
 L9093: /* 37011 LD B,A           or Y-16 (if Willy is on or about to step onto a ramp */
+    VERIFY(0x9093, 0x47);
     FETCH(0x9093);
     B = A;
 L9094: /* 37012 AND 15           Is Willy at a point in a jump (right) where his sprite */
+    VERIFY(0x9094, 0xE6);
     FETCH(0x9094);
     IMM(0x9095); and8(mem[(uint16_t)0x9095]);
 L9096: /* 37014 JR Z,37025       Jump if not (Willy's sprite is cell-aligned) */
+    VERIFY(0x9096, 0x28);
     FETCH(0x9096);
     IMM(0x9097);
     if ((F&FZ)) { JRTAKEN(0x9097); goto L90A1; }
 L9098: /* 37016 LD A,(32946)     Pick up the attribute byte of the wall tile for the */
+    VERIFY(0x9098, 0x3A);
     FETCH(0x9098);
     { IMM(0x9099); IMM(0x909A); uint16_t ea = RD16IMM(0x9099);
     A = RD(ea); }
 L909B: /* 37019 ADD HL,DE        Point #REGhl at the cell at (x+2,y+2) */
+    VERIFY(0x909B, 0x19);
     FETCH(0x909B);
     IR(7);
     HL = add16(HL, DE);
 L909C: /* 37020 CP (HL)          Is there a wall tile there? */
+    VERIFY(0x909C, 0xBE);
     FETCH(0x909C);
     cp8(RD(HL));
 L909D: /* 37021 RET Z            Return if so without moving Willy (his path is blocked) */
+    VERIFY(0x909D, 0xC8);
     FETCH(0x909D);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L909E: /* 37022 OR A             {Point #REGhl at the cell at (x+2,y+1) */
+    VERIFY(0x909E, 0xB7);
     FETCH(0x909E);
     or8(A);
 L909F: /* 37023 SBC HL,DE        } */
+    VERIFY(0x909F, 0xED);
     FETCH(0x909F); FETCH(0x90A0);
     IR(7);
     sbc16(DE);
 L90A1: /* 37025 LD A,(32946)     Pick up the attribute byte of the wall tile for the */
+    VERIFY(0x90A1, 0x3A);
     FETCH(0x90A1);
     { IMM(0x90A2); IMM(0x90A3); uint16_t ea = RD16IMM(0x90A2);
     A = RD(ea); }
 L90A4: /* 37028 OR A             {Point #REGhl at the cell at (x+2,y), or at the cell at */
+    VERIFY(0x90A4, 0xB7);
     FETCH(0x90A4);
     or8(A);
 L90A5: /* 37029 SBC HL,DE        (x+2,y+1) if Willy is walking down a ramp, or at the */
+    VERIFY(0x90A5, 0xED);
     FETCH(0x90A5); FETCH(0x90A6);
     IR(7);
     sbc16(DE);
 L90A7: /* 37031 CP (HL)          Is there a wall tile in the cell pointed to by #REGhl? */
+    VERIFY(0x90A7, 0xBE);
     FETCH(0x90A7);
     cp8(RD(HL));
 L90A8: /* 37032 RET Z            Return if so without moving Willy (his path is blocked) */
+    VERIFY(0x90A8, 0xC8);
     FETCH(0x90A8);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L90A9: /* 37033 DEC HL           Point #REGhl at the cell at (x+1,y), or at the cell at */
+    VERIFY(0x90A9, 0x2B);
     FETCH(0x90A9);
     IR(2);
     HL = (uint16_t)(HL - 1);
 L90AA: /* 37034 LD (34259),HL    Save Willy's new attribute buffer coordinates (in */
+    VERIFY(0x90AA, 0x22);
     FETCH(0x90AA);
     { IMM(0x90AB); IMM(0x90AC); uint16_t ea = RD16IMM(0x90AB);
     WR(ea, L); WR((uint16_t)(ea + 1), H); }
 L90AD: /* 37037 XOR A            {Change Willy's animation frame at #R34258 from 3 to 0 */
+    VERIFY(0x90AD, 0xAF);
     FETCH(0x90AD);
     xor8(A);
 L90AE: /* 37038 LD (34258),A     } */
+    VERIFY(0x90AE, 0x32);
     FETCH(0x90AE);
     { IMM(0x90AF); IMM(0x90B0); uint16_t ea = RD16IMM(0x90AF);
     WR(ea, A); }
 L90B1: /* 37041 LD A,B           {Save Willy's new y-coordinate at #R34255 */
+    VERIFY(0x90B1, 0x78);
     FETCH(0x90B1);
     A = B;
 L90B2: /* 37042 LD (34255),A     } */
+    VERIFY(0x90B2, 0x32);
     FETCH(0x90B2);
     { IMM(0x90B3); IMM(0x90B4); uint16_t ea = RD16IMM(0x90B3);
     WR(ea, A); }
 L90B5: /* 37045 RET               */
+    VERIFY(0x90B5, 0xC9);
     FETCH(0x90B5);
     POPPC(); goto dispatch;
 
 /* ---- KILLWILLY ---- */
 L90B6: /* 37046 POP HL           Drop the return address from the stack */
+    VERIFY(0x90B6, 0xE1);
     FETCH(0x90B6);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L90B7: /* 37047 POP HL           Drop the return address from the stack */
+    VERIFY(0x90B7, 0xE1);
     FETCH(0x90B7);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L90B8: /* 37048 LD A,255         {Set the airborne status indicator at #R34257 to #b255 */
+    VERIFY(0x90B8, 0x3E);
     FETCH(0x90B8);
     IMM(0x90B9); A = mem[(uint16_t)0x90B9];
 L90BA: /* 37050 LD (34257),A     (meaning Willy has had a fatal accident)} */
+    VERIFY(0x90BA, 0x32);
     FETCH(0x90BA);
     { IMM(0x90BB); IMM(0x90BC); uint16_t ea = RD16IMM(0x90BB);
     WR(ea, A); }
 L90BD: /* 37053 JP 35317         Jump back into the main loop */
+    VERIFY(0x90BD, 0xC3);
     FETCH(0x90BD);
     IMM(0x90BE); IMM(0x90BF);
     goto L89F5;
 
 /* ---- MOVETHINGS ---- */
 L90C0: /* 37056 LD IX,33024      Point #REGix at the first byte of the first entity */
+    VERIFY(0x90C0, 0xDD);
     FETCH(0x90C0); FETCH(0x90C1);
     IMM(0x90C2); IMM(0x90C3); IX = RD16IMM(0x90C2);
 L90C4: /* 37060 LD A,(IX+0)      Pick up the first byte of the current entity's buffer */
+    VERIFY(0x90C4, 0xDD);
     FETCH(0x90C4); FETCH(0x90C5);
     IMM(0x90C6); IC(0x90C6, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x90C6]); A = RD(ea); }
 L90C7: /* 37063 CP 255           Have we already dealt with every entity? */
+    VERIFY(0x90C7, 0xFE);
     FETCH(0x90C7);
     IMM(0x90C8); cp8(mem[(uint16_t)0x90C8]);
 L90C9: /* 37065 RET Z            Return if so */
+    VERIFY(0x90C9, 0xC8);
     FETCH(0x90C9);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L90CA: /* 37066 AND 3            Keep only bits 0 and 1 (which determine the type of */
+    VERIFY(0x90CA, 0xE6);
     FETCH(0x90CA);
     IMM(0x90CB); and8(mem[(uint16_t)0x90CB]);
 L90CC: /* 37068 JP Z,37302       Jump to consider the next entity buffer if this one */
+    VERIFY(0x90CC, 0xCA);
     FETCH(0x90CC);
     IMM(0x90CD); IMM(0x90CE);
     if ((F&FZ)) goto L91B6;
 L90CF: /* 37071 CP 1             Is this a horizontal guardian? */
+    VERIFY(0x90CF, 0xFE);
     FETCH(0x90CF);
     IMM(0x90D0); cp8(mem[(uint16_t)0x90D0]);
 L90D1: /* 37073 JP Z,37171       Jump if so */
+    VERIFY(0x90D1, 0xCA);
     FETCH(0x90D1);
     IMM(0x90D2); IMM(0x90D3);
     if ((F&FZ)) goto L9133;
 L90D4: /* 37076 CP 2             Is this a vertical guardian? */
+    VERIFY(0x90D4, 0xFE);
     FETCH(0x90D4);
     IMM(0x90D5); cp8(mem[(uint16_t)0x90D5]);
 L90D6: /* 37078 JP Z,37247       Jump if so */
+    VERIFY(0x90D6, 0xCA);
     FETCH(0x90D6);
     IMM(0x90D7); IMM(0x90D8);
     if ((F&FZ)) goto L917F;
 L90D9: /* 37081 BIT 7,(IX+0)     Is the rope currently swinging right to left? */
+    VERIFY(0x90D9, 0xDD);
     FETCH(0x90D9); FETCH(0x90DA); IMM(0x90DB); IMM(0x90DC); IC(0x90DC, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x90DB]); uint8_t v = RD(ea);
     IC(ea, 1); bit(7, v); }
 L90DD: /* 37085 JR Z,37119       Jump if so */
+    VERIFY(0x90DD, 0x28);
     FETCH(0x90DD);
     IMM(0x90DE);
     if ((F&FZ)) { JRTAKEN(0x90DE); goto L90FF; }
 L90DF: /* 37087 LD A,(IX+1)      Pick up the animation frame index */
+    VERIFY(0x90DF, 0xDD);
     FETCH(0x90DF); FETCH(0x90E0);
     IMM(0x90E1); IC(0x90E1, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x90E1]); A = RD(ea); }
 L90E2: /* 37090 BIT 7,A          Is the rope currently swinging away from the centre? */
+    VERIFY(0x90E2, 0xCB);
     FETCH(0x90E2); FETCH(0x90E3);
     bit(7, A);
 L90E4: /* 37092 JR Z,37109       Jump if so */
+    VERIFY(0x90E4, 0x28);
     FETCH(0x90E4);
     IMM(0x90E5);
     if ((F&FZ)) { JRTAKEN(0x90E5); goto L90F5; }
 L90E6: /* 37094 SUB 2            Subtract 2 from the animation frame index in #REGa */
+    VERIFY(0x90E6, 0xD6);
     FETCH(0x90E6);
     IMM(0x90E7); sub8(mem[(uint16_t)0x90E7]);
 L90E8: /* 37096 CP 148           Is it still #b148 or greater? */
+    VERIFY(0x90E8, 0xFE);
     FETCH(0x90E8);
     IMM(0x90E9); cp8(mem[(uint16_t)0x90E9]);
 L90EA: /* 37098 JR NC,37149      If so, use it as the next animation frame index */
+    VERIFY(0x90EA, 0x30);
     FETCH(0x90EA);
     IMM(0x90EB);
     if (!(F&FC)) { JRTAKEN(0x90EB); goto L911D; }
 L90EC: /* 37100 SUB 2            Subtract 2 from the animation frame index again */
+    VERIFY(0x90EC, 0xD6);
     FETCH(0x90EC);
     IMM(0x90ED); sub8(mem[(uint16_t)0x90ED]);
 L90EE: /* 37102 CP 128           Is it #b128 now? */
+    VERIFY(0x90EE, 0xFE);
     FETCH(0x90EE);
     IMM(0x90EF); cp8(mem[(uint16_t)0x90EF]);
 L90F0: /* 37104 JR NZ,37149      If not, use it as the next animation frame index */
+    VERIFY(0x90F0, 0x20);
     FETCH(0x90F0);
     IMM(0x90F1);
     if (!(F&FZ)) { JRTAKEN(0x90F1); goto L911D; }
 L90F2: /* 37106 XOR A            The rope has reached the centre, so the next animation */
+    VERIFY(0x90F2, 0xAF);
     FETCH(0x90F2);
     xor8(A);
 L90F3: /* 37107 JR 37149         Jump to set it */
+    VERIFY(0x90F3, 0x18);
     FETCH(0x90F3);
     IMM(0x90F4); JRTAKEN(0x90F4);
     goto L911D;
 L90F5: /* 37109 ADD A,2          Add 2 to the animation frame index in #REGa */
+    VERIFY(0x90F5, 0xC6);
     FETCH(0x90F5);
     IMM(0x90F6); add8(mem[(uint16_t)0x90F6]);
 L90F7: /* 37111 CP 18            Is it now #b18 or greater? */
+    VERIFY(0x90F7, 0xFE);
     FETCH(0x90F7);
     IMM(0x90F8); cp8(mem[(uint16_t)0x90F8]);
 L90F9: /* 37113 JR NC,37149      If so, use it as the next animation frame index */
+    VERIFY(0x90F9, 0x30);
     FETCH(0x90F9);
     IMM(0x90FA);
     if (!(F&FC)) { JRTAKEN(0x90FA); goto L911D; }
 L90FB: /* 37115 ADD A,2          Add 2 to the animation frame index again */
+    VERIFY(0x90FB, 0xC6);
     FETCH(0x90FB);
     IMM(0x90FC); add8(mem[(uint16_t)0x90FC]);
 L90FD: /* 37117 JR 37149         Use this value as the next animation frame index */
+    VERIFY(0x90FD, 0x18);
     FETCH(0x90FD);
     IMM(0x90FE); JRTAKEN(0x90FE);
     goto L911D;
 L90FF: /* 37119 LD A,(IX+1)      Pick up the animation frame index */
+    VERIFY(0x90FF, 0xDD);
     FETCH(0x90FF); FETCH(0x9100);
     IMM(0x9101); IC(0x9101, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9101]); A = RD(ea); }
 L9102: /* 37122 BIT 7,A          Is the rope currently swinging away from the centre? */
+    VERIFY(0x9102, 0xCB);
     FETCH(0x9102); FETCH(0x9103);
     bit(7, A);
 L9104: /* 37124 JR NZ,37141      Jump if so */
+    VERIFY(0x9104, 0x20);
     FETCH(0x9104);
     IMM(0x9105);
     if (!(F&FZ)) { JRTAKEN(0x9105); goto L9115; }
 L9106: /* 37126 SUB 2            Subtract 2 from the animation frame index in #REGa */
+    VERIFY(0x9106, 0xD6);
     FETCH(0x9106);
     IMM(0x9107); sub8(mem[(uint16_t)0x9107]);
 L9108: /* 37128 CP 20            Is it still #b20 or greater? */
+    VERIFY(0x9108, 0xFE);
     FETCH(0x9108);
     IMM(0x9109); cp8(mem[(uint16_t)0x9109]);
 L910A: /* 37130 JR NC,37149      If so, use it as the next animation frame index */
+    VERIFY(0x910A, 0x30);
     FETCH(0x910A);
     IMM(0x910B);
     if (!(F&FC)) { JRTAKEN(0x910B); goto L911D; }
 L910C: /* 37132 SUB 2            Subtract 2 from the animation frame index again */
+    VERIFY(0x910C, 0xD6);
     FETCH(0x910C);
     IMM(0x910D); sub8(mem[(uint16_t)0x910D]);
 L910E: /* 37134 OR A             Is it 0 now? */
+    VERIFY(0x910E, 0xB7);
     FETCH(0x910E);
     or8(A);
 L910F: /* 37135 JR NZ,37149      If not, use it as the next animation frame index */
+    VERIFY(0x910F, 0x20);
     FETCH(0x910F);
     IMM(0x9110);
     if (!(F&FZ)) { JRTAKEN(0x9110); goto L911D; }
 L9111: /* 37137 LD A,128         The rope has reached the centre, so the next animation */
+    VERIFY(0x9111, 0x3E);
     FETCH(0x9111);
     IMM(0x9112); A = mem[(uint16_t)0x9112];
 L9113: /* 37139 JR 37149         Jump to set it */
+    VERIFY(0x9113, 0x18);
     FETCH(0x9113);
     IMM(0x9114); JRTAKEN(0x9114);
     goto L911D;
 L9115: /* 37141 ADD A,2          Add 2 to the animation frame index in #REGa */
+    VERIFY(0x9115, 0xC6);
     FETCH(0x9115);
     IMM(0x9116); add8(mem[(uint16_t)0x9116]);
 L9117: /* 37143 CP 146           Is it now #b146 or greater? */
+    VERIFY(0x9117, 0xFE);
     FETCH(0x9117);
     IMM(0x9118); cp8(mem[(uint16_t)0x9118]);
 L9119: /* 37145 JR NC,37149      If so, use it as the next animation frame index */
+    VERIFY(0x9119, 0x30);
     FETCH(0x9119);
     IMM(0x911A);
     if (!(F&FC)) { JRTAKEN(0x911A); goto L911D; }
 L911B: /* 37147 ADD A,2          Add 2 to the animation frame index again */
+    VERIFY(0x911B, 0xC6);
     FETCH(0x911B);
     IMM(0x911C); add8(mem[(uint16_t)0x911C]);
 L911D: /* 37149 LD (IX+1),A      Update the animation frame index */
+    VERIFY(0x911D, 0xDD);
     FETCH(0x911D); FETCH(0x911E);
     IMM(0x911F); IC(0x911F, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x911F]); WR(ea, A); }
 L9120: /* 37152 AND 127          Reset bit 7 */
+    VERIFY(0x9120, 0xE6);
     FETCH(0x9120);
     IMM(0x9121); and8(mem[(uint16_t)0x9121]);
 L9122: /* 37154 CP (IX+7)        Does #REGa match the eighth byte of the rope's buffer */
+    VERIFY(0x9122, 0xDD);
     FETCH(0x9122); FETCH(0x9123);
     IMM(0x9124); IC(0x9124, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9124]); cp8(RD(ea)); }
 L9125: /* 37157 JP NZ,37302      If not, jump to consider the next entity */
+    VERIFY(0x9125, 0xC2);
     FETCH(0x9125);
     IMM(0x9126); IMM(0x9127);
     if (!(F&FZ)) goto L91B6;
 L9128: /* 37160 LD A,(IX+0)      {Flip bit 7 of the first byte of the rope's buffer: the */
+    VERIFY(0x9128, 0xDD);
     FETCH(0x9128); FETCH(0x9129);
     IMM(0x912A); IC(0x912A, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x912A]); A = RD(ea); }
 L912B: /* 37163 XOR 128          rope has just changed direction and will now swing back */
+    VERIFY(0x912B, 0xEE);
     FETCH(0x912B);
     IMM(0x912C); xor8(mem[(uint16_t)0x912C]);
 L912D: /* 37165 LD (IX+0),A      towards the centre} */
+    VERIFY(0x912D, 0xDD);
     FETCH(0x912D); FETCH(0x912E);
     IMM(0x912F); IC(0x912F, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x912F]); WR(ea, A); }
 L9130: /* 37168 JP 37302         Jump to consider the next entity */
+    VERIFY(0x9130, 0xC3);
     FETCH(0x9130);
     IMM(0x9131); IMM(0x9132);
     goto L91B6;
 L9133: /* 37171 BIT 7,(IX+0)     Is the guardian currently moving left to right? */
+    VERIFY(0x9133, 0xDD);
     FETCH(0x9133); FETCH(0x9134); IMM(0x9135); IMM(0x9136); IC(0x9136, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9135]); uint8_t v = RD(ea);
     IC(ea, 1); bit(7, v); }
 L9137: /* 37175 JR NZ,37212      Jump if so */
+    VERIFY(0x9137, 0x20);
     FETCH(0x9137);
     IMM(0x9138);
     if (!(F&FZ)) { JRTAKEN(0x9138); goto L915C; }
 L9139: /* 37177 LD A,(IX+0)      {Update the guardian's animation frame (in bits 5 and 6 */
+    VERIFY(0x9139, 0xDD);
     FETCH(0x9139); FETCH(0x913A);
     IMM(0x913B); IC(0x913B, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x913B]); A = RD(ea); }
 L913C: /* 37180 SUB 32           of the first byte of its buffer) */
+    VERIFY(0x913C, 0xD6);
     FETCH(0x913C);
     IMM(0x913D); sub8(mem[(uint16_t)0x913D]);
 L913E: /* 37182 AND 127           */
+    VERIFY(0x913E, 0xE6);
     FETCH(0x913E);
     IMM(0x913F); and8(mem[(uint16_t)0x913F]);
 L9140: /* 37184 LD (IX+0),A      } */
+    VERIFY(0x9140, 0xDD);
     FETCH(0x9140); FETCH(0x9141);
     IMM(0x9142); IC(0x9142, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9142]); WR(ea, A); }
 L9143: /* 37187 CP 96            Is it time to update the x-coordinate of the guardian */
+    VERIFY(0x9143, 0xFE);
     FETCH(0x9143);
     IMM(0x9144); cp8(mem[(uint16_t)0x9144]);
 L9145: /* 37189 JR C,37302       If not, jump to consider the next entity */
+    VERIFY(0x9145, 0x38);
     FETCH(0x9145);
     IMM(0x9146);
     if ((F&FC)) { JRTAKEN(0x9146); goto L91B6; }
 L9147: /* 37191 LD A,(IX+2)      {Pick up the sprite's current screen x-coordinate (0-31) */
+    VERIFY(0x9147, 0xDD);
     FETCH(0x9147); FETCH(0x9148);
     IMM(0x9149); IC(0x9149, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9149]); A = RD(ea); }
 L914A: /* 37194 AND 31           } */
+    VERIFY(0x914A, 0xE6);
     FETCH(0x914A);
     IMM(0x914B); and8(mem[(uint16_t)0x914B]);
 L914C: /* 37196 CP (IX+6)        Has the guardian reached the leftmost point of its path? */
+    VERIFY(0x914C, 0xDD);
     FETCH(0x914C); FETCH(0x914D);
     IMM(0x914E); IC(0x914E, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x914E]); cp8(RD(ea)); }
 L914F: /* 37199 JR Z,37206       Jump if so */
+    VERIFY(0x914F, 0x28);
     FETCH(0x914F);
     IMM(0x9150);
     if ((F&FZ)) { JRTAKEN(0x9150); goto L9156; }
 L9151: /* 37201 DEC (IX+2)       Decrement the sprite's x-coordinate */
+    VERIFY(0x9151, 0xDD);
     FETCH(0x9151); FETCH(0x9152);
     IMM(0x9153); IC(0x9153, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9153]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, dec8(v)); }
 L9154: /* 37204 JR 37302         Jump to consider the next entity */
+    VERIFY(0x9154, 0x18);
     FETCH(0x9154);
     IMM(0x9155); JRTAKEN(0x9155);
     goto L91B6;
 L9156: /* 37206 LD (IX+0),129    The guardian will now start moving left to right */
+    VERIFY(0x9156, 0xDD);
     FETCH(0x9156); FETCH(0x9157);
     IMM(0x9158); IMM(0x9159); IC(0x9159, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9158]); WR(ea, mem[0x9159]); }
 L915A: /* 37210 JR 37302         Jump to consider the next entity */
+    VERIFY(0x915A, 0x18);
     FETCH(0x915A);
     IMM(0x915B); JRTAKEN(0x915B);
     goto L91B6;
 L915C: /* 37212 LD A,(IX+0)      {Update the guardian's animation frame (in bits 5 and 6 */
+    VERIFY(0x915C, 0xDD);
     FETCH(0x915C); FETCH(0x915D);
     IMM(0x915E); IC(0x915E, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x915E]); A = RD(ea); }
 L915F: /* 37215 ADD A,32         of the first byte of its buffer) */
+    VERIFY(0x915F, 0xC6);
     FETCH(0x915F);
     IMM(0x9160); add8(mem[(uint16_t)0x9160]);
 L9161: /* 37217 OR 128            */
+    VERIFY(0x9161, 0xF6);
     FETCH(0x9161);
     IMM(0x9162); or8(mem[(uint16_t)0x9162]);
 L9163: /* 37219 LD (IX+0),A      } */
+    VERIFY(0x9163, 0xDD);
     FETCH(0x9163); FETCH(0x9164);
     IMM(0x9165); IC(0x9165, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9165]); WR(ea, A); }
 L9166: /* 37222 CP 160           Is it time to update the x-coordinate of the guardian */
+    VERIFY(0x9166, 0xFE);
     FETCH(0x9166);
     IMM(0x9167); cp8(mem[(uint16_t)0x9167]);
 L9168: /* 37224 JR NC,37302      If not, jump to consider the next entity */
+    VERIFY(0x9168, 0x30);
     FETCH(0x9168);
     IMM(0x9169);
     if (!(F&FC)) { JRTAKEN(0x9169); goto L91B6; }
 L916A: /* 37226 LD A,(IX+2)      {Pick up the sprite's current screen x-coordinate (0-31) */
+    VERIFY(0x916A, 0xDD);
     FETCH(0x916A); FETCH(0x916B);
     IMM(0x916C); IC(0x916C, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x916C]); A = RD(ea); }
 L916D: /* 37229 AND 31           } */
+    VERIFY(0x916D, 0xE6);
     FETCH(0x916D);
     IMM(0x916E); and8(mem[(uint16_t)0x916E]);
 L916F: /* 37231 CP (IX+7)        Has the guardian reached the rightmost point of its */
+    VERIFY(0x916F, 0xDD);
     FETCH(0x916F); FETCH(0x9170);
     IMM(0x9171); IC(0x9171, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9171]); cp8(RD(ea)); }
 L9172: /* 37234 JR Z,37241       Jump if so */
+    VERIFY(0x9172, 0x28);
     FETCH(0x9172);
     IMM(0x9173);
     if ((F&FZ)) { JRTAKEN(0x9173); goto L9179; }
 L9174: /* 37236 INC (IX+2)       Increment the sprite's x-coordinate */
+    VERIFY(0x9174, 0xDD);
     FETCH(0x9174); FETCH(0x9175);
     IMM(0x9176); IC(0x9176, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9176]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L9177: /* 37239 JR 37302         Jump to consider the next entity */
+    VERIFY(0x9177, 0x18);
     FETCH(0x9177);
     IMM(0x9178); JRTAKEN(0x9178);
     goto L91B6;
 L9179: /* 37241 LD (IX+0),97     The guardian will now start moving right to left */
+    VERIFY(0x9179, 0xDD);
     FETCH(0x9179); FETCH(0x917A);
     IMM(0x917B); IMM(0x917C); IC(0x917C, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x917B]); WR(ea, mem[0x917C]); }
 L917D: /* 37245 JR 37302         Jump to consider the next entity */
+    VERIFY(0x917D, 0x18);
     FETCH(0x917D);
     IMM(0x917E); JRTAKEN(0x917E);
     goto L91B6;
 L917F: /* 37247 LD A,(IX+0)      {Flip bit 3 of the first byte of the guardian's buffer */
+    VERIFY(0x917F, 0xDD);
     FETCH(0x917F); FETCH(0x9180);
     IMM(0x9181); IC(0x9181, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9181]); A = RD(ea); }
 L9182: /* 37250 XOR 8            (if bit 4 is set, the guardian's animation frame is */
+    VERIFY(0x9182, 0xEE);
     FETCH(0x9182);
     IMM(0x9183); xor8(mem[(uint16_t)0x9183]);
 L9184: /* 37252 LD (IX+0),A      updated on every pass through this routine; otherwise, */
+    VERIFY(0x9184, 0xDD);
     FETCH(0x9184); FETCH(0x9185);
     IMM(0x9186); IC(0x9186, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9186]); WR(ea, A); }
 L9187: /* 37255 AND 24           Are bits 3 and 4 both reset now? */
+    VERIFY(0x9187, 0xE6);
     FETCH(0x9187);
     IMM(0x9188); and8(mem[(uint16_t)0x9188]);
 L9189: /* 37257 JR Z,37267       Jump if so */
+    VERIFY(0x9189, 0x28);
     FETCH(0x9189);
     IMM(0x918A);
     if ((F&FZ)) { JRTAKEN(0x918A); goto L9193; }
 L918B: /* 37259 LD A,(IX+0)      {Update the guardian's animation frame (in bits 5-7 of */
+    VERIFY(0x918B, 0xDD);
     FETCH(0x918B); FETCH(0x918C);
     IMM(0x918D); IC(0x918D, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x918D]); A = RD(ea); }
 L918E: /* 37262 ADD A,32         the first byte of its buffer) */
+    VERIFY(0x918E, 0xC6);
     FETCH(0x918E);
     IMM(0x918F); add8(mem[(uint16_t)0x918F]);
 L9190: /* 37264 LD (IX+0),A      } */
+    VERIFY(0x9190, 0xDD);
     FETCH(0x9190); FETCH(0x9191);
     IMM(0x9192); IC(0x9192, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9192]); WR(ea, A); }
 L9193: /* 37267 LD A,(IX+3)      {Update the guardian's y-coordinate */
+    VERIFY(0x9193, 0xDD);
     FETCH(0x9193); FETCH(0x9194);
     IMM(0x9195); IC(0x9195, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9195]); A = RD(ea); }
 L9196: /* 37270 ADD A,(IX+4)      */
+    VERIFY(0x9196, 0xDD);
     FETCH(0x9196); FETCH(0x9197);
     IMM(0x9198); IC(0x9198, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9198]); add8(RD(ea)); }
 L9199: /* 37273 LD (IX+3),A      } */
+    VERIFY(0x9199, 0xDD);
     FETCH(0x9199); FETCH(0x919A);
     IMM(0x919B); IC(0x919B, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x919B]); WR(ea, A); }
 L919C: /* 37276 CP (IX+7)        Has the guardian reached the lowest point of its path */
+    VERIFY(0x919C, 0xDD);
     FETCH(0x919C); FETCH(0x919D);
     IMM(0x919E); IC(0x919E, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x919E]); cp8(RD(ea)); }
 L919F: /* 37279 JR NC,37294      If so, jump to change its direction of movement */
+    VERIFY(0x919F, 0x30);
     FETCH(0x919F);
     IMM(0x91A0);
     if (!(F&FC)) { JRTAKEN(0x91A0); goto L91AE; }
 L91A1: /* 37281 CP (IX+6)        Compare the new y-coordinate with the minimum value (the */
+    VERIFY(0x91A1, 0xDD);
     FETCH(0x91A1); FETCH(0x91A2);
     IMM(0x91A3); IC(0x91A3, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91A3]); cp8(RD(ea)); }
 L91A4: /* 37284 JR Z,37288       If they match, jump to change the guardian's direction */
+    VERIFY(0x91A4, 0x28);
     FETCH(0x91A4);
     IMM(0x91A5);
     if ((F&FZ)) { JRTAKEN(0x91A5); goto L91A8; }
 L91A6: /* 37286 JR NC,37302      If the new y-coordinate is above the minimum value, jump */
+    VERIFY(0x91A6, 0x30);
     FETCH(0x91A6);
     IMM(0x91A7);
     if (!(F&FC)) { JRTAKEN(0x91A7); goto L91B6; }
 L91A8: /* 37288 LD A,(IX+6)      {Make sure that the guardian's y-coordinate is set to */
+    VERIFY(0x91A8, 0xDD);
     FETCH(0x91A8); FETCH(0x91A9);
     IMM(0x91AA); IC(0x91AA, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91AA]); A = RD(ea); }
 L91AB: /* 37291 LD (IX+3),A      its minimum value} */
+    VERIFY(0x91AB, 0xDD);
     FETCH(0x91AB); FETCH(0x91AC);
     IMM(0x91AD); IC(0x91AD, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91AD]); WR(ea, A); }
 L91AE: /* 37294 LD A,(IX+4)      {Negate the y-coordinate increment; this changes the */
+    VERIFY(0x91AE, 0xDD);
     FETCH(0x91AE); FETCH(0x91AF);
     IMM(0x91B0); IC(0x91B0, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91B0]); A = RD(ea); }
 L91B1: /* 37297 NEG              guardian's direction of movement */
+    VERIFY(0x91B1, 0xED);
     FETCH(0x91B1); FETCH(0x91B2);
     neg();
 L91B3: /* 37299 LD (IX+4),A      } */
+    VERIFY(0x91B3, 0xDD);
     FETCH(0x91B3); FETCH(0x91B4);
     IMM(0x91B5); IC(0x91B5, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91B5]); WR(ea, A); }
 L91B6: /* 37302 LD DE,8          {Point #REGix at the first byte of the next entity's */
+    VERIFY(0x91B6, 0x11);
     FETCH(0x91B6);
     IMM(0x91B7); IMM(0x91B8); DE = RD16IMM(0x91B7);
 L91B9: /* 37305 ADD IX,DE        buffer} */
+    VERIFY(0x91B9, 0xDD);
     FETCH(0x91B9); FETCH(0x91BA);
     IR(7); IX = add16(IX, DE);
 L91BB: /* 37307 JP 37060         Jump back to deal with it */
+    VERIFY(0x91BB, 0xC3);
     FETCH(0x91BB);
     IMM(0x91BC); IMM(0x91BD);
     goto L90C4;
 
 /* ---- DRAWTHINGS ---- */
 L91BE: /* 37310 LD IX,33024      Point #REGix at the first byte of the first entity */
+    VERIFY(0x91BE, 0xDD);
     FETCH(0x91BE); FETCH(0x91BF);
     IMM(0x91C0); IMM(0x91C1); IX = RD16IMM(0x91C0);
 L91C2: /* 37314 LD A,(IX+0)      Pick up the first byte of the current entity's buffer */
+    VERIFY(0x91C2, 0xDD);
     FETCH(0x91C2); FETCH(0x91C3);
     IMM(0x91C4); IC(0x91C4, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91C4]); A = RD(ea); }
 L91C5: /* 37317 CP 255           Have we already dealt with every entity? */
+    VERIFY(0x91C5, 0xFE);
     FETCH(0x91C5);
     IMM(0x91C6); cp8(mem[(uint16_t)0x91C6]);
 L91C7: /* 37319 RET Z            Return if so */
+    VERIFY(0x91C7, 0xC8);
     FETCH(0x91C7);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L91C8: /* 37320 AND 7            Keep only bits 0-2 (which determine the type of entity) */
+    VERIFY(0x91C8, 0xE6);
     FETCH(0x91C8);
     IMM(0x91C9); and8(mem[(uint16_t)0x91C9]);
 L91CA: /* 37322 JP Z,37811       Jump to consider the next entity buffer if this one is */
+    VERIFY(0x91CA, 0xCA);
     FETCH(0x91CA);
     IMM(0x91CB); IMM(0x91CC);
     if ((F&FZ)) goto L93B3;
 L91CD: /* 37325 CP 3             Is this a rope? */
+    VERIFY(0x91CD, 0xFE);
     FETCH(0x91CD);
     IMM(0x91CE); cp8(mem[(uint16_t)0x91CE]);
 L91CF: /* 37327 JP Z,37540       Jump if so */
+    VERIFY(0x91CF, 0xCA);
     FETCH(0x91CF);
     IMM(0x91D0); IMM(0x91D1);
     if ((F&FZ)) goto L92A4;
 L91D2: /* 37330 CP 4             Is this an arrow? */
+    VERIFY(0x91D2, 0xFE);
     FETCH(0x91D2);
     IMM(0x91D3); cp8(mem[(uint16_t)0x91D3]);
 L91D4: /* 37332 JR Z,37431       Jump if so */
+    VERIFY(0x91D4, 0x28);
     FETCH(0x91D4);
     IMM(0x91D5);
     if ((F&FZ)) { JRTAKEN(0x91D5); goto L9237; }
 L91D6: /* 37334 LD E,(IX+3)      {Point #REGde at the entry in the screen buffer address */
+    VERIFY(0x91D6, 0xDD);
     FETCH(0x91D6); FETCH(0x91D7);
     IMM(0x91D8); IC(0x91D8, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91D8]); E = RD(ea); }
 L91D9: /* 37337 LD D,130         lookup table at #R33280 that corresponds to the */
+    VERIFY(0x91D9, 0x16);
     FETCH(0x91D9);
     IMM(0x91DA); D = mem[(uint16_t)0x91DA];
 L91DB: /* 37339 LD A,(DE)        {Copy the LSB of the screen buffer address to #REGl */
+    VERIFY(0x91DB, 0x1A);
     FETCH(0x91DB);
     A = RD(DE);
 L91DC: /* 37340 LD L,A           } */
+    VERIFY(0x91DC, 0x6F);
     FETCH(0x91DC);
     L = A;
 L91DD: /* 37341 LD A,(IX+2)      {Pick up the guardian's x-coordinate from bits 0-4 of */
+    VERIFY(0x91DD, 0xDD);
     FETCH(0x91DD); FETCH(0x91DE);
     IMM(0x91DF); IC(0x91DF, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91DF]); A = RD(ea); }
 L91E0: /* 37344 AND 31           the third byte of its buffer} */
+    VERIFY(0x91E0, 0xE6);
     FETCH(0x91E0);
     IMM(0x91E1); and8(mem[(uint16_t)0x91E1]);
 L91E2: /* 37346 ADD A,L          {Adjust the LSB of the screen buffer address in #REGl */
+    VERIFY(0x91E2, 0x85);
     FETCH(0x91E2);
     add8(L);
 L91E3: /* 37347 LD L,A           for the guardian's x-coordinate} */
+    VERIFY(0x91E3, 0x6F);
     FETCH(0x91E3);
     L = A;
 L91E4: /* 37348 LD A,E           Copy the fourth byte of the guardian's buffer to #REGa */
+    VERIFY(0x91E4, 0x7B);
     FETCH(0x91E4);
     A = E;
 L91E5: /* 37349 RLCA             {#REGh=#b92 or #b93; now #REGhl holds the address of the */
+    VERIFY(0x91E5, 0x07);
     FETCH(0x91E5);
     rlca();
 L91E6: /* 37350 AND 1            guardian's current location in the attribute buffer at */
+    VERIFY(0x91E6, 0xE6);
     FETCH(0x91E6);
     IMM(0x91E7); and8(mem[(uint16_t)0x91E7]);
 L91E8: /* 37352 OR 92            #R23552 */
+    VERIFY(0x91E8, 0xF6);
     FETCH(0x91E8);
     IMM(0x91E9); or8(mem[(uint16_t)0x91E9]);
 L91EA: /* 37354 LD H,A           } */
+    VERIFY(0x91EA, 0x67);
     FETCH(0x91EA);
     H = A;
 L91EB: /* 37355 LD DE,31         Prepare #REGde for later addition */
+    VERIFY(0x91EB, 0x11);
     FETCH(0x91EB);
     IMM(0x91EC); IMM(0x91ED); DE = RD16IMM(0x91EC);
 L91EE: /* 37358 LD A,(IX+1)      Pick up the second byte of the guardian's buffer */
+    VERIFY(0x91EE, 0xDD);
     FETCH(0x91EE); FETCH(0x91EF);
     IMM(0x91F0); IC(0x91F0, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x91F0]); A = RD(ea); }
 L91F1: /* 37361 AND 15           Keep only bits 0-2 (INK colour) and 3 (BRIGHT value) */
+    VERIFY(0x91F1, 0xE6);
     FETCH(0x91F1);
     IMM(0x91F2); and8(mem[(uint16_t)0x91F2]);
 L91F3: /* 37363 ADD A,56         Push bit 3 up to bit 6 */
+    VERIFY(0x91F3, 0xC6);
     FETCH(0x91F3);
     IMM(0x91F4); add8(mem[(uint16_t)0x91F4]);
 L91F5: /* 37365 AND 71           Keep only bits 0-2 (INK colour) and 6 (BRIGHT value) */
+    VERIFY(0x91F5, 0xE6);
     FETCH(0x91F5);
     IMM(0x91F6); and8(mem[(uint16_t)0x91F6]);
 L91F7: /* 37367 LD C,A           Save this value in #REGc temporarily */
+    VERIFY(0x91F7, 0x4F);
     FETCH(0x91F7);
     C = A;
 L91F8: /* 37368 LD A,(HL)        Pick up the room attribute byte at the guardian's */
+    VERIFY(0x91F8, 0x7E);
     FETCH(0x91F8);
     A = RD(HL);
 L91F9: /* 37369 AND 56           Keep only bits 3-5 (PAPER colour) */
+    VERIFY(0x91F9, 0xE6);
     FETCH(0x91F9);
     IMM(0x91FA); and8(mem[(uint16_t)0x91FA]);
 L91FB: /* 37371 XOR C            Merge the INK colour and BRIGHT value from #REGc */
+    VERIFY(0x91FB, 0xA9);
     FETCH(0x91FB);
     xor8(C);
 L91FC: /* 37372 LD C,A           Copy this attribute value to #REGc */
+    VERIFY(0x91FC, 0x4F);
     FETCH(0x91FC);
     C = A;
 L91FD: /* 37373 LD (HL),C        {Set the attribute bytes in the buffer at #R23552 for */
+    VERIFY(0x91FD, 0x71);
     FETCH(0x91FD);
     WR(HL, C);
 L91FE: /* 37374 INC HL           the top two rows of cells occupied by the guardian's */
+    VERIFY(0x91FE, 0x23);
     FETCH(0x91FE);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L91FF: /* 37375 LD (HL),C        sprite */
+    VERIFY(0x91FF, 0x71);
     FETCH(0x91FF);
     WR(HL, C);
 L9200: /* 37376 ADD HL,DE         */
+    VERIFY(0x9200, 0x19);
     FETCH(0x9200);
     IR(7);
     HL = add16(HL, DE);
 L9201: /* 37377 LD (HL),C         */
+    VERIFY(0x9201, 0x71);
     FETCH(0x9201);
     WR(HL, C);
 L9202: /* 37378 INC HL            */
+    VERIFY(0x9202, 0x23);
     FETCH(0x9202);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L9203: /* 37379 LD (HL),C        } */
+    VERIFY(0x9203, 0x71);
     FETCH(0x9203);
     WR(HL, C);
 L9204: /* 37380 LD A,(IX+3)      Pick up the fourth byte of the guardian's buffer */
+    VERIFY(0x9204, 0xDD);
     FETCH(0x9204); FETCH(0x9205);
     IMM(0x9206); IC(0x9206, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9206]); A = RD(ea); }
 L9207: /* 37383 AND 14           Does the guardian's sprite occupy only two rows of cells */
+    VERIFY(0x9207, 0xE6);
     FETCH(0x9207);
     IMM(0x9208); and8(mem[(uint16_t)0x9208]);
 L9209: /* 37385 JR Z,37391       Jump if so */
+    VERIFY(0x9209, 0x28);
     FETCH(0x9209);
     IMM(0x920A);
     if ((F&FZ)) { JRTAKEN(0x920A); goto L920F; }
 L920B: /* 37387 ADD HL,DE        {Set the attribute bytes in the buffer at #R23552 for */
+    VERIFY(0x920B, 0x19);
     FETCH(0x920B);
     IR(7);
     HL = add16(HL, DE);
 L920C: /* 37388 LD (HL),C        the third row of cells occupied by the guardian's sprite */
+    VERIFY(0x920C, 0x71);
     FETCH(0x920C);
     WR(HL, C);
 L920D: /* 37389 INC HL            */
+    VERIFY(0x920D, 0x23);
     FETCH(0x920D);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L920E: /* 37390 LD (HL),C        } */
+    VERIFY(0x920E, 0x71);
     FETCH(0x920E);
     WR(HL, C);
 L920F: /* 37391 LD C,1           Prepare #REGc for the call to #R37974 later on */
+    VERIFY(0x920F, 0x0E);
     FETCH(0x920F);
     IMM(0x9210); C = mem[(uint16_t)0x9210];
 L9211: /* 37393 LD A,(IX+1)      Now bits 5-7 of #REGa hold the animation frame mask */
+    VERIFY(0x9211, 0xDD);
     FETCH(0x9211); FETCH(0x9212);
     IMM(0x9213); IC(0x9213, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9213]); A = RD(ea); }
 L9214: /* 37396 AND (IX+0)       '#S/AND/' on the current animation frame (bits 5-7) */
+    VERIFY(0x9214, 0xDD);
     FETCH(0x9214); FETCH(0x9215);
     IMM(0x9216); IC(0x9216, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9216]); and8(RD(ea)); }
 L9217: /* 37399 OR (IX+2)        '#S/OR/' on the base sprite index (bits 5-7) */
+    VERIFY(0x9217, 0xDD);
     FETCH(0x9217); FETCH(0x9218);
     IMM(0x9219); IC(0x9219, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9219]); or8(RD(ea)); }
 L921A: /* 37402 AND 224          Keep only bits 5-7 */
+    VERIFY(0x921A, 0xE6);
     FETCH(0x921A);
     IMM(0x921B); and8(mem[(uint16_t)0x921B]);
 L921C: /* 37404 LD E,A           {Point #REGde at the graphic data for the guardian's */
+    VERIFY(0x921C, 0x5F);
     FETCH(0x921C);
     E = A;
 L921D: /* 37405 LD D,(IX+5)      current animation frame (see #R43776)} */
+    VERIFY(0x921D, 0xDD);
     FETCH(0x921D); FETCH(0x921E);
     IMM(0x921F); IC(0x921F, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x921F]); D = RD(ea); }
 L9220: /* 37408 LD H,130         {Point #REGhl at the guardian's current location in the */
+    VERIFY(0x9220, 0x26);
     FETCH(0x9220);
     IMM(0x9221); H = mem[(uint16_t)0x9221];
 L9222: /* 37410 LD L,(IX+3)      screen buffer at #R24576 */
+    VERIFY(0x9222, 0xDD);
     FETCH(0x9222); FETCH(0x9223);
     IMM(0x9224); IC(0x9224, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9224]); L = RD(ea); }
 L9225: /* 37413 LD A,(IX+2)       */
+    VERIFY(0x9225, 0xDD);
     FETCH(0x9225); FETCH(0x9226);
     IMM(0x9227); IC(0x9227, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9227]); A = RD(ea); }
 L9228: /* 37416 AND 31            */
+    VERIFY(0x9228, 0xE6);
     FETCH(0x9228);
     IMM(0x9229); and8(mem[(uint16_t)0x9229]);
 L922A: /* 37418 OR (HL)           */
+    VERIFY(0x922A, 0xB6);
     FETCH(0x922A);
     or8(RD(HL));
 L922B: /* 37419 INC HL            */
+    VERIFY(0x922B, 0x23);
     FETCH(0x922B);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L922C: /* 37420 LD H,(HL)         */
+    VERIFY(0x922C, 0x66);
     FETCH(0x922C);
     H = RD(HL);
 L922D: /* 37421 LD L,A           } */
+    VERIFY(0x922D, 0x6F);
     FETCH(0x922D);
     L = A;
 L922E: /* 37422 CALL 37974       Draw the guardian */
+    VERIFY(0x922E, 0xCD);
     FETCH(0x922E);
     IMM(0x922F); IMM(0x9230); IC(0x9230, 1);
     PUSHW(0x9231); goto L9456;
 L9231: /* 37425 JP NZ,37047      Kill Willy if the guardian collided with him */
+    VERIFY(0x9231, 0xC2);
     FETCH(0x9231);
     IMM(0x9232); IMM(0x9233);
     if (!(F&FZ)) goto L90B7;
 L9234: /* 37428 JP 37811         Jump to consider the next entity */
+    VERIFY(0x9234, 0xC3);
     FETCH(0x9234);
     IMM(0x9235); IMM(0x9236);
     goto L93B3;
 L9237: /* 37431 BIT 7,(IX+0)     Is the arrow travelling left to right? */
+    VERIFY(0x9237, 0xDD);
     FETCH(0x9237); FETCH(0x9238); IMM(0x9239); IMM(0x923A); IC(0x923A, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9239]); uint8_t v = RD(ea);
     IC(ea, 1); bit(7, v); }
 L923B: /* 37435 JR NZ,37444      Jump if so */
+    VERIFY(0x923B, 0x20);
     FETCH(0x923B);
     IMM(0x923C);
     if (!(F&FZ)) { JRTAKEN(0x923C); goto L9244; }
 L923D: /* 37437 DEC (IX+4)       Decrement the arrow's x-coordinate */
+    VERIFY(0x923D, 0xDD);
     FETCH(0x923D); FETCH(0x923E);
     IMM(0x923F); IC(0x923F, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x923F]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, dec8(v)); }
 L9240: /* 37440 LD C,44          The sound effect for an arrow travelling right to left */
+    VERIFY(0x9240, 0x0E);
     FETCH(0x9240);
     IMM(0x9241); C = mem[(uint16_t)0x9241];
 L9242: /* 37442 JR 37449          */
+    VERIFY(0x9242, 0x18);
     FETCH(0x9242);
     IMM(0x9243); JRTAKEN(0x9243);
     goto L9249;
 L9244: /* 37444 INC (IX+4)       Increment the arrow's x-coordinate */
+    VERIFY(0x9244, 0xDD);
     FETCH(0x9244); FETCH(0x9245);
     IMM(0x9246); IC(0x9246, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9246]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L9247: /* 37447 LD C,244         The sound effect for an arrow travelling left to right */
+    VERIFY(0x9247, 0x0E);
     FETCH(0x9247);
     IMM(0x9248); C = mem[(uint16_t)0x9248];
 L9249: /* 37449 LD A,(IX+4)      Pick up the arrow's x-coordinate (0-255) */
+    VERIFY(0x9249, 0xDD);
     FETCH(0x9249); FETCH(0x924A);
     IMM(0x924B); IC(0x924B, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x924B]); A = RD(ea); }
 L924C: /* 37452 CP C             Is it time to make the arrow sound effect? */
+    VERIFY(0x924C, 0xB9);
     FETCH(0x924C);
     cp8(C);
 L924D: /* 37453 JR NZ,37474      Jump if not */
+    VERIFY(0x924D, 0x20);
     FETCH(0x924D);
     IMM(0x924E);
     if (!(F&FZ)) { JRTAKEN(0x924E); goto L9262; }
 L924F: /* 37455 LD BC,640        Prepare the delay counters (#REGb=#b2, #REGc=#b128) for */
+    VERIFY(0x924F, 0x01);
     FETCH(0x924F);
     IMM(0x9250); IMM(0x9251); BC = RD16IMM(0x9250);
 L9252: /* 37458 LD A,(32990)     Pick up the border colour for the current room from */
+    VERIFY(0x9252, 0x3A);
     FETCH(0x9252);
     { IMM(0x9253); IMM(0x9254); uint16_t ea = RD16IMM(0x9253);
     A = RD(ea); }
 L9255: /* 37461 OUT (254),A      {Produce the arrow sound effect */
+    VERIFY(0x9255, 0xD3);
     FETCH(0x9255);
     IMM(0x9256); OUTP((uint16_t)((mem[(uint16_t)0x9256]) | (A << 8)), A);
 L9257: /* 37463 XOR 24            */
+    VERIFY(0x9257, 0xEE);
     FETCH(0x9257);
     IMM(0x9258); xor8(mem[(uint16_t)0x9258]);
 L9259: /* 37465 DJNZ 37465        */
+    VERIFY(0x9259, 0x10);
     FETCH(0x9259);
     T(1); IMM(0x925A);
     if (--B) { JRTAKEN(0x925A); goto L9259; }
 L925B: /* 37467 LD B,C            */
+    VERIFY(0x925B, 0x41);
     FETCH(0x925B);
     B = C;
 L925C: /* 37468 DEC C             */
+    VERIFY(0x925C, 0x0D);
     FETCH(0x925C);
     C = dec8(C);
 L925D: /* 37469 JR NZ,37461      } */
+    VERIFY(0x925D, 0x20);
     FETCH(0x925D);
     IMM(0x925E);
     if (!(F&FZ)) { JRTAKEN(0x925E); goto L9255; }
 L925F: /* 37471 JP 37811         Jump to consider the next entity */
+    VERIFY(0x925F, 0xC3);
     FETCH(0x925F);
     IMM(0x9260); IMM(0x9261);
     goto L93B3;
 L9262: /* 37474 AND 224          Is the arrow's x-coordinate in the range 0-31 (i.e. */
+    VERIFY(0x9262, 0xE6);
     FETCH(0x9262);
     IMM(0x9263); and8(mem[(uint16_t)0x9263]);
 L9264: /* 37476 JP NZ,37811      If not, jump to consider the next entity */
+    VERIFY(0x9264, 0xC2);
     FETCH(0x9264);
     IMM(0x9265); IMM(0x9266);
     if (!(F&FZ)) goto L93B3;
 L9267: /* 37479 LD E,(IX+2)      {Point #REGde at the entry in the screen buffer address */
+    VERIFY(0x9267, 0xDD);
     FETCH(0x9267); FETCH(0x9268);
     IMM(0x9269); IC(0x9269, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9269]); E = RD(ea); }
 L926A: /* 37482 LD D,130         lookup table at #R33280 that corresponds to the arrow's */
+    VERIFY(0x926A, 0x16);
     FETCH(0x926A);
     IMM(0x926B); D = mem[(uint16_t)0x926B];
 L926C: /* 37484 LD A,(DE)        Pick up the LSB of the screen buffer address */
+    VERIFY(0x926C, 0x1A);
     FETCH(0x926C);
     A = RD(DE);
 L926D: /* 37485 ADD A,(IX+4)     Adjust it for the arrow's x-coordinate */
+    VERIFY(0x926D, 0xDD);
     FETCH(0x926D); FETCH(0x926E);
     IMM(0x926F); IC(0x926F, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x926F]); add8(RD(ea)); }
 L9270: /* 37488 LD L,A           {Point #REGhl at the arrow's current location in the */
+    VERIFY(0x9270, 0x6F);
     FETCH(0x9270);
     L = A;
 L9271: /* 37489 LD A,E           attribute buffer at #R23552 */
+    VERIFY(0x9271, 0x7B);
     FETCH(0x9271);
     A = E;
 L9272: /* 37490 AND 128           */
+    VERIFY(0x9272, 0xE6);
     FETCH(0x9272);
     IMM(0x9273); and8(mem[(uint16_t)0x9273]);
 L9274: /* 37492 RLCA              */
+    VERIFY(0x9274, 0x07);
     FETCH(0x9274);
     rlca();
 L9275: /* 37493 OR 92             */
+    VERIFY(0x9275, 0xF6);
     FETCH(0x9275);
     IMM(0x9276); or8(mem[(uint16_t)0x9276]);
 L9277: /* 37495 LD H,A           } */
+    VERIFY(0x9277, 0x67);
     FETCH(0x9277);
     H = A;
 L9278: /* 37496 LD (IX+5),0      Initialise the collision detection byte (#b0=off, */
+    VERIFY(0x9278, 0xDD);
     FETCH(0x9278); FETCH(0x9279);
     IMM(0x927A); IMM(0x927B); IC(0x927B, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x927A]); WR(ea, mem[0x927B]); }
 L927C: /* 37500 LD A,(HL)        Pick up the room attribute byte at the arrow's location */
+    VERIFY(0x927C, 0x7E);
     FETCH(0x927C);
     A = RD(HL);
 L927D: /* 37501 AND 7            Keep only bits 0-2 (INK colour) */
+    VERIFY(0x927D, 0xE6);
     FETCH(0x927D);
     IMM(0x927E); and8(mem[(uint16_t)0x927E]);
 L927F: /* 37503 CP 7             Is the INK white? */
+    VERIFY(0x927F, 0xFE);
     FETCH(0x927F);
     IMM(0x9280); cp8(mem[(uint16_t)0x9280]);
 L9281: /* 37505 JR NZ,37510      Jump if not */
+    VERIFY(0x9281, 0x20);
     FETCH(0x9281);
     IMM(0x9282);
     if (!(F&FZ)) { JRTAKEN(0x9282); goto L9286; }
 L9283: /* 37507 DEC (IX+5)       Activate collision detection */
+    VERIFY(0x9283, 0xDD);
     FETCH(0x9283); FETCH(0x9284);
     IMM(0x9285); IC(0x9285, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9285]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, dec8(v)); }
 L9286: /* 37510 LD A,(HL)        {Set the INK colour to white at the arrow's location */
+    VERIFY(0x9286, 0x7E);
     FETCH(0x9286);
     A = RD(HL);
 L9287: /* 37511 OR 7              */
+    VERIFY(0x9287, 0xF6);
     FETCH(0x9287);
     IMM(0x9288); or8(mem[(uint16_t)0x9288]);
 L9289: /* 37513 LD (HL),A        } */
+    VERIFY(0x9289, 0x77);
     FETCH(0x9289);
     WR(HL, A);
 L928A: /* 37514 INC DE           {Pick up the MSB of the screen buffer address for the */
+    VERIFY(0x928A, 0x13);
     FETCH(0x928A);
     IR(2);
     DE = (uint16_t)(DE + 1);
 L928B: /* 37515 LD A,(DE)        arrow's location} */
+    VERIFY(0x928B, 0x1A);
     FETCH(0x928B);
     A = RD(DE);
 L928C: /* 37516 LD H,A           {Point #REGhl at the top pixel row of the arrow's */
+    VERIFY(0x928C, 0x67);
     FETCH(0x928C);
     H = A;
 L928D: /* 37517 DEC H            location in the screen buffer at #R24576} */
+    VERIFY(0x928D, 0x25);
     FETCH(0x928D);
     H = dec8(H);
 L928E: /* 37518 LD A,(IX+6)      {Draw the top pixel row of the arrow */
+    VERIFY(0x928E, 0xDD);
     FETCH(0x928E); FETCH(0x928F);
     IMM(0x9290); IC(0x9290, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9290]); A = RD(ea); }
 L9291: /* 37521 LD (HL),A        } */
+    VERIFY(0x9291, 0x77);
     FETCH(0x9291);
     WR(HL, A);
 L9292: /* 37522 INC H            Point #REGhl at the middle pixel row of the arrow's */
+    VERIFY(0x9292, 0x24);
     FETCH(0x9292);
     H = inc8(H);
 L9293: /* 37523 LD A,(HL)        Pick up the graphic byte that's already here */
+    VERIFY(0x9293, 0x7E);
     FETCH(0x9293);
     A = RD(HL);
 L9294: /* 37524 AND (IX+5)       Has the arrow hit anything that has white INK (e.g. */
+    VERIFY(0x9294, 0xDD);
     FETCH(0x9294); FETCH(0x9295);
     IMM(0x9296); IC(0x9296, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9296]); and8(RD(ea)); }
 L9297: /* 37527 JP NZ,37047      If so, kill Willy */
+    VERIFY(0x9297, 0xC2);
     FETCH(0x9297);
     IMM(0x9298); IMM(0x9299);
     if (!(F&FZ)) goto L90B7;
 L929A: /* 37530 LD (HL),255      Draw the shaft of the arrow */
+    VERIFY(0x929A, 0x36);
     FETCH(0x929A);
     IMM(0x929B); WR(HL, mem[(uint16_t)0x929B]);
 L929C: /* 37532 INC H            Point #REGhl at the bottom pixel row of the arrow's */
+    VERIFY(0x929C, 0x24);
     FETCH(0x929C);
     H = inc8(H);
 L929D: /* 37533 LD A,(IX+6)      {Draw the bottom pixel row of the arrow */
+    VERIFY(0x929D, 0xDD);
     FETCH(0x929D); FETCH(0x929E);
     IMM(0x929F); IC(0x929F, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x929F]); A = RD(ea); }
 L92A0: /* 37536 LD (HL),A        } */
+    VERIFY(0x92A0, 0x77);
     FETCH(0x92A0);
     WR(HL, A);
 L92A1: /* 37537 JP 37811         Jump to consider the next entity */
+    VERIFY(0x92A1, 0xC3);
     FETCH(0x92A1);
     IMM(0x92A2); IMM(0x92A3);
     goto L93B3;
 L92A4: /* 37540 LD IY,33280      Point #REGiy at the first byte of the screen buffer */
+    VERIFY(0x92A4, 0xFD);
     FETCH(0x92A4); FETCH(0x92A5);
     IMM(0x92A6); IMM(0x92A7); IY = RD16IMM(0x92A6);
 L92A8: /* 37544 LD (IX+9),0      Initialise the second byte in the following entity */
+    VERIFY(0x92A8, 0xDD);
     FETCH(0x92A8); FETCH(0x92A9);
     IMM(0x92AA); IMM(0x92AB); IC(0x92AB, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92AA]); WR(ea, mem[0x92AB]); }
 L92AC: /* 37548 LD A,(IX+2)      {Initialise the fourth byte of the rope's buffer; this */
+    VERIFY(0x92AC, 0xDD);
     FETCH(0x92AC); FETCH(0x92AD);
     IMM(0x92AE); IC(0x92AE, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92AE]); A = RD(ea); }
 L92AF: /* 37551 LD (IX+3),A      holds the x-coordinate of the cell in which the segment */
+    VERIFY(0x92AF, 0xDD);
     FETCH(0x92AF); FETCH(0x92B0);
     IMM(0x92B1); IC(0x92B1, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92B1]); WR(ea, A); }
 L92B2: /* 37554 LD (IX+5),128    Initialise the sixth byte of the rope's buffer to #b128 */
+    VERIFY(0x92B2, 0xDD);
     FETCH(0x92B2); FETCH(0x92B3);
     IMM(0x92B4); IMM(0x92B5); IC(0x92B5, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92B4]); WR(ea, mem[0x92B5]); }
 L92B6: /* 37558 LD A,(IY+0)      {Point #REGhl at the location of the segment of rope */
+    VERIFY(0x92B6, 0xFD);
     FETCH(0x92B6); FETCH(0x92B7);
     IMM(0x92B8); IC(0x92B8, 5); { uint16_t ea = (uint16_t)(IY + (int8_t)mem[0x92B8]); A = RD(ea); }
 L92B9: /* 37561 ADD A,(IX+3)     under consideration in the screen buffer at #R24576 */
+    VERIFY(0x92B9, 0xDD);
     FETCH(0x92B9); FETCH(0x92BA);
     IMM(0x92BB); IC(0x92BB, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92BB]); add8(RD(ea)); }
 L92BC: /* 37564 LD L,A            */
+    VERIFY(0x92BC, 0x6F);
     FETCH(0x92BC);
     L = A;
 L92BD: /* 37565 LD H,(IY+1)      } */
+    VERIFY(0x92BD, 0xFD);
     FETCH(0x92BD); FETCH(0x92BE);
     IMM(0x92BF); IC(0x92BF, 5); { uint16_t ea = (uint16_t)(IY + (int8_t)mem[0x92BF]); H = RD(ea); }
 L92C0: /* 37568 LD A,(34262)     Pick up the rope status indicator at #R34262 */
+    VERIFY(0x92C0, 0x3A);
     FETCH(0x92C0);
     { IMM(0x92C1); IMM(0x92C2); uint16_t ea = RD16IMM(0x92C1);
     A = RD(ea); }
 L92C3: /* 37571 OR A             Is Willy on the rope, or has he recently jumped or */
+    VERIFY(0x92C3, 0xB7);
     FETCH(0x92C3);
     or8(A);
 L92C4: /* 37572 JR NZ,37590      Jump if so */
+    VERIFY(0x92C4, 0x20);
     FETCH(0x92C4);
     IMM(0x92C5);
     if (!(F&FZ)) { JRTAKEN(0x92C5); goto L92D6; }
 L92C6: /* 37574 LD A,(IX+5)      Pick up the drawing byte */
+    VERIFY(0x92C6, 0xDD);
     FETCH(0x92C6); FETCH(0x92C7);
     IMM(0x92C8); IC(0x92C8, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92C8]); A = RD(ea); }
 L92C9: /* 37577 AND (HL)         Is this segment of rope touching anything else that's */
+    VERIFY(0x92C9, 0xA6);
     FETCH(0x92C9);
     and8(RD(HL));
 L92CA: /* 37578 JR Z,37646       Jump if not */
+    VERIFY(0x92CA, 0x28);
     FETCH(0x92CA);
     IMM(0x92CB);
     if ((F&FZ)) { JRTAKEN(0x92CB); goto L930E; }
 L92CC: /* 37580 LD A,(IX+9)      {Copy the segment counter into the rope status indicator */
+    VERIFY(0x92CC, 0xDD);
     FETCH(0x92CC); FETCH(0x92CD);
     IMM(0x92CE); IC(0x92CE, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92CE]); A = RD(ea); }
 L92CF: /* 37583 LD (34262),A     at #R34262} */
+    VERIFY(0x92CF, 0x32);
     FETCH(0x92CF);
     { IMM(0x92D0); IMM(0x92D1); uint16_t ea = RD16IMM(0x92D0);
     WR(ea, A); }
 L92D2: /* 37586 SET 0,(IX+11)    Signal: Willy is on the rope */
+    VERIFY(0x92D2, 0xDD);
     FETCH(0x92D2); FETCH(0x92D3); IMM(0x92D4); IMM(0x92D5); IC(0x92D5, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92D4]); uint8_t v = RD(ea);
     IC(ea, 1); WR(ea, (uint8_t)(v | (1u << 0))); }
 L92D6: /* 37590 CP (IX+9)        Does the rope status indicator at #R34262 match the */
+    VERIFY(0x92D6, 0xDD);
     FETCH(0x92D6); FETCH(0x92D7);
     IMM(0x92D8); IC(0x92D8, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92D8]); cp8(RD(ea)); }
 L92D9: /* 37593 JR NZ,37646      Jump if not */
+    VERIFY(0x92D9, 0x20);
     FETCH(0x92D9);
     IMM(0x92DA);
     if (!(F&FZ)) { JRTAKEN(0x92DA); goto L930E; }
 L92DB: /* 37595 BIT 0,(IX+11)    Is Willy on the rope (and clinging to this particular */
+    VERIFY(0x92DB, 0xDD);
     FETCH(0x92DB); FETCH(0x92DC); IMM(0x92DD); IMM(0x92DE); IC(0x92DE, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92DD]); uint8_t v = RD(ea);
     IC(ea, 1); bit(0, v); }
 L92DF: /* 37599 JR Z,37646       Jump if not */
+    VERIFY(0x92DF, 0x28);
     FETCH(0x92DF);
     IMM(0x92E0);
     if ((F&FZ)) { JRTAKEN(0x92E0); goto L930E; }
 L92E1: /* 37601 LD B,(IX+3)      Copy the x-coordinate of the cell containing the segment */
+    VERIFY(0x92E1, 0xDD);
     FETCH(0x92E1); FETCH(0x92E2);
     IMM(0x92E3); IC(0x92E3, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92E3]); B = RD(ea); }
 L92E4: /* 37604 LD A,(IX+5)      Pick up the drawing byte in #REGa */
+    VERIFY(0x92E4, 0xDD);
     FETCH(0x92E4); FETCH(0x92E5);
     IMM(0x92E6); IC(0x92E6, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x92E6]); A = RD(ea); }
 L92E7: /* 37607 LD C,1           The value in #REGc will specify Willy's next animation */
+    VERIFY(0x92E7, 0x0E);
     FETCH(0x92E7);
     IMM(0x92E8); C = mem[(uint16_t)0x92E8];
 L92E9: /* 37609 CP 4             Is the set bit of the drawing byte in bit 0 or 1? */
+    VERIFY(0x92E9, 0xFE);
     FETCH(0x92E9);
     IMM(0x92EA); cp8(mem[(uint16_t)0x92EA]);
 L92EB: /* 37611 JR C,37628       Jump if so */
+    VERIFY(0x92EB, 0x38);
     FETCH(0x92EB);
     IMM(0x92EC);
     if ((F&FC)) { JRTAKEN(0x92EC); goto L92FC; }
 L92ED: /* 37613 LD C,0           Assume that Willy's next animation frame will be 0 */
+    VERIFY(0x92ED, 0x0E);
     FETCH(0x92ED);
     IMM(0x92EE); C = mem[(uint16_t)0x92EE];
 L92EF: /* 37615 CP 16            Is the set bit of the drawing byte in bit 2 or 3? */
+    VERIFY(0x92EF, 0xFE);
     FETCH(0x92EF);
     IMM(0x92F0); cp8(mem[(uint16_t)0x92F0]);
 L92F1: /* 37617 JR C,37628       Jump if so */
+    VERIFY(0x92F1, 0x38);
     FETCH(0x92F1);
     IMM(0x92F2);
     if ((F&FC)) { JRTAKEN(0x92F2); goto L92FC; }
 L92F3: /* 37619 DEC B            Decrement the x-coordinate */
+    VERIFY(0x92F3, 0x05);
     FETCH(0x92F3);
     B = dec8(B);
 L92F4: /* 37620 LD C,3           Assume that Willy's next animation frame will be 3 */
+    VERIFY(0x92F4, 0x0E);
     FETCH(0x92F4);
     IMM(0x92F5); C = mem[(uint16_t)0x92F5];
 L92F6: /* 37622 CP 64            Is the set bit of the drawing byte in bit 4 or 5? */
+    VERIFY(0x92F6, 0xFE);
     FETCH(0x92F6);
     IMM(0x92F7); cp8(mem[(uint16_t)0x92F7]);
 L92F8: /* 37624 JR C,37628       Jump if so */
+    VERIFY(0x92F8, 0x38);
     FETCH(0x92F8);
     IMM(0x92F9);
     if ((F&FC)) { JRTAKEN(0x92F9); goto L92FC; }
 L92FA: /* 37626 LD C,2           Willy's next animation frame will be 2 (the set bit of */
+    VERIFY(0x92FA, 0x0E);
     FETCH(0x92FA);
     IMM(0x92FB); C = mem[(uint16_t)0x92FB];
 L92FC: /* 37628 LD (34258),BC    Set Willy's animation frame at #R34258, and temporarily */
+    VERIFY(0x92FC, 0xED);
     FETCH(0x92FC); FETCH(0x92FD);
     { IMM(0x92FE); IMM(0x92FF); uint16_t ea = RD16IMM(0x92FE);
     WR(ea, (uint8_t)BC); WR((uint16_t)(ea + 1), (uint8_t)(BC >> 8)); }
 L9300: /* 37632 LD A,IYL         {Update Willy's y-coordinate at #R34255 to account for */
+    VERIFY(0x9300, 0xFD);
     FETCH(0x9300); FETCH(0x9301);
     A = IYL;
 L9302: /* 37634 SUB 16           his change of location as the rope moves */
+    VERIFY(0x9302, 0xD6);
     FETCH(0x9302);
     IMM(0x9303); sub8(mem[(uint16_t)0x9303]);
 L9304: /* 37636 LD (34255),A     } */
+    VERIFY(0x9304, 0x32);
     FETCH(0x9304);
     { IMM(0x9305); IMM(0x9306); uint16_t ea = RD16IMM(0x9305);
     WR(ea, A); }
 L9307: /* 37639 PUSH HL          Save #REGhl briefly */
+    VERIFY(0x9307, 0xE5);
     FETCH(0x9307);
     IR(1);
     PUSHW(HL);
 L9308: /* 37640 CALL 36508       Update Willy's attribute buffer address at #R34259 to */
+    VERIFY(0x9308, 0xCD);
     FETCH(0x9308);
     IMM(0x9309); IMM(0x930A); IC(0x930A, 1);
     PUSHW(0x930B); goto L8E9C;
 L930B: /* 37643 POP HL           Restore the screen buffer address of the segment of rope */
+    VERIFY(0x930B, 0xE1);
     FETCH(0x930B);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L930C: /* 37644 JR 37646         Make a redundant jump to the next instruction */
+    VERIFY(0x930C, 0x18);
     FETCH(0x930C);
     IMM(0x930D); JRTAKEN(0x930D);
     goto L930E;
 L930E: /* 37646 LD A,(IX+5)      {Draw a pixel of the rope to the screen buffer at */
+    VERIFY(0x930E, 0xDD);
     FETCH(0x930E); FETCH(0x930F);
     IMM(0x9310); IC(0x9310, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9310]); A = RD(ea); }
 L9311: /* 37649 OR (HL)          #R24576 */
+    VERIFY(0x9311, 0xB6);
     FETCH(0x9311);
     or8(RD(HL));
 L9312: /* 37650 LD (HL),A        } */
+    VERIFY(0x9312, 0x77);
     FETCH(0x9312);
     WR(HL, A);
 L9313: /* 37651 LD A,(IX+9)      {Point #REGhl at the relevant entry in the second half */
+    VERIFY(0x9313, 0xDD);
     FETCH(0x9313); FETCH(0x9314);
     IMM(0x9315); IC(0x9315, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9315]); A = RD(ea); }
 L9316: /* 37654 ADD A,(IX+1)     of the rope animation table at #R33536 */
+    VERIFY(0x9316, 0xDD);
     FETCH(0x9316); FETCH(0x9317);
     IMM(0x9318); IC(0x9318, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9318]); add8(RD(ea)); }
 L9319: /* 37657 LD L,A            */
+    VERIFY(0x9319, 0x6F);
     FETCH(0x9319);
     L = A;
 L931A: /* 37658 SET 7,L           */
+    VERIFY(0x931A, 0xCB);
     FETCH(0x931A); FETCH(0x931B);
     L = (uint8_t)(L | (1u << 7));
 L931C: /* 37660 LD H,131         } */
+    VERIFY(0x931C, 0x26);
     FETCH(0x931C);
     IMM(0x931D); H = mem[(uint16_t)0x931D];
 L931E: /* 37662 LD E,(HL)        {Add its value to #REGiy; now #REGiy points at the entry */
+    VERIFY(0x931E, 0x5E);
     FETCH(0x931E);
     E = RD(HL);
 L931F: /* 37663 LD D,0           in the screen buffer address lookup table at #R33280 */
+    VERIFY(0x931F, 0x16);
     FETCH(0x931F);
     IMM(0x9320); D = mem[(uint16_t)0x9320];
 L9321: /* 37665 ADD IY,DE        that corresponds to the next segment of rope to consider */
+    VERIFY(0x9321, 0xFD);
     FETCH(0x9321); FETCH(0x9322);
     IR(7); IY = add16(IY, DE);
 L9323: /* 37667 RES 7,L          Point #REGhl at the relevant entry in the first half of */
+    VERIFY(0x9323, 0xCB);
     FETCH(0x9323); FETCH(0x9324);
     L = (uint8_t)(L & ~(1u << 7));
 L9325: /* 37669 LD A,(HL)        Pick up its value */
+    VERIFY(0x9325, 0x7E);
     FETCH(0x9325);
     A = RD(HL);
 L9326: /* 37670 OR A             Is it zero? */
+    VERIFY(0x9326, 0xB7);
     FETCH(0x9326);
     or8(A);
 L9327: /* 37671 JR Z,37712       Jump if so */
+    VERIFY(0x9327, 0x28);
     FETCH(0x9327);
     IMM(0x9328);
     if ((F&FZ)) { JRTAKEN(0x9328); goto L9350; }
 L9329: /* 37673 LD B,A           Copy the rope animation table entry value to #REGb; this */
+    VERIFY(0x9329, 0x47);
     FETCH(0x9329);
     B = A;
 L932A: /* 37674 BIT 7,(IX+1)     Is the rope currently right of centre? */
+    VERIFY(0x932A, 0xDD);
     FETCH(0x932A); FETCH(0x932B); IMM(0x932C); IMM(0x932D); IC(0x932D, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x932C]); uint8_t v = RD(ea);
     IC(ea, 1); bit(7, v); }
 L932E: /* 37678 JR Z,37697       Jump if so */
+    VERIFY(0x932E, 0x28);
     FETCH(0x932E);
     IMM(0x932F);
     if ((F&FZ)) { JRTAKEN(0x932F); goto L9341; }
 L9330: /* 37680 RLC (IX+5)       Rotate the drawing byte left once */
+    VERIFY(0x9330, 0xDD);
     FETCH(0x9330); FETCH(0x9331); IMM(0x9332); IMM(0x9333); IC(0x9333, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9332]); uint8_t v = RD(ea);
     IC(ea, 1); WR(ea, rlc(v)); }
 L9334: /* 37684 BIT 0,(IX+5)     Did that push the set bit from bit 7 into bit 0? */
+    VERIFY(0x9334, 0xDD);
     FETCH(0x9334); FETCH(0x9335); IMM(0x9336); IMM(0x9337); IC(0x9337, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9336]); uint8_t v = RD(ea);
     IC(ea, 1); bit(0, v); }
 L9338: /* 37688 JR Z,37693       Jump if not */
+    VERIFY(0x9338, 0x28);
     FETCH(0x9338);
     IMM(0x9339);
     if ((F&FZ)) { JRTAKEN(0x9339); goto L933D; }
 L933A: /* 37690 DEC (IX+3)       Decrement the x-coordinate for the cell containing this */
+    VERIFY(0x933A, 0xDD);
     FETCH(0x933A); FETCH(0x933B);
     IMM(0x933C); IC(0x933C, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x933C]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, dec8(v)); }
 L933D: /* 37693 DJNZ 37680       Jump back until the drawing byte has been rotated as */
+    VERIFY(0x933D, 0x10);
     FETCH(0x933D);
     T(1); IMM(0x933E);
     if (--B) { JRTAKEN(0x933E); goto L9330; }
 L933F: /* 37695 JR 37712         Jump to consider the next segment of rope */
+    VERIFY(0x933F, 0x18);
     FETCH(0x933F);
     IMM(0x9340); JRTAKEN(0x9340);
     goto L9350;
 L9341: /* 37697 RRC (IX+5)       Rotate the drawing byte right once */
+    VERIFY(0x9341, 0xDD);
     FETCH(0x9341); FETCH(0x9342); IMM(0x9343); IMM(0x9344); IC(0x9344, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9343]); uint8_t v = RD(ea);
     IC(ea, 1); WR(ea, rrc(v)); }
 L9345: /* 37701 BIT 7,(IX+5)     Did that push the set bit from bit 0 into bit 7? */
+    VERIFY(0x9345, 0xDD);
     FETCH(0x9345); FETCH(0x9346); IMM(0x9347); IMM(0x9348); IC(0x9348, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9347]); uint8_t v = RD(ea);
     IC(ea, 1); bit(7, v); }
 L9349: /* 37705 JR Z,37710       Jump if not */
+    VERIFY(0x9349, 0x28);
     FETCH(0x9349);
     IMM(0x934A);
     if ((F&FZ)) { JRTAKEN(0x934A); goto L934E; }
 L934B: /* 37707 INC (IX+3)       Increment the x-coordinate for the cell containing this */
+    VERIFY(0x934B, 0xDD);
     FETCH(0x934B); FETCH(0x934C);
     IMM(0x934D); IC(0x934D, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x934D]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L934E: /* 37710 DJNZ 37697       Jump back until the drawing byte has been rotated as */
+    VERIFY(0x934E, 0x10);
     FETCH(0x934E);
     T(1); IMM(0x934F);
     if (--B) { JRTAKEN(0x934F); goto L9341; }
 L9350: /* 37712 LD A,(IX+9)      Pick up the segment counter */
+    VERIFY(0x9350, 0xDD);
     FETCH(0x9350); FETCH(0x9351);
     IMM(0x9352); IC(0x9352, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9352]); A = RD(ea); }
 L9353: /* 37715 CP (IX+4)        Have we drawn every segment of the rope yet? */
+    VERIFY(0x9353, 0xDD);
     FETCH(0x9353); FETCH(0x9354);
     IMM(0x9355); IC(0x9355, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9355]); cp8(RD(ea)); }
 L9356: /* 37718 JR Z,37726       Jump if so */
+    VERIFY(0x9356, 0x28);
     FETCH(0x9356);
     IMM(0x9357);
     if ((F&FZ)) { JRTAKEN(0x9357); goto L935E; }
 L9358: /* 37720 INC (IX+9)       Increment the segment counter */
+    VERIFY(0x9358, 0xDD);
     FETCH(0x9358); FETCH(0x9359);
     IMM(0x935A); IC(0x935A, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x935A]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L935B: /* 37723 JP 37558         Jump back to draw the next segment of rope */
+    VERIFY(0x935B, 0xC3);
     FETCH(0x935B);
     IMM(0x935C); IMM(0x935D);
     goto L92B6;
 L935E: /* 37726 LD A,(34262)     Pick up the rope status indicator at #R34262 */
+    VERIFY(0x935E, 0x3A);
     FETCH(0x935E);
     { IMM(0x935F); IMM(0x9360); uint16_t ea = RD16IMM(0x935F);
     A = RD(ea); }
 L9361: /* 37729 BIT 7,A          Has Willy recently jumped off the rope or dropped off */
+    VERIFY(0x9361, 0xCB);
     FETCH(0x9361); FETCH(0x9362);
     bit(7, A);
 L9363: /* 37731 JR Z,37743       Jump if not */
+    VERIFY(0x9363, 0x28);
     FETCH(0x9363);
     IMM(0x9364);
     if ((F&FZ)) { JRTAKEN(0x9364); goto L936F; }
 L9365: /* 37733 INC A            {Update the rope status indicator at #R34262 */
+    VERIFY(0x9365, 0x3C);
     FETCH(0x9365);
     A = inc8(A);
 L9366: /* 37734 LD (34262),A     } */
+    VERIFY(0x9366, 0x32);
     FETCH(0x9366);
     { IMM(0x9367); IMM(0x9368); uint16_t ea = RD16IMM(0x9367);
     WR(ea, A); }
 L9369: /* 37737 RES 0,(IX+11)    Signal: Willy is not on the rope */
+    VERIFY(0x9369, 0xDD);
     FETCH(0x9369); FETCH(0x936A); IMM(0x936B); IMM(0x936C); IC(0x936C, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x936B]); uint8_t v = RD(ea);
     IC(ea, 1); WR(ea, (uint8_t)(v & ~(1u << 0))); }
 L936D: /* 37741 JR 37811         Jump to consider the next entity */
+    VERIFY(0x936D, 0x18);
     FETCH(0x936D);
     IMM(0x936E); JRTAKEN(0x936E);
     goto L93B3;
 L936F: /* 37743 BIT 0,(IX+11)    Is Willy on the rope? */
+    VERIFY(0x936F, 0xDD);
     FETCH(0x936F); FETCH(0x9370); IMM(0x9371); IMM(0x9372); IC(0x9372, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9371]); uint8_t v = RD(ea);
     IC(ea, 1); bit(0, v); }
 L9373: /* 37747 JR Z,37811       If not, jump to consider the next entity */
+    VERIFY(0x9373, 0x28);
     FETCH(0x9373);
     IMM(0x9374);
     if ((F&FZ)) { JRTAKEN(0x9374); goto L93B3; }
 L9375: /* 37749 LD A,(34256)     Pick up Willy's direction and movement flags from */
+    VERIFY(0x9375, 0x3A);
     FETCH(0x9375);
     { IMM(0x9376); IMM(0x9377); uint16_t ea = RD16IMM(0x9376);
     A = RD(ea); }
 L9378: /* 37752 BIT 1,A          Is Willy moving up or down the rope? */
+    VERIFY(0x9378, 0xCB);
     FETCH(0x9378); FETCH(0x9379);
     bit(1, A);
 L937A: /* 37754 JR Z,37811       If not, jump to consider the next entity */
+    VERIFY(0x937A, 0x28);
     FETCH(0x937A);
     IMM(0x937B);
     if ((F&FZ)) { JRTAKEN(0x937B); goto L93B3; }
 L937C: /* 37756 RRCA             {#S/XOR/ Willy's direction bit (0=facing right, 1=facing */
+    VERIFY(0x937C, 0x0F);
     FETCH(0x937C);
     rrca();
 L937D: /* 37757 XOR (IX+0)       left) with the rope's direction bit (0=swinging right to */
+    VERIFY(0x937D, 0xDD);
     FETCH(0x937D); FETCH(0x937E);
     IMM(0x937F); IC(0x937F, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x937F]); xor8(RD(ea)); }
 L9380: /* 37760 RLCA             left, 1=swinging left to right)} */
+    VERIFY(0x9380, 0x07);
     FETCH(0x9380);
     rlca();
 L9381: /* 37761 RLCA             {Now #REGa=1 if Willy is facing the same direction as */
+    VERIFY(0x9381, 0x07);
     FETCH(0x9381);
     rlca();
 L9382: /* 37762 AND 2            the rope is swinging (he will move down the rope), or -1 */
+    VERIFY(0x9382, 0xE6);
     FETCH(0x9382);
     IMM(0x9383); and8(mem[(uint16_t)0x9383]);
 L9384: /* 37764 DEC A            otherwise (he will move up the rope)} */
+    VERIFY(0x9384, 0x3D);
     FETCH(0x9384);
     A = dec8(A);
 L9385: /* 37765 LD HL,34262      {Increment or decrement the rope status indicator at */
+    VERIFY(0x9385, 0x21);
     FETCH(0x9385);
     IMM(0x9386); IMM(0x9387); HL = RD16IMM(0x9386);
 L9388: /* 37768 ADD A,(HL)       #R34262 */
+    VERIFY(0x9388, 0x86);
     FETCH(0x9388);
     add8(RD(HL));
 L9389: /* 37769 LD (HL),A        } */
+    VERIFY(0x9389, 0x77);
     FETCH(0x9389);
     WR(HL, A);
 L938A: /* 37770 LD A,(33003)     {Pick up the number of the room above from #R33003 and */
+    VERIFY(0x938A, 0x3A);
     FETCH(0x938A);
     { IMM(0x938B); IMM(0x938C); uint16_t ea = RD16IMM(0x938B);
     A = RD(ea); }
 L938D: /* 37773 LD C,A           copy it to #REGc} */
+    VERIFY(0x938D, 0x4F);
     FETCH(0x938D);
     C = A;
 L938E: /* 37774 LD A,(33824)     Pick up the number of the current room from #R33824 */
+    VERIFY(0x938E, 0x3A);
     FETCH(0x938E);
     { IMM(0x938F); IMM(0x9390); uint16_t ea = RD16IMM(0x938F);
     A = RD(ea); }
 L9391: /* 37777 CP C             Is there a room above this one? */
+    VERIFY(0x9391, 0xB9);
     FETCH(0x9391);
     cp8(C);
 L9392: /* 37778 JR NZ,37787      Jump if so */
+    VERIFY(0x9392, 0x20);
     FETCH(0x9392);
     IMM(0x9393);
     if (!(F&FZ)) { JRTAKEN(0x9393); goto L939B; }
 L9394: /* 37780 LD A,(HL)        Pick up the rope status indicator at #R34262 */
+    VERIFY(0x9394, 0x7E);
     FETCH(0x9394);
     A = RD(HL);
 L9395: /* 37781 CP 12            Is it #b12 or greater? */
+    VERIFY(0x9395, 0xFE);
     FETCH(0x9395);
     IMM(0x9396); cp8(mem[(uint16_t)0x9396]);
 L9397: /* 37783 JR NC,37787      Jump if so */
+    VERIFY(0x9397, 0x30);
     FETCH(0x9397);
     IMM(0x9398);
     if (!(F&FC)) { JRTAKEN(0x9398); goto L939B; }
 L9399: /* 37785 LD (HL),12       Set the rope status indicator at #R34262 to #b12 (there */
+    VERIFY(0x9399, 0x36);
     FETCH(0x9399);
     IMM(0x939A); WR(HL, mem[(uint16_t)0x939A]);
 L939B: /* 37787 LD A,(HL)        Pick up the rope status indicator at #R34262 */
+    VERIFY(0x939B, 0x7E);
     FETCH(0x939B);
     A = RD(HL);
 L939C: /* 37788 CP (IX+4)        Compare it with the length of the rope */
+    VERIFY(0x939C, 0xDD);
     FETCH(0x939C); FETCH(0x939D);
     IMM(0x939E); IC(0x939E, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x939E]); cp8(RD(ea)); }
 L939F: /* 37791 JR C,37811       {If Willy is at or above the bottom of the rope, jump to */
+    VERIFY(0x939F, 0x38);
     FETCH(0x939F);
     IMM(0x93A0);
     if ((F&FC)) { JRTAKEN(0x93A0); goto L93B3; }
 L93A1: /* 37793 JR Z,37811       consider the next entity} */
+    VERIFY(0x93A1, 0x28);
     FETCH(0x93A1);
     IMM(0x93A2);
     if ((F&FZ)) { JRTAKEN(0x93A2); goto L93B3; }
 L93A3: /* 37795 LD (HL),240      Set the rope status indicator at #R34262 to #b240 (Willy */
+    VERIFY(0x93A3, 0x36);
     FETCH(0x93A3);
     IMM(0x93A4); WR(HL, mem[(uint16_t)0x93A4]);
 L93A5: /* 37797 LD A,(34255)     {Round down Willy's y-coordinate at #R34255 to the */
+    VERIFY(0x93A5, 0x3A);
     FETCH(0x93A5);
     { IMM(0x93A6); IMM(0x93A7); uint16_t ea = RD16IMM(0x93A6);
     A = RD(ea); }
 L93A8: /* 37800 AND 248          nearest multiple of 8; this might move him upwards a */
+    VERIFY(0x93A8, 0xE6);
     FETCH(0x93A8);
     IMM(0x93A9); and8(mem[(uint16_t)0x93A9]);
 L93AA: /* 37802 LD (34255),A     little, but ensures that his actual pixel y-coordinate */
+    VERIFY(0x93AA, 0x32);
     FETCH(0x93AA);
     { IMM(0x93AB); IMM(0x93AC); uint16_t ea = RD16IMM(0x93AB);
     WR(ea, A); }
 L93AD: /* 37805 XOR A            {Initialise the airborne status indicator at #R34257 */
+    VERIFY(0x93AD, 0xAF);
     FETCH(0x93AD);
     xor8(A);
 L93AE: /* 37806 LD (34257),A     } */
+    VERIFY(0x93AE, 0x32);
     FETCH(0x93AE);
     { IMM(0x93AF); IMM(0x93B0); uint16_t ea = RD16IMM(0x93AF);
     WR(ea, A); }
 L93B1: /* 37809 JR 37811         Make a redundant jump to the next instruction */
+    VERIFY(0x93B1, 0x18);
     FETCH(0x93B1);
     IMM(0x93B2); JRTAKEN(0x93B2);
     goto L93B3;
 L93B3: /* 37811 LD DE,8          {Point #REGix at the first byte of the next entity's */
+    VERIFY(0x93B3, 0x11);
     FETCH(0x93B3);
     IMM(0x93B4); IMM(0x93B5); DE = RD16IMM(0x93B4);
 L93B6: /* 37814 ADD IX,DE        buffer} */
+    VERIFY(0x93B6, 0xDD);
     FETCH(0x93B6); FETCH(0x93B7);
     IR(7); IX = add16(IX, DE);
 L93B8: /* 37816 JP 37314         Jump back to deal with it */
+    VERIFY(0x93B8, 0xC3);
     FETCH(0x93B8);
     IMM(0x93B9); IMM(0x93BA);
     goto L91C2;
 
 /* ---- DRAWITEMS ---- */
 L93D1: /* 37841 LD H,164         Page #R41984(#b164) holds the first byte of each entry */
+    VERIFY(0x93D1, 0x26);
     FETCH(0x93D1);
     IMM(0x93D2); H = mem[(uint16_t)0x93D2];
 L93D3: /* 37843 LD A,(41983)     Pick up the index of the first item from #R41983 */
+    VERIFY(0x93D3, 0x3A);
     FETCH(0x93D3);
     { IMM(0x93D4); IMM(0x93D5); uint16_t ea = RD16IMM(0x93D4);
     A = RD(ea); }
 L93D6: /* 37846 LD L,A           Point #REGhl at the first byte of the first entry in the */
+    VERIFY(0x93D6, 0x6F);
     FETCH(0x93D6);
     L = A;
 L93D7: /* 37847 LD C,(HL)        Pick up the first byte of the current entry in the item */
+    VERIFY(0x93D7, 0x4E);
     FETCH(0x93D7);
     C = RD(HL);
 L93D8: /* 37848 RES 7,C          Reset bit 7; bit 6 holds the collection flag, and bits */
+    VERIFY(0x93D8, 0xCB);
     FETCH(0x93D8); FETCH(0x93D9);
     C = (uint8_t)(C & ~(1u << 7));
 L93DA: /* 37850 LD A,(33824)     Pick up the number of the current room from #R33824 */
+    VERIFY(0x93DA, 0x3A);
     FETCH(0x93DA);
     { IMM(0x93DB); IMM(0x93DC); uint16_t ea = RD16IMM(0x93DB);
     A = RD(ea); }
 L93DD: /* 37853 OR 64            Set bit 6 (corresponding to the collection flag) */
+    VERIFY(0x93DD, 0xF6);
     FETCH(0x93DD);
     IMM(0x93DE); or8(mem[(uint16_t)0x93DE]);
 L93DF: /* 37855 CP C             Is the item in the current room and still uncollected? */
+    VERIFY(0x93DF, 0xB9);
     FETCH(0x93DF);
     cp8(C);
 L93E0: /* 37856 JR NZ,37970      If not, jump to consider the next entry in the item */
+    VERIFY(0x93E0, 0x20);
     FETCH(0x93E0);
     IMM(0x93E1);
     if (!(F&FZ)) { JRTAKEN(0x93E1); goto L9452; }
 L93E2: /* 37858 LD A,(HL)        Pick up the first byte of the current entry in the item */
+    VERIFY(0x93E2, 0x7E);
     FETCH(0x93E2);
     A = RD(HL);
 L93E3: /* 37859 RLCA             {Point #REGde at the location of the item in the */
+    VERIFY(0x93E3, 0x07);
     FETCH(0x93E3);
     rlca();
 L93E4: /* 37860 AND 1            attribute buffer at #R23552 */
+    VERIFY(0x93E4, 0xE6);
     FETCH(0x93E4);
     IMM(0x93E5); and8(mem[(uint16_t)0x93E5]);
 L93E6: /* 37862 ADD A,92          */
+    VERIFY(0x93E6, 0xC6);
     FETCH(0x93E6);
     IMM(0x93E7); add8(mem[(uint16_t)0x93E7]);
 L93E8: /* 37864 LD D,A            */
+    VERIFY(0x93E8, 0x57);
     FETCH(0x93E8);
     D = A;
 L93E9: /* 37865 INC H             */
+    VERIFY(0x93E9, 0x24);
     FETCH(0x93E9);
     H = inc8(H);
 L93EA: /* 37866 LD E,(HL)         */
+    VERIFY(0x93EA, 0x5E);
     FETCH(0x93EA);
     E = RD(HL);
 L93EB: /* 37867 DEC H            } */
+    VERIFY(0x93EB, 0x25);
     FETCH(0x93EB);
     H = dec8(H);
 L93EC: /* 37868 LD A,(DE)        Pick up the current attribute byte at the item's */
+    VERIFY(0x93EC, 0x1A);
     FETCH(0x93EC);
     A = RD(DE);
 L93ED: /* 37869 AND 7            {Is the INK white (which happens if Willy is touching */
+    VERIFY(0x93ED, 0xE6);
     FETCH(0x93ED);
     IMM(0x93EE); and8(mem[(uint16_t)0x93EE]);
 L93EF: /* 37871 CP 7             the item, or the room's background tile has white INK, */
+    VERIFY(0x93EF, 0xFE);
     FETCH(0x93EF);
     IMM(0x93F0); cp8(mem[(uint16_t)0x93F0]);
 L93F1: /* 37873 JR NZ,37936      Jump if not */
+    VERIFY(0x93F1, 0x20);
     FETCH(0x93F1);
     IMM(0x93F2);
     if (!(F&FZ)) { JRTAKEN(0x93F2); goto L9430; }
 L93F3: /* 37875 LD IX,34172      Point #REGix at the number of items collected at #R34172 */
+    VERIFY(0x93F3, 0xDD);
     FETCH(0x93F3); FETCH(0x93F4);
     IMM(0x93F5); IMM(0x93F6); IX = RD16IMM(0x93F5);
 L93F7: /* 37879 INC (IX+2)       Increment a digit of the number of items collected */
+    VERIFY(0x93F7, 0xDD);
     FETCH(0x93F7); FETCH(0x93F8);
     IMM(0x93F9); IC(0x93F9, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x93F9]); uint8_t v = RD(ea); IC(ea, 1); WR(ea, inc8(v)); }
 L93FA: /* 37882 LD A,(IX+2)      {Was the digit originally '9'? */
+    VERIFY(0x93FA, 0xDD);
     FETCH(0x93FA); FETCH(0x93FB);
     IMM(0x93FC); IC(0x93FC, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x93FC]); A = RD(ea); }
 L93FD: /* 37885 CP 58            } */
+    VERIFY(0x93FD, 0xFE);
     FETCH(0x93FD);
     IMM(0x93FE); cp8(mem[(uint16_t)0x93FE]);
 L93FF: /* 37887 JR NZ,37897      Jump if not */
+    VERIFY(0x93FF, 0x20);
     FETCH(0x93FF);
     IMM(0x9400);
     if (!(F&FZ)) { JRTAKEN(0x9400); goto L9409; }
 L9401: /* 37889 LD (IX+2),48     Set the digit to '0' */
+    VERIFY(0x9401, 0xDD);
     FETCH(0x9401); FETCH(0x9402);
     IMM(0x9403); IMM(0x9404); IC(0x9404, 2); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9403]); WR(ea, mem[0x9404]); }
 L9405: /* 37893 DEC IX           Move back to the digit on the left */
+    VERIFY(0x9405, 0xDD);
     FETCH(0x9405); FETCH(0x9406);
     IR(2); IX = (uint16_t)(IX - 1);
 L9407: /* 37895 JR 37879         Jump back to increment this digit */
+    VERIFY(0x9407, 0x18);
     FETCH(0x9407);
     IMM(0x9408); JRTAKEN(0x9408);
     goto L93F7;
 L9409: /* 37897 LD A,(32990)     Pick up the border colour for the current room from */
+    VERIFY(0x9409, 0x3A);
     FETCH(0x9409);
     { IMM(0x940A); IMM(0x940B); uint16_t ea = RD16IMM(0x940A);
     A = RD(ea); }
 L940C: /* 37900 LD C,128         {Produce the sound effect for collecting an item */
+    VERIFY(0x940C, 0x0E);
     FETCH(0x940C);
     IMM(0x940D); C = mem[(uint16_t)0x940D];
 L940E: /* 37902 OUT (254),A       */
+    VERIFY(0x940E, 0xD3);
     FETCH(0x940E);
     IMM(0x940F); OUTP((uint16_t)((mem[(uint16_t)0x940F]) | (A << 8)), A);
 L9410: /* 37904 XOR 24            */
+    VERIFY(0x9410, 0xEE);
     FETCH(0x9410);
     IMM(0x9411); xor8(mem[(uint16_t)0x9411]);
 L9412: /* 37906 LD E,A            */
+    VERIFY(0x9412, 0x5F);
     FETCH(0x9412);
     E = A;
 L9413: /* 37907 LD A,144          */
+    VERIFY(0x9413, 0x3E);
     FETCH(0x9413);
     IMM(0x9414); A = mem[(uint16_t)0x9414];
 L9415: /* 37909 SUB C             */
+    VERIFY(0x9415, 0x91);
     FETCH(0x9415);
     sub8(C);
 L9416: /* 37910 LD B,A            */
+    VERIFY(0x9416, 0x47);
     FETCH(0x9416);
     B = A;
 L9417: /* 37911 LD A,E            */
+    VERIFY(0x9417, 0x7B);
     FETCH(0x9417);
     A = E;
 L9418: /* 37912 DJNZ 37912        */
+    VERIFY(0x9418, 0x10);
     FETCH(0x9418);
     T(1); IMM(0x9419);
     if (--B) { JRTAKEN(0x9419); goto L9418; }
 L941A: /* 37914 DEC C             */
+    VERIFY(0x941A, 0x0D);
     FETCH(0x941A);
     C = dec8(C);
 L941B: /* 37915 DEC C             */
+    VERIFY(0x941B, 0x0D);
     FETCH(0x941B);
     C = dec8(C);
 L941C: /* 37916 JR NZ,37902      } */
+    VERIFY(0x941C, 0x20);
     FETCH(0x941C);
     IMM(0x941D);
     if (!(F&FZ)) { JRTAKEN(0x941D); goto L940E; }
 L941E: /* 37918 LD A,(34270)     {Update the counter of items remaining at #R34270, and */
+    VERIFY(0x941E, 0x3A);
     FETCH(0x941E);
     { IMM(0x941F); IMM(0x9420); uint16_t ea = RD16IMM(0x941F);
     A = RD(ea); }
 L9421: /* 37921 INC A            set the zero flag if there are no more items to collect */
+    VERIFY(0x9421, 0x3C);
     FETCH(0x9421);
     A = inc8(A);
 L9422: /* 37922 LD (34270),A     } */
+    VERIFY(0x9422, 0x32);
     FETCH(0x9422);
     { IMM(0x9423); IMM(0x9424); uint16_t ea = RD16IMM(0x9423);
     WR(ea, A); }
 L9425: /* 37925 JR NZ,37932      Jump if there are any items still to be collected */
+    VERIFY(0x9425, 0x20);
     FETCH(0x9425);
     IMM(0x9426);
     if (!(F&FZ)) { JRTAKEN(0x9426); goto L942C; }
 L9427: /* 37927 LD A,1           {Update the game mode indicator at #R34271 to 1 (all */
+    VERIFY(0x9427, 0x3E);
     FETCH(0x9427);
     IMM(0x9428); A = mem[(uint16_t)0x9428];
 L9429: /* 37929 LD (34271),A     items collected)} */
+    VERIFY(0x9429, 0x32);
     FETCH(0x9429);
     { IMM(0x942A); IMM(0x942B); uint16_t ea = RD16IMM(0x942A);
     WR(ea, A); }
 L942C: /* 37932 RES 6,(HL)       Reset bit 6 of the first byte of the entry in the item */
+    VERIFY(0x942C, 0xCB);
     FETCH(0x942C); FETCH(0x942D);
     { uint8_t v = RD(HL); IC(HL, 1); WR(HL, (uint8_t)(v & ~(1u << 6))); }
 L942E: /* 37934 JR 37970         Jump to consider the next entry in the item table */
+    VERIFY(0x942E, 0x18);
     FETCH(0x942E);
     IMM(0x942F); JRTAKEN(0x942F);
     goto L9452;
 L9430: /* 37936 LD A,(34251)     {Generate the INK colour for the item from the value of */
+    VERIFY(0x9430, 0x3A);
     FETCH(0x9430);
     { IMM(0x9431); IMM(0x9432); uint16_t ea = RD16IMM(0x9431);
     A = RD(ea); }
 L9433: /* 37939 ADD A,L          the minute counter at #R34251 (#b0-#b255) and the index */
+    VERIFY(0x9433, 0x85);
     FETCH(0x9433);
     add8(L);
 L9434: /* 37940 AND 3            of the item in the item table (#b173-#b255) */
+    VERIFY(0x9434, 0xE6);
     FETCH(0x9434);
     IMM(0x9435); and8(mem[(uint16_t)0x9435]);
 L9436: /* 37942 ADD A,3           */
+    VERIFY(0x9436, 0xC6);
     FETCH(0x9436);
     IMM(0x9437); add8(mem[(uint16_t)0x9437]);
 L9438: /* 37944 LD C,A           } */
+    VERIFY(0x9438, 0x4F);
     FETCH(0x9438);
     C = A;
 L9439: /* 37945 LD A,(DE)        {Change the INK colour of the item in the attribute */
+    VERIFY(0x9439, 0x1A);
     FETCH(0x9439);
     A = RD(DE);
 L943A: /* 37946 AND 248          buffer at #R23552 */
+    VERIFY(0x943A, 0xE6);
     FETCH(0x943A);
     IMM(0x943B); and8(mem[(uint16_t)0x943B]);
 L943C: /* 37948 OR C              */
+    VERIFY(0x943C, 0xB1);
     FETCH(0x943C);
     or8(C);
 L943D: /* 37949 LD (DE),A        } */
+    VERIFY(0x943D, 0x12);
     FETCH(0x943D);
     WR(DE, A);
 L943E: /* 37950 LD A,(HL)        {Point #REGde at the location of the item in the screen */
+    VERIFY(0x943E, 0x7E);
     FETCH(0x943E);
     A = RD(HL);
 L943F: /* 37951 RLCA             buffer at #R24576 */
+    VERIFY(0x943F, 0x07);
     FETCH(0x943F);
     rlca();
 L9440: /* 37952 RLCA              */
+    VERIFY(0x9440, 0x07);
     FETCH(0x9440);
     rlca();
 L9441: /* 37953 RLCA              */
+    VERIFY(0x9441, 0x07);
     FETCH(0x9441);
     rlca();
 L9442: /* 37954 RLCA              */
+    VERIFY(0x9442, 0x07);
     FETCH(0x9442);
     rlca();
 L9443: /* 37955 AND 8             */
+    VERIFY(0x9443, 0xE6);
     FETCH(0x9443);
     IMM(0x9444); and8(mem[(uint16_t)0x9444]);
 L9445: /* 37957 ADD A,96          */
+    VERIFY(0x9445, 0xC6);
     FETCH(0x9445);
     IMM(0x9446); add8(mem[(uint16_t)0x9446]);
 L9447: /* 37959 LD D,A           } */
+    VERIFY(0x9447, 0x57);
     FETCH(0x9447);
     D = A;
 L9448: /* 37960 PUSH HL          Save #REGhl briefly */
+    VERIFY(0x9448, 0xE5);
     FETCH(0x9448);
     IR(1);
     PUSHW(HL);
 L9449: /* 37961 LD HL,32993      Point #REGhl at the item graphic for the current room */
+    VERIFY(0x9449, 0x21);
     FETCH(0x9449);
     IMM(0x944A); IMM(0x944B); HL = RD16IMM(0x944A);
 L944C: /* 37964 LD B,8           There are eight pixel rows to copy */
+    VERIFY(0x944C, 0x06);
     FETCH(0x944C);
     IMM(0x944D); B = mem[(uint16_t)0x944D];
 L944E: /* 37966 CALL 38555       Draw the item to the screen buffer at #R24576 */
+    VERIFY(0x944E, 0xCD);
     FETCH(0x944E);
     IMM(0x944F); IMM(0x9450); IC(0x9450, 1);
     PUSHW(0x9451); goto L969B;
 L9451: /* 37969 POP HL           Restore the item table pointer to #REGhl */
+    VERIFY(0x9451, 0xE1);
     FETCH(0x9451);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L9452: /* 37970 INC L            Point #REGhl at the first byte of the next entry in the */
+    VERIFY(0x9452, 0x2C);
     FETCH(0x9452);
     L = inc8(L);
 L9453: /* 37971 JR NZ,37847      Jump back unless we've examined every entry */
+    VERIFY(0x9453, 0x20);
     FETCH(0x9453);
     IMM(0x9454);
     if (!(F&FZ)) { JRTAKEN(0x9454); goto L93D7; }
 L9455: /* 37973 RET               */
+    VERIFY(0x9455, 0xC9);
     FETCH(0x9455);
     POPPC(); goto dispatch;
 
 /* ---- DRAWSPRITE ---- */
 L9456: /* 37974 LD B,16          There are 16 rows of pixels to draw */
+    VERIFY(0x9456, 0x06);
     FETCH(0x9456);
     IMM(0x9457); B = mem[(uint16_t)0x9457];
 L9458: /* 37976 BIT 0,C          Set the zero flag if we're in overwrite mode */
+    VERIFY(0x9458, 0xCB);
     FETCH(0x9458); FETCH(0x9459);
     bit(0, C);
 L945A: /* 37978 LD A,(DE)        Pick up a sprite graphic byte */
+    VERIFY(0x945A, 0x1A);
     FETCH(0x945A);
     A = RD(DE);
 L945B: /* 37979 JR Z,37985       Jump if we're in overwrite mode */
+    VERIFY(0x945B, 0x28);
     FETCH(0x945B);
     IMM(0x945C);
     if ((F&FZ)) { JRTAKEN(0x945C); goto L9461; }
 L945D: /* 37981 AND (HL)         {Return with the zero flag reset if any of the set bits */
+    VERIFY(0x945D, 0xA6);
     FETCH(0x945D);
     and8(RD(HL));
 L945E: /* 37982 RET NZ           in the sprite graphic byte collide with a set bit in the */
+    VERIFY(0x945E, 0xC0);
     FETCH(0x945E);
     IR(1);
     if (!(F&FZ)) { POPPC(); goto dispatch; }
 L945F: /* 37983 LD A,(DE)        Pick up the sprite graphic byte again */
+    VERIFY(0x945F, 0x1A);
     FETCH(0x945F);
     A = RD(DE);
 L9460: /* 37984 OR (HL)          Blend it with the background byte */
+    VERIFY(0x9460, 0xB6);
     FETCH(0x9460);
     or8(RD(HL));
 L9461: /* 37985 LD (HL),A        Copy the graphic byte to its destination cell */
+    VERIFY(0x9461, 0x77);
     FETCH(0x9461);
     WR(HL, A);
 L9462: /* 37986 INC L            Move #REGhl along to the next cell on the right */
+    VERIFY(0x9462, 0x2C);
     FETCH(0x9462);
     L = inc8(L);
 L9463: /* 37987 INC DE           Point #REGde at the next sprite graphic byte */
+    VERIFY(0x9463, 0x13);
     FETCH(0x9463);
     IR(2);
     DE = (uint16_t)(DE + 1);
 L9464: /* 37988 BIT 0,C          Set the zero flag if we're in overwrite mode */
+    VERIFY(0x9464, 0xCB);
     FETCH(0x9464); FETCH(0x9465);
     bit(0, C);
 L9466: /* 37990 LD A,(DE)        Pick up a sprite graphic byte */
+    VERIFY(0x9466, 0x1A);
     FETCH(0x9466);
     A = RD(DE);
 L9467: /* 37991 JR Z,37997       Jump if we're in overwrite mode */
+    VERIFY(0x9467, 0x28);
     FETCH(0x9467);
     IMM(0x9468);
     if ((F&FZ)) { JRTAKEN(0x9468); goto L946D; }
 L9469: /* 37993 AND (HL)         {Return with the zero flag reset if any of the set bits */
+    VERIFY(0x9469, 0xA6);
     FETCH(0x9469);
     and8(RD(HL));
 L946A: /* 37994 RET NZ           in the sprite graphic byte collide with a set bit in the */
+    VERIFY(0x946A, 0xC0);
     FETCH(0x946A);
     IR(1);
     if (!(F&FZ)) { POPPC(); goto dispatch; }
 L946B: /* 37995 LD A,(DE)        Pick up the sprite graphic byte again */
+    VERIFY(0x946B, 0x1A);
     FETCH(0x946B);
     A = RD(DE);
 L946C: /* 37996 OR (HL)          Blend it with the background byte */
+    VERIFY(0x946C, 0xB6);
     FETCH(0x946C);
     or8(RD(HL));
 L946D: /* 37997 LD (HL),A        Copy the graphic byte to its destination cell */
+    VERIFY(0x946D, 0x77);
     FETCH(0x946D);
     WR(HL, A);
 L946E: /* 37998 DEC L            {Move #REGhl to the next pixel row down in the cell on */
+    VERIFY(0x946E, 0x2D);
     FETCH(0x946E);
     L = dec8(L);
 L946F: /* 37999 INC H            the left} */
+    VERIFY(0x946F, 0x24);
     FETCH(0x946F);
     H = inc8(H);
 L9470: /* 38000 INC DE           Point #REGde at the next sprite graphic byte */
+    VERIFY(0x9470, 0x13);
     FETCH(0x9470);
     IR(2);
     DE = (uint16_t)(DE + 1);
 L9471: /* 38001 LD A,H           {Have we drawn the bottom pixel row in this pair of */
+    VERIFY(0x9471, 0x7C);
     FETCH(0x9471);
     A = H;
 L9472: /* 38002 AND 7            cells yet?} */
+    VERIFY(0x9472, 0xE6);
     FETCH(0x9472);
     IMM(0x9473); and8(mem[(uint16_t)0x9473]);
 L9474: /* 38004 JR NZ,38022      Jump if not */
+    VERIFY(0x9474, 0x20);
     FETCH(0x9474);
     IMM(0x9475);
     if (!(F&FZ)) { JRTAKEN(0x9475); goto L9486; }
 L9476: /* 38006 LD A,H           {Otherwise move #REGhl to the top pixel row in the cell */
+    VERIFY(0x9476, 0x7C);
     FETCH(0x9476);
     A = H;
 L9477: /* 38007 SUB 8            below */
+    VERIFY(0x9477, 0xD6);
     FETCH(0x9477);
     IMM(0x9478); sub8(mem[(uint16_t)0x9478]);
 L9479: /* 38009 LD H,A            */
+    VERIFY(0x9479, 0x67);
     FETCH(0x9479);
     H = A;
 L947A: /* 38010 LD A,L            */
+    VERIFY(0x947A, 0x7D);
     FETCH(0x947A);
     A = L;
 L947B: /* 38011 ADD A,32          */
+    VERIFY(0x947B, 0xC6);
     FETCH(0x947B);
     IMM(0x947C); add8(mem[(uint16_t)0x947C]);
 L947D: /* 38013 LD L,A           } */
+    VERIFY(0x947D, 0x6F);
     FETCH(0x947D);
     L = A;
 L947E: /* 38014 AND 224          Was the last pair of cells at y-coordinate 7 or 15? */
+    VERIFY(0x947E, 0xE6);
     FETCH(0x947E);
     IMM(0x947F); and8(mem[(uint16_t)0x947F]);
 L9480: /* 38016 JR NZ,38022      Jump if not */
+    VERIFY(0x9480, 0x20);
     FETCH(0x9480);
     IMM(0x9481);
     if (!(F&FZ)) { JRTAKEN(0x9481); goto L9486; }
 L9482: /* 38018 LD A,H           {Otherwise adjust #REGhl to account for the movement */
+    VERIFY(0x9482, 0x7C);
     FETCH(0x9482);
     A = H;
 L9483: /* 38019 ADD A,8          from the top or middle third of the screen to the next */
+    VERIFY(0x9483, 0xC6);
     FETCH(0x9483);
     IMM(0x9484); add8(mem[(uint16_t)0x9484]);
 L9485: /* 38021 LD H,A           one down} */
+    VERIFY(0x9485, 0x67);
     FETCH(0x9485);
     H = A;
 L9486: /* 38022 DJNZ 37976       Jump back until all 16 rows of pixels have been drawn */
+    VERIFY(0x9486, 0x10);
     FETCH(0x9486);
     T(1); IMM(0x9487);
     if (--B) { JRTAKEN(0x9487); goto L9458; }
 L9488: /* 38024 XOR A            Set the zero flag (to indicate no collision) */
+    VERIFY(0x9488, 0xAF);
     FETCH(0x9488);
     xor8(A);
 L9489: /* 38025 RET               */
+    VERIFY(0x9489, 0xC9);
     FETCH(0x9489);
     POPPC(); goto dispatch;
 
 /* ---- ROOMLEFT ---- */
 L948A: /* 38026 LD A,(33001)     Pick up the number of the room to the left from #R33001 */
+    VERIFY(0x948A, 0x3A);
     FETCH(0x948A);
     { IMM(0x948B); IMM(0x948C); uint16_t ea = RD16IMM(0x948B);
     A = RD(ea); }
 L948D: /* 38029 LD (33824),A     Make it the current room number by copying it to #R33824 */
+    VERIFY(0x948D, 0x32);
     FETCH(0x948D);
     { IMM(0x948E); IMM(0x948F); uint16_t ea = RD16IMM(0x948E);
     WR(ea, A); }
 L9490: /* 38032 LD A,(34259)     {Adjust Willy's screen x-coordinate (at #R34259) to 30 */
+    VERIFY(0x9490, 0x3A);
     FETCH(0x9490);
     { IMM(0x9491); IMM(0x9492); uint16_t ea = RD16IMM(0x9491);
     A = RD(ea); }
 L9493: /* 38035 OR 31            (on the far right) */
+    VERIFY(0x9493, 0xF6);
     FETCH(0x9493);
     IMM(0x9494); or8(mem[(uint16_t)0x9494]);
 L9495: /* 38037 AND 254           */
+    VERIFY(0x9495, 0xE6);
     FETCH(0x9495);
     IMM(0x9496); and8(mem[(uint16_t)0x9496]);
 L9497: /* 38039 LD (34259),A     } */
+    VERIFY(0x9497, 0x32);
     FETCH(0x9497);
     { IMM(0x9498); IMM(0x9499); uint16_t ea = RD16IMM(0x9498);
     WR(ea, A); }
 L949A: /* 38042 POP HL           Drop the return address (#R35281, in the main loop) from */
+    VERIFY(0x949A, 0xE1);
     FETCH(0x949A);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L949B: /* 38043 JP 35090         Draw the room and re-enter the main loop */
+    VERIFY(0x949B, 0xC3);
     FETCH(0x949B);
     IMM(0x949C); IMM(0x949D);
     goto L8912;
 
 /* ---- ROOMRIGHT ---- */
 L949E: /* 38046 LD A,(33002)     Pick up the number of the room to the right from #R33002 */
+    VERIFY(0x949E, 0x3A);
     FETCH(0x949E);
     { IMM(0x949F); IMM(0x94A0); uint16_t ea = RD16IMM(0x949F);
     A = RD(ea); }
 L94A1: /* 38049 LD (33824),A     Make it the current room number by copying it to #R33824 */
+    VERIFY(0x94A1, 0x32);
     FETCH(0x94A1);
     { IMM(0x94A2); IMM(0x94A3); uint16_t ea = RD16IMM(0x94A2);
     WR(ea, A); }
 L94A4: /* 38052 LD A,(34259)     {Adjust Willy's screen x-coordinate (at #R34259) to 0 */
+    VERIFY(0x94A4, 0x3A);
     FETCH(0x94A4);
     { IMM(0x94A5); IMM(0x94A6); uint16_t ea = RD16IMM(0x94A5);
     A = RD(ea); }
 L94A7: /* 38055 AND 224          (on the far left) */
+    VERIFY(0x94A7, 0xE6);
     FETCH(0x94A7);
     IMM(0x94A8); and8(mem[(uint16_t)0x94A8]);
 L94A9: /* 38057 LD (34259),A     } */
+    VERIFY(0x94A9, 0x32);
     FETCH(0x94A9);
     { IMM(0x94AA); IMM(0x94AB); uint16_t ea = RD16IMM(0x94AA);
     WR(ea, A); }
 L94AC: /* 38060 POP HL           Drop the return address (#R35281, in the main loop) from */
+    VERIFY(0x94AC, 0xE1);
     FETCH(0x94AC);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L94AD: /* 38061 JP 35090         Draw the room and re-enter the main loop */
+    VERIFY(0x94AD, 0xC3);
     FETCH(0x94AD);
     IMM(0x94AE); IMM(0x94AF);
     goto L8912;
 
 /* ---- ROOMABOVE ---- */
 L94B0: /* 38064 LD A,(33003)     Pick up the number of the room above from #R33003 */
+    VERIFY(0x94B0, 0x3A);
     FETCH(0x94B0);
     { IMM(0x94B1); IMM(0x94B2); uint16_t ea = RD16IMM(0x94B1);
     A = RD(ea); }
 L94B3: /* 38067 LD (33824),A     Make it the current room number by copying it to #R33824 */
+    VERIFY(0x94B3, 0x32);
     FETCH(0x94B3);
     { IMM(0x94B4); IMM(0x94B5); uint16_t ea = RD16IMM(0x94B4);
     WR(ea, A); }
 L94B6: /* 38070 LD A,(34259)     {Willy should now appear on the bottom floor of the */
+    VERIFY(0x94B6, 0x3A);
     FETCH(0x94B6);
     { IMM(0x94B7); IMM(0x94B8); uint16_t ea = RD16IMM(0x94B7);
     A = RD(ea); }
 L94B9: /* 38073 AND 31           room, so adjust his attribute buffer coordinates (at */
+    VERIFY(0x94B9, 0xE6);
     FETCH(0x94B9);
     IMM(0x94BA); and8(mem[(uint16_t)0x94BA]);
 L94BB: /* 38075 ADD A,160        #R34259) accordingly */
+    VERIFY(0x94BB, 0xC6);
     FETCH(0x94BB);
     IMM(0x94BC); add8(mem[(uint16_t)0x94BC]);
 L94BD: /* 38077 LD (34259),A      */
+    VERIFY(0x94BD, 0x32);
     FETCH(0x94BD);
     { IMM(0x94BE); IMM(0x94BF); uint16_t ea = RD16IMM(0x94BE);
     WR(ea, A); }
 L94C0: /* 38080 LD A,93           */
+    VERIFY(0x94C0, 0x3E);
     FETCH(0x94C0);
     IMM(0x94C1); A = mem[(uint16_t)0x94C1];
 L94C2: /* 38082 LD (34260),A     } */
+    VERIFY(0x94C2, 0x32);
     FETCH(0x94C2);
     { IMM(0x94C3); IMM(0x94C4); uint16_t ea = RD16IMM(0x94C3);
     WR(ea, A); }
 L94C5: /* 38085 LD A,208         {Adjust Willy's y-coordinate (at #R34255) as well */
+    VERIFY(0x94C5, 0x3E);
     FETCH(0x94C5);
     IMM(0x94C6); A = mem[(uint16_t)0x94C6];
 L94C7: /* 38087 LD (34255),A     } */
+    VERIFY(0x94C7, 0x32);
     FETCH(0x94C7);
     { IMM(0x94C8); IMM(0x94C9); uint16_t ea = RD16IMM(0x94C8);
     WR(ea, A); }
 L94CA: /* 38090 XOR A            {Reset the airborne status indicator at #R34257 */
+    VERIFY(0x94CA, 0xAF);
     FETCH(0x94CA);
     xor8(A);
 L94CB: /* 38091 LD (34257),A     } */
+    VERIFY(0x94CB, 0x32);
     FETCH(0x94CB);
     { IMM(0x94CC); IMM(0x94CD); uint16_t ea = RD16IMM(0x94CC);
     WR(ea, A); }
 L94CE: /* 38094 POP HL           Drop the return address (either #R35281 or #R35289, in */
+    VERIFY(0x94CE, 0xE1);
     FETCH(0x94CE);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L94CF: /* 38095 JP 35090         Draw the room and re-enter the main loop */
+    VERIFY(0x94CF, 0xC3);
     FETCH(0x94CF);
     IMM(0x94D0); IMM(0x94D1);
     goto L8912;
 
 /* ---- ROOMBELOW ---- */
 L94D2: /* 38098 LD A,(33004)     Pick up the number of the room below from #R33004 */
+    VERIFY(0x94D2, 0x3A);
     FETCH(0x94D2);
     { IMM(0x94D3); IMM(0x94D4); uint16_t ea = RD16IMM(0x94D3);
     A = RD(ea); }
 L94D5: /* 38101 LD (33824),A     Make it the current room number by copying it to #R33824 */
+    VERIFY(0x94D5, 0x32);
     FETCH(0x94D5);
     { IMM(0x94D6); IMM(0x94D7); uint16_t ea = RD16IMM(0x94D6);
     WR(ea, A); }
 L94D8: /* 38104 XOR A            {Set Willy's y-coordinate (at #R34255) to 0 */
+    VERIFY(0x94D8, 0xAF);
     FETCH(0x94D8);
     xor8(A);
 L94D9: /* 38105 LD (34255),A     } */
+    VERIFY(0x94D9, 0x32);
     FETCH(0x94D9);
     { IMM(0x94DA); IMM(0x94DB); uint16_t ea = RD16IMM(0x94DA);
     WR(ea, A); }
 L94DC: /* 38108 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x94DC, 0x3A);
     FETCH(0x94DC);
     { IMM(0x94DD); IMM(0x94DE); uint16_t ea = RD16IMM(0x94DD);
     A = RD(ea); }
 L94DF: /* 38111 CP 11            Is it #b11 or greater (meaning Willy has already been */
+    VERIFY(0x94DF, 0xFE);
     FETCH(0x94DF);
     IMM(0x94E0); cp8(mem[(uint16_t)0x94E0]);
 L94E1: /* 38113 JR NC,38120      Jump if so */
+    VERIFY(0x94E1, 0x30);
     FETCH(0x94E1);
     IMM(0x94E2);
     if (!(F&FC)) { JRTAKEN(0x94E2); goto L94E8; }
 L94E3: /* 38115 LD A,2           {Otherwise set the airborne status indicator to 2 (Willy */
+    VERIFY(0x94E3, 0x3E);
     FETCH(0x94E3);
     IMM(0x94E4); A = mem[(uint16_t)0x94E4];
 L94E5: /* 38117 LD (34257),A     will start falling here if there's no floor beneath him) */
+    VERIFY(0x94E5, 0x32);
     FETCH(0x94E5);
     { IMM(0x94E6); IMM(0x94E7); uint16_t ea = RD16IMM(0x94E6);
     WR(ea, A); }
 L94E8: /* 38120 LD A,(34259)     {Willy should now appear at the top of the room, so */
+    VERIFY(0x94E8, 0x3A);
     FETCH(0x94E8);
     { IMM(0x94E9); IMM(0x94EA); uint16_t ea = RD16IMM(0x94E9);
     A = RD(ea); }
 L94EB: /* 38123 AND 31           adjust his attribute buffer coordinates (at #R34259) */
+    VERIFY(0x94EB, 0xE6);
     FETCH(0x94EB);
     IMM(0x94EC); and8(mem[(uint16_t)0x94EC]);
 L94ED: /* 38125 LD (34259),A     accordingly */
+    VERIFY(0x94ED, 0x32);
     FETCH(0x94ED);
     { IMM(0x94EE); IMM(0x94EF); uint16_t ea = RD16IMM(0x94EE);
     WR(ea, A); }
 L94F0: /* 38128 LD A,92           */
+    VERIFY(0x94F0, 0x3E);
     FETCH(0x94F0);
     IMM(0x94F1); A = mem[(uint16_t)0x94F1];
 L94F2: /* 38130 LD (34260),A     } */
+    VERIFY(0x94F2, 0x32);
     FETCH(0x94F2);
     { IMM(0x94F3); IMM(0x94F4); uint16_t ea = RD16IMM(0x94F3);
     WR(ea, A); }
 L94F5: /* 38133 POP HL           Drop the return address (#R35281, in the main loop) from */
+    VERIFY(0x94F5, 0xE1);
     FETCH(0x94F5);
     { uint8_t lo = RD(SP); SP++; uint8_t hi = RD(SP); SP++; HL = (uint16_t)(lo | (hi << 8)); }
 L94F6: /* 38134 JP 35090         Draw the room and re-enter the main loop */
+    VERIFY(0x94F6, 0xC3);
     FETCH(0x94F6);
     IMM(0x94F7); IMM(0x94F8);
     goto L8912;
 
 /* ---- MVCONVEYOR ---- */
 L94F9: /* 38137 LD HL,(32983)    Pick up the address of the conveyor's location in the */
+    VERIFY(0x94F9, 0x2A);
     FETCH(0x94F9);
     { IMM(0x94FA); IMM(0x94FB); uint16_t ea = RD16IMM(0x94FA);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L94FC: /* 38140 LD A,H           {Point #REGde and #REGhl at the location of the left end */
+    VERIFY(0x94FC, 0x7C);
     FETCH(0x94FC);
     A = H;
 L94FD: /* 38141 AND 1            of the conveyor in the screen buffer at #R28672 */
+    VERIFY(0x94FD, 0xE6);
     FETCH(0x94FD);
     IMM(0x94FE); and8(mem[(uint16_t)0x94FE]);
 L94FF: /* 38143 RLCA              */
+    VERIFY(0x94FF, 0x07);
     FETCH(0x94FF);
     rlca();
 L9500: /* 38144 RLCA              */
+    VERIFY(0x9500, 0x07);
     FETCH(0x9500);
     rlca();
 L9501: /* 38145 RLCA              */
+    VERIFY(0x9501, 0x07);
     FETCH(0x9501);
     rlca();
 L9502: /* 38146 ADD A,112         */
+    VERIFY(0x9502, 0xC6);
     FETCH(0x9502);
     IMM(0x9503); add8(mem[(uint16_t)0x9503]);
 L9504: /* 38148 LD H,A            */
+    VERIFY(0x9504, 0x67);
     FETCH(0x9504);
     H = A;
 L9505: /* 38149 LD E,L            */
+    VERIFY(0x9505, 0x5D);
     FETCH(0x9505);
     E = L;
 L9506: /* 38150 LD D,H           } */
+    VERIFY(0x9506, 0x54);
     FETCH(0x9506);
     D = H;
 L9507: /* 38151 LD A,(32985)     Pick up the length of the conveyor from #R32985 */
+    VERIFY(0x9507, 0x3A);
     FETCH(0x9507);
     { IMM(0x9508); IMM(0x9509); uint16_t ea = RD16IMM(0x9508);
     A = RD(ea); }
 L950A: /* 38154 OR A             Is there a conveyor in the room? */
+    VERIFY(0x950A, 0xB7);
     FETCH(0x950A);
     or8(A);
 L950B: /* 38155 RET Z            Return if not */
+    VERIFY(0x950B, 0xC8);
     FETCH(0x950B);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L950C: /* 38156 LD B,A           #REGb will count the conveyor tiles */
+    VERIFY(0x950C, 0x47);
     FETCH(0x950C);
     B = A;
 L950D: /* 38157 LD A,(32982)     Pick up the direction of the conveyor from #R32982 */
+    VERIFY(0x950D, 0x3A);
     FETCH(0x950D);
     { IMM(0x950E); IMM(0x950F); uint16_t ea = RD16IMM(0x950E);
     A = RD(ea); }
 L9510: /* 38160 OR A             Is the conveyor moving right? */
+    VERIFY(0x9510, 0xB7);
     FETCH(0x9510);
     or8(A);
 L9511: /* 38161 JR NZ,38182      Jump if so */
+    VERIFY(0x9511, 0x20);
     FETCH(0x9511);
     IMM(0x9512);
     if (!(F&FZ)) { JRTAKEN(0x9512); goto L9526; }
 L9513: /* 38163 LD A,(HL)        Copy the first pixel row of the conveyor tile to #REGa */
+    VERIFY(0x9513, 0x7E);
     FETCH(0x9513);
     A = RD(HL);
 L9514: /* 38164 RLC A            {Rotate it left twice */
+    VERIFY(0x9514, 0xCB);
     FETCH(0x9514); FETCH(0x9515);
     A = rlc(A);
 L9516: /* 38166 RLC A            } */
+    VERIFY(0x9516, 0xCB);
     FETCH(0x9516); FETCH(0x9517);
     A = rlc(A);
 L9518: /* 38168 INC H            {Point #REGhl at the third pixel row of the conveyor */
+    VERIFY(0x9518, 0x24);
     FETCH(0x9518);
     H = inc8(H);
 L9519: /* 38169 INC H            tile} */
+    VERIFY(0x9519, 0x24);
     FETCH(0x9519);
     H = inc8(H);
 L951A: /* 38170 LD C,(HL)        Copy this pixel row to #REGc */
+    VERIFY(0x951A, 0x4E);
     FETCH(0x951A);
     C = RD(HL);
 L951B: /* 38171 RRC C            {Rotate it right twice */
+    VERIFY(0x951B, 0xCB);
     FETCH(0x951B); FETCH(0x951C);
     C = rrc(C);
 L951D: /* 38173 RRC C            } */
+    VERIFY(0x951D, 0xCB);
     FETCH(0x951D); FETCH(0x951E);
     C = rrc(C);
 L951F: /* 38175 LD (DE),A        {Update the first and third pixel rows of every conveyor */
+    VERIFY(0x951F, 0x12);
     FETCH(0x951F);
     WR(DE, A);
 L9520: /* 38176 LD (HL),C        tile in the screen buffer at #R28672 */
+    VERIFY(0x9520, 0x71);
     FETCH(0x9520);
     WR(HL, C);
 L9521: /* 38177 INC L             */
+    VERIFY(0x9521, 0x2C);
     FETCH(0x9521);
     L = inc8(L);
 L9522: /* 38178 INC E             */
+    VERIFY(0x9522, 0x1C);
     FETCH(0x9522);
     E = inc8(E);
 L9523: /* 38179 DJNZ 38175       } */
+    VERIFY(0x9523, 0x10);
     FETCH(0x9523);
     T(1); IMM(0x9524);
     if (--B) { JRTAKEN(0x9524); goto L951F; }
 L9525: /* 38181 RET               */
+    VERIFY(0x9525, 0xC9);
     FETCH(0x9525);
     POPPC(); goto dispatch;
 L9526: /* 38182 LD A,(HL)        Copy the first pixel row of the conveyor tile to #REGa */
+    VERIFY(0x9526, 0x7E);
     FETCH(0x9526);
     A = RD(HL);
 L9527: /* 38183 RRC A            {Rotate it right twice */
+    VERIFY(0x9527, 0xCB);
     FETCH(0x9527); FETCH(0x9528);
     A = rrc(A);
 L9529: /* 38185 RRC A            } */
+    VERIFY(0x9529, 0xCB);
     FETCH(0x9529); FETCH(0x952A);
     A = rrc(A);
 L952B: /* 38187 INC H            {Point #REGhl at the third pixel row of the conveyor */
+    VERIFY(0x952B, 0x24);
     FETCH(0x952B);
     H = inc8(H);
 L952C: /* 38188 INC H            tile} */
+    VERIFY(0x952C, 0x24);
     FETCH(0x952C);
     H = inc8(H);
 L952D: /* 38189 LD C,(HL)        Copy this pixel row to #REGc */
+    VERIFY(0x952D, 0x4E);
     FETCH(0x952D);
     C = RD(HL);
 L952E: /* 38190 RLC C            {Rotate it left twice */
+    VERIFY(0x952E, 0xCB);
     FETCH(0x952E); FETCH(0x952F);
     C = rlc(C);
 L9530: /* 38192 RLC C            } */
+    VERIFY(0x9530, 0xCB);
     FETCH(0x9530); FETCH(0x9531);
     C = rlc(C);
 L9532: /* 38194 JR 38175         Jump back to update the first and third pixel rows of */
+    VERIFY(0x9532, 0x18);
     FETCH(0x9532);
     IMM(0x9533); JRTAKEN(0x9533);
     goto L951F;
 
 /* ---- BEDANDBATH ---- */
 L9534: /* 38196 LD A,(33824)     Pick up the number of the current room from #R33824 */
+    VERIFY(0x9534, 0x3A);
     FETCH(0x9534);
     { IMM(0x9535); IMM(0x9536); uint16_t ea = RD16IMM(0x9535);
     A = RD(ea); }
 L9537: /* 38199 CP 35            Are we in #R58112(Master Bedroom)? */
+    VERIFY(0x9537, 0xFE);
     FETCH(0x9537);
     IMM(0x9538); cp8(mem[(uint16_t)0x9538]);
 L9539: /* 38201 JR NZ,38298      Jump if not */
+    VERIFY(0x9539, 0x20);
     FETCH(0x9539);
     IMM(0x953A);
     if (!(F&FZ)) { JRTAKEN(0x953A); goto L959A; }
 L953B: /* 38203 LD A,(34271)     Pick up the game mode indicator from #R34271 */
+    VERIFY(0x953B, 0x3A);
     FETCH(0x953B);
     { IMM(0x953C); IMM(0x953D); uint16_t ea = RD16IMM(0x953C);
     A = RD(ea); }
 L953E: /* 38206 OR A             Has Willy collected all the items? */
+    VERIFY(0x953E, 0xB7);
     FETCH(0x953E);
     or8(A);
 L953F: /* 38207 JR NZ,38262      Jump if so */
+    VERIFY(0x953F, 0x20);
     FETCH(0x953F);
     IMM(0x9540);
     if (!(F&FZ)) { JRTAKEN(0x9540); goto L9576; }
 L9541: /* 38209 LD A,(34251)     Pick up the minute counter from #R34251; this will */
+    VERIFY(0x9541, 0x3A);
     FETCH(0x9541);
     { IMM(0x9542); IMM(0x9543); uint16_t ea = RD16IMM(0x9542);
     A = RD(ea); }
 L9544: /* 38212 AND 2            {Keep only bit 1, move it to bit 5, and set bit 7 */
+    VERIFY(0x9544, 0xE6);
     FETCH(0x9544);
     IMM(0x9545); and8(mem[(uint16_t)0x9545]);
 L9546: /* 38214 RRCA              */
+    VERIFY(0x9546, 0x0F);
     FETCH(0x9546);
     rrca();
 L9547: /* 38215 RRCA              */
+    VERIFY(0x9547, 0x0F);
     FETCH(0x9547);
     rrca();
 L9548: /* 38216 RRCA              */
+    VERIFY(0x9548, 0x0F);
     FETCH(0x9548);
     rrca();
 L9549: /* 38217 RRCA              */
+    VERIFY(0x9549, 0x0F);
     FETCH(0x9549);
     rrca();
 L954A: /* 38218 OR 128           } */
+    VERIFY(0x954A, 0xF6);
     FETCH(0x954A);
     IMM(0x954B); or8(mem[(uint16_t)0x954B]);
 L954C: /* 38220 LD E,A           Now #REGe=#b128 (foot down) or #b160 (foot raised) */
+    VERIFY(0x954C, 0x5F);
     FETCH(0x954C);
     E = A;
 L954D: /* 38221 LD A,(34255)     Pick up Willy's y-coordinate from #R34255 */
+    VERIFY(0x954D, 0x3A);
     FETCH(0x954D);
     { IMM(0x954E); IMM(0x954F); uint16_t ea = RD16IMM(0x954E);
     A = RD(ea); }
 L9550: /* 38224 CP 208           Is Willy on the floor below the ramp? */
+    VERIFY(0x9550, 0xFE);
     FETCH(0x9550);
     IMM(0x9551); cp8(mem[(uint16_t)0x9551]);
 L9552: /* 38226 JR Z,38236       Jump if so */
+    VERIFY(0x9552, 0x28);
     FETCH(0x9552);
     IMM(0x9553);
     if ((F&FZ)) { JRTAKEN(0x9553); goto L955C; }
 L9554: /* 38228 LD E,192         #REGe=#b192 (raising arm) */
+    VERIFY(0x9554, 0x1E);
     FETCH(0x9554);
     IMM(0x9555); E = mem[(uint16_t)0x9555];
 L9556: /* 38230 CP 192           Is Willy 8 or fewer pixels above floor level? */
+    VERIFY(0x9556, 0xFE);
     FETCH(0x9556);
     IMM(0x9557); cp8(mem[(uint16_t)0x9557]);
 L9558: /* 38232 JR NC,38236      Jump if so */
+    VERIFY(0x9558, 0x30);
     FETCH(0x9558);
     IMM(0x9559);
     if (!(F&FC)) { JRTAKEN(0x9559); goto L955C; }
 L955A: /* 38234 LD E,224         #REGe=#b224 (arm raised) */
+    VERIFY(0x955A, 0x1E);
     FETCH(0x955A);
     IMM(0x955B); E = mem[(uint16_t)0x955B];
 L955C: /* 38236 LD D,156         Point #REGde at the sprite graphic data for Maria */
+    VERIFY(0x955C, 0x16);
     FETCH(0x955C);
     IMM(0x955D); D = mem[(uint16_t)0x955D];
 L955E: /* 38238 LD HL,26734      {Draw Maria at (11,14) in the screen buffer at #R24576 */
+    VERIFY(0x955E, 0x21);
     FETCH(0x955E);
     IMM(0x955F); IMM(0x9560); HL = RD16IMM(0x955F);
 L9561: /* 38241 LD C,1            */
+    VERIFY(0x9561, 0x0E);
     FETCH(0x9561);
     IMM(0x9562); C = mem[(uint16_t)0x9562];
 L9563: /* 38243 CALL 37974       } */
+    VERIFY(0x9563, 0xCD);
     FETCH(0x9563);
     IMM(0x9564); IMM(0x9565); IC(0x9565, 1);
     PUSHW(0x9566); goto L9456;
 L9566: /* 38246 JP NZ,37047      Kill Willy if Maria collided with him */
+    VERIFY(0x9566, 0xC2);
     FETCH(0x9566);
     IMM(0x9567); IMM(0x9568);
     if (!(F&FZ)) goto L90B7;
 L9569: /* 38249 LD HL,17733      #REGh=#REGl=#b69 (INK 5: PAPER 0: BRIGHT 1) */
+    VERIFY(0x9569, 0x21);
     FETCH(0x9569);
     IMM(0x956A); IMM(0x956B); HL = RD16IMM(0x956A);
 L956C: /* 38252 LD (23918),HL    Set the attribute bytes for the top half of Maria's */
+    VERIFY(0x956C, 0x22);
     FETCH(0x956C);
     { IMM(0x956D); IMM(0x956E); uint16_t ea = RD16IMM(0x956D);
     WR(ea, L); WR((uint16_t)(ea + 1), H); }
 L956F: /* 38255 LD HL,1799       #REGh=#REGl=#b7 (INK 7: PAPER 0: BRIGHT 0) */
+    VERIFY(0x956F, 0x21);
     FETCH(0x956F);
     IMM(0x9570); IMM(0x9571); HL = RD16IMM(0x9570);
 L9572: /* 38258 LD (23950),HL    Set the attribute bytes for the bottom half of Maria's */
+    VERIFY(0x9572, 0x22);
     FETCH(0x9572);
     { IMM(0x9573); IMM(0x9574); uint16_t ea = RD16IMM(0x9573);
     WR(ea, L); WR((uint16_t)(ea + 1), H); }
 L9575: /* 38261 RET               */
+    VERIFY(0x9575, 0xC9);
     FETCH(0x9575);
     POPPC(); goto dispatch;
 L9576: /* 38262 LD A,(34259)     {Pick up Willy's screen x-coordinate from #R34259 */
+    VERIFY(0x9576, 0x3A);
     FETCH(0x9576);
     { IMM(0x9577); IMM(0x9578); uint16_t ea = RD16IMM(0x9577);
     A = RD(ea); }
 L9579: /* 38265 AND 31           } */
+    VERIFY(0x9579, 0xE6);
     FETCH(0x9579);
     IMM(0x957A); and8(mem[(uint16_t)0x957A]);
 L957B: /* 38267 CP 6             Has Willy reached the bed (at x=5) yet? */
+    VERIFY(0x957B, 0xFE);
     FETCH(0x957B);
     IMM(0x957C); cp8(mem[(uint16_t)0x957C]);
 L957D: /* 38269 RET NC           Return if not */
+    VERIFY(0x957D, 0xD0);
     FETCH(0x957D);
     IR(1);
     if (!(F&FC)) { POPPC(); goto dispatch; }
 L957E: /* 38270 LD A,2           {Update the game mode indicator at #R34271 to 2 (Willy */
+    VERIFY(0x957E, 0x3E);
     FETCH(0x957E);
     IMM(0x957F); A = mem[(uint16_t)0x957F];
 L9580: /* 38272 LD (34271),A     is running to the toilet)} */
+    VERIFY(0x9580, 0x32);
     FETCH(0x9580);
     { IMM(0x9581); IMM(0x9582); uint16_t ea = RD16IMM(0x9581);
     WR(ea, A); }
 L9583: /* 38275 RET               */
+    VERIFY(0x9583, 0xC9);
     FETCH(0x9583);
     POPPC(); goto dispatch;
 
 /* ---- CHKTOILET ---- */
 L9584: /* 38276 LD A,(33824)     Pick up the number of the current room from #R33824 */
+    VERIFY(0x9584, 0x3A);
     FETCH(0x9584);
     { IMM(0x9585); IMM(0x9586); uint16_t ea = RD16IMM(0x9585);
     A = RD(ea); }
 L9587: /* 38279 CP 33            Are we in #R57600(The Bathroom)? */
+    VERIFY(0x9587, 0xFE);
     FETCH(0x9587);
     IMM(0x9588); cp8(mem[(uint16_t)0x9588]);
 L9589: /* 38281 RET NZ           Return if not */
+    VERIFY(0x9589, 0xC0);
     FETCH(0x9589);
     IR(1);
     if (!(F&FZ)) { POPPC(); goto dispatch; }
 L958A: /* 38282 LD A,(34259)     Pick up the LSB of Willy's attribute buffer location */
+    VERIFY(0x958A, 0x3A);
     FETCH(0x958A);
     { IMM(0x958B); IMM(0x958C); uint16_t ea = RD16IMM(0x958B);
     A = RD(ea); }
 L958D: /* 38285 CP 188           Is Willy's screen x-coordinate 28 (where the toilet is)? */
+    VERIFY(0x958D, 0xFE);
     FETCH(0x958D);
     IMM(0x958E); cp8(mem[(uint16_t)0x958E]);
 L958F: /* 38287 RET NZ           Return if not */
+    VERIFY(0x958F, 0xC0);
     FETCH(0x958F);
     IR(1);
     if (!(F&FZ)) { POPPC(); goto dispatch; }
 L9590: /* 38288 XOR A            {Reset the minute counter at #R34251 to 0 (so that we */
+    VERIFY(0x9590, 0xAF);
     FETCH(0x9590);
     xor8(A);
 L9591: /* 38289 LD (34251),A     get to see Willy's head down the toilet for at least a */
+    VERIFY(0x9591, 0x32);
     FETCH(0x9591);
     { IMM(0x9592); IMM(0x9593); uint16_t ea = RD16IMM(0x9592);
     WR(ea, A); }
 L9594: /* 38292 LD A,3           {Update the game mode indicator at #R34271 to 3 (Willy's */
+    VERIFY(0x9594, 0x3E);
     FETCH(0x9594);
     IMM(0x9595); A = mem[(uint16_t)0x9595];
 L9596: /* 38294 LD (34271),A     head is down the toilet)} */
+    VERIFY(0x9596, 0x32);
     FETCH(0x9596);
     { IMM(0x9597); IMM(0x9598); uint16_t ea = RD16IMM(0x9597);
     WR(ea, A); }
 L9599: /* 38297 RET               */
+    VERIFY(0x9599, 0xC9);
     FETCH(0x9599);
     POPPC(); goto dispatch;
 
 /* ---- DRAWTOILET ---- */
 L959A: /* 38298 LD A,(33824)     Pick up the number of the current room from #R33824 */
+    VERIFY(0x959A, 0x3A);
     FETCH(0x959A);
     { IMM(0x959B); IMM(0x959C); uint16_t ea = RD16IMM(0x959B);
     A = RD(ea); }
 L959D: /* 38301 CP 33            Are we in #R57600(The Bathroom)? */
+    VERIFY(0x959D, 0xFE);
     FETCH(0x959D);
     IMM(0x959E); cp8(mem[(uint16_t)0x959E]);
 L959F: /* 38303 RET NZ           Return if not */
+    VERIFY(0x959F, 0xC0);
     FETCH(0x959F);
     IR(1);
     if (!(F&FZ)) { POPPC(); goto dispatch; }
 L95A0: /* 38304 LD A,(34251)     Pick up the minute counter from #R34251; this will */
+    VERIFY(0x95A0, 0x3A);
     FETCH(0x95A0);
     { IMM(0x95A1); IMM(0x95A2); uint16_t ea = RD16IMM(0x95A1);
     A = RD(ea); }
 L95A3: /* 38307 AND 1            {Keep only bit 0 and move it to bit 5 */
+    VERIFY(0x95A3, 0xE6);
     FETCH(0x95A3);
     IMM(0x95A4); and8(mem[(uint16_t)0x95A4]);
 L95A5: /* 38309 RRCA              */
+    VERIFY(0x95A5, 0x0F);
     FETCH(0x95A5);
     rrca();
 L95A6: /* 38310 RRCA              */
+    VERIFY(0x95A6, 0x0F);
     FETCH(0x95A6);
     rrca();
 L95A7: /* 38311 RRCA             } */
+    VERIFY(0x95A7, 0x0F);
     FETCH(0x95A7);
     rrca();
 L95A8: /* 38312 LD E,A           Now #REGe=#b0 or #b32 */
+    VERIFY(0x95A8, 0x5F);
     FETCH(0x95A8);
     E = A;
 L95A9: /* 38313 LD A,(34271)     Pick up the game mode indicator from #R34271 */
+    VERIFY(0x95A9, 0x3A);
     FETCH(0x95A9);
     { IMM(0x95AA); IMM(0x95AB); uint16_t ea = RD16IMM(0x95AA);
     A = RD(ea); }
 L95AC: /* 38316 CP 3             Is Willy's head down the toilet? */
+    VERIFY(0x95AC, 0xFE);
     FETCH(0x95AC);
     IMM(0x95AD); cp8(mem[(uint16_t)0x95AD]);
 L95AE: /* 38318 JR NZ,38322      Jump if not */
+    VERIFY(0x95AE, 0x20);
     FETCH(0x95AE);
     IMM(0x95AF);
     if (!(F&FZ)) { JRTAKEN(0x95AF); goto L95B2; }
 L95B0: /* 38320 SET 6,E          Now #REGe=#b64 or #b96 */
+    VERIFY(0x95B0, 0xCB);
     FETCH(0x95B0); FETCH(0x95B1);
     E = (uint8_t)(E | (1u << 6));
 L95B2: /* 38322 LD D,166         Point #REGde at the toilet sprite to use (#R42496, */
+    VERIFY(0x95B2, 0x16);
     FETCH(0x95B2);
     IMM(0x95B3); D = mem[(uint16_t)0x95B3];
 L95B4: /* 38324 LD IX,33488      {Draw the toilet at (13,28) in the screen buffer at */
+    VERIFY(0x95B4, 0xDD);
     FETCH(0x95B4); FETCH(0x95B5);
     IMM(0x95B6); IMM(0x95B7); IX = RD16IMM(0x95B6);
 L95B8: /* 38328 LD BC,4124       #R24576 */
+    VERIFY(0x95B8, 0x01);
     FETCH(0x95B8);
     IMM(0x95B9); IMM(0x95BA); BC = RD16IMM(0x95B9);
 L95BB: /* 38331 CALL 38504       } */
+    VERIFY(0x95BB, 0xCD);
     FETCH(0x95BB);
     IMM(0x95BC); IMM(0x95BD); IC(0x95BD, 1);
     PUSHW(0x95BE); goto L9668;
 L95BE: /* 38334 LD HL,1799       #REGh=#REGl=#b7 (INK 7: PAPER 0) */
+    VERIFY(0x95BE, 0x21);
     FETCH(0x95BE);
     IMM(0x95BF); IMM(0x95C0); HL = RD16IMM(0x95BF);
 L95C1: /* 38337 LD (23996),HL    {Set the attribute bytes for the toilet in the buffer at */
+    VERIFY(0x95C1, 0x22);
     FETCH(0x95C1);
     { IMM(0x95C2); IMM(0x95C3); uint16_t ea = RD16IMM(0x95C2);
     WR(ea, L); WR((uint16_t)(ea + 1), H); }
 L95C4: /* 38340 LD (24028),HL    #R23552} */
+    VERIFY(0x95C4, 0x22);
     FETCH(0x95C4);
     { IMM(0x95C5); IMM(0x95C6); uint16_t ea = RD16IMM(0x95C5);
     WR(ea, L); WR((uint16_t)(ea + 1), H); }
 L95C7: /* 38343 RET               */
+    VERIFY(0x95C7, 0xC9);
     FETCH(0x95C7);
     POPPC(); goto dispatch;
 
 /* ---- WILLYATTRS ---- */
 L95C8: /* 38344 LD HL,(34259)    Pick up Willy's attribute buffer coordinates from */
+    VERIFY(0x95C8, 0x2A);
     FETCH(0x95C8);
     { IMM(0x95C9); IMM(0x95CA); uint16_t ea = RD16IMM(0x95C9);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L95CB: /* 38347 LD B,0           Initialise #REGb to 0 (in case Willy is not standing on */
+    VERIFY(0x95CB, 0x06);
     FETCH(0x95CB);
     IMM(0x95CC); B = mem[(uint16_t)0x95CC];
 L95CD: /* 38349 LD A,(32986)     Pick up the direction byte of the ramp definition for */
+    VERIFY(0x95CD, 0x3A);
     FETCH(0x95CD);
     { IMM(0x95CE); IMM(0x95CF); uint16_t ea = RD16IMM(0x95CE);
     A = RD(ea); }
 L95D0: /* 38352 AND 1            {Point #REGhl at one of the cells under Willy's feet */
+    VERIFY(0x95D0, 0xE6);
     FETCH(0x95D0);
     IMM(0x95D1); and8(mem[(uint16_t)0x95D1]);
 L95D2: /* 38354 ADD A,64         (the one on the left if the ramp goes up to the left, */
+    VERIFY(0x95D2, 0xC6);
     FETCH(0x95D2);
     IMM(0x95D3); add8(mem[(uint16_t)0x95D3]);
 L95D4: /* 38356 LD E,A           the one on the right if the ramp goes up to the right) */
+    VERIFY(0x95D4, 0x5F);
     FETCH(0x95D4);
     E = A;
 L95D5: /* 38357 LD D,0            */
+    VERIFY(0x95D5, 0x16);
     FETCH(0x95D5);
     IMM(0x95D6); D = mem[(uint16_t)0x95D6];
 L95D7: /* 38359 ADD HL,DE        } */
+    VERIFY(0x95D7, 0x19);
     FETCH(0x95D7);
     IR(7);
     HL = add16(HL, DE);
 L95D8: /* 38360 LD A,(32964)     Pick up the ramp's attribute byte from #R32964 */
+    VERIFY(0x95D8, 0x3A);
     FETCH(0x95D8);
     { IMM(0x95D9); IMM(0x95DA); uint16_t ea = RD16IMM(0x95D9);
     A = RD(ea); }
 L95DB: /* 38363 CP (HL)          Is Willy on or just above the ramp? */
+    VERIFY(0x95DB, 0xBE);
     FETCH(0x95DB);
     cp8(RD(HL));
 L95DC: /* 38364 JR NZ,38392      Jump if not */
+    VERIFY(0x95DC, 0x20);
     FETCH(0x95DC);
     IMM(0x95DD);
     if (!(F&FZ)) { JRTAKEN(0x95DD); goto L95F8; }
 L95DE: /* 38366 LD A,(34257)     Pick up the airborne status indicator from #R34257 */
+    VERIFY(0x95DE, 0x3A);
     FETCH(0x95DE);
     { IMM(0x95DF); IMM(0x95E0); uint16_t ea = RD16IMM(0x95DF);
     A = RD(ea); }
 L95E1: /* 38369 OR A             Is Willy airborne? */
+    VERIFY(0x95E1, 0xB7);
     FETCH(0x95E1);
     or8(A);
 L95E2: /* 38370 JR NZ,38392      Jump if so */
+    VERIFY(0x95E2, 0x20);
     FETCH(0x95E2);
     IMM(0x95E3);
     if (!(F&FZ)) { JRTAKEN(0x95E3); goto L95F8; }
 L95E4: /* 38372 LD A,(34258)     Pick up Willy's current animation frame (0-3) from */
+    VERIFY(0x95E4, 0x3A);
     FETCH(0x95E4);
     { IMM(0x95E5); IMM(0x95E6); uint16_t ea = RD16IMM(0x95E5);
     A = RD(ea); }
 L95E7: /* 38375 AND 3            {#REGb=0, 4, 8 or 12 */
+    VERIFY(0x95E7, 0xE6);
     FETCH(0x95E7);
     IMM(0x95E8); and8(mem[(uint16_t)0x95E8]);
 L95E9: /* 38377 RLCA              */
+    VERIFY(0x95E9, 0x07);
     FETCH(0x95E9);
     rlca();
 L95EA: /* 38378 RLCA              */
+    VERIFY(0x95EA, 0x07);
     FETCH(0x95EA);
     rlca();
 L95EB: /* 38379 LD B,A           } */
+    VERIFY(0x95EB, 0x47);
     FETCH(0x95EB);
     B = A;
 L95EC: /* 38380 LD A,(32986)     Pick up the direction byte of the ramp definition for */
+    VERIFY(0x95EC, 0x3A);
     FETCH(0x95EC);
     { IMM(0x95ED); IMM(0x95EE); uint16_t ea = RD16IMM(0x95ED);
     A = RD(ea); }
 L95EF: /* 38383 AND 1            {#REGa=#REGb (if the ramp goes up to the left) or */
+    VERIFY(0x95EF, 0xE6);
     FETCH(0x95EF);
     IMM(0x95F0); and8(mem[(uint16_t)0x95F0]);
 L95F1: /* 38385 DEC A            12-#REGb (if the ramp goes up to the right) */
+    VERIFY(0x95F1, 0x3D);
     FETCH(0x95F1);
     A = dec8(A);
 L95F2: /* 38386 XOR 12            */
+    VERIFY(0x95F2, 0xEE);
     FETCH(0x95F2);
     IMM(0x95F3); xor8(mem[(uint16_t)0x95F3]);
 L95F4: /* 38388 XOR B             */
+    VERIFY(0x95F4, 0xA8);
     FETCH(0x95F4);
     xor8(B);
 L95F5: /* 38389 AND 12           } */
+    VERIFY(0x95F5, 0xE6);
     FETCH(0x95F5);
     IMM(0x95F6); and8(mem[(uint16_t)0x95F6]);
 L95F7: /* 38391 LD B,A           Copy this value to #REGb */
+    VERIFY(0x95F7, 0x47);
     FETCH(0x95F7);
     B = A;
 L95F8: /* 38392 LD HL,(34259)    Pick up Willy's attribute buffer coordinates from */
+    VERIFY(0x95F8, 0x2A);
     FETCH(0x95F8);
     { IMM(0x95F9); IMM(0x95FA); uint16_t ea = RD16IMM(0x95F9);
     L = RD(ea); H = RD((uint16_t)(ea + 1)); }
 L95FB: /* 38395 LD DE,31         Prepare #REGde for later addition */
+    VERIFY(0x95FB, 0x11);
     FETCH(0x95FB);
     IMM(0x95FC); IMM(0x95FD); DE = RD16IMM(0x95FC);
 L95FE: /* 38398 LD C,15          Set #REGc=#b15 for the top two rows of cells (to make */
+    VERIFY(0x95FE, 0x0E);
     FETCH(0x95FE);
     IMM(0x95FF); C = mem[(uint16_t)0x95FF];
 L9600: /* 38400 CALL 38430       Check and set the attribute byte for the top-left cell */
+    VERIFY(0x9600, 0xCD);
     FETCH(0x9600);
     IMM(0x9601); IMM(0x9602); IC(0x9602, 1);
     PUSHW(0x9603); goto L961E;
 L9603: /* 38403 INC HL           Move #REGhl to the next cell to the right */
+    VERIFY(0x9603, 0x23);
     FETCH(0x9603);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L9604: /* 38404 CALL 38430       Check and set the attribute byte for the top-right cell */
+    VERIFY(0x9604, 0xCD);
     FETCH(0x9604);
     IMM(0x9605); IMM(0x9606); IC(0x9606, 1);
     PUSHW(0x9607); goto L961E;
 L9607: /* 38407 ADD HL,DE        Move #REGhl down a row and back one cell to the left */
+    VERIFY(0x9607, 0x19);
     FETCH(0x9607);
     IR(7);
     HL = add16(HL, DE);
 L9608: /* 38408 CALL 38430       Check and set the attribute byte for the mid-left cell */
+    VERIFY(0x9608, 0xCD);
     FETCH(0x9608);
     IMM(0x9609); IMM(0x960A); IC(0x960A, 1);
     PUSHW(0x960B); goto L961E;
 L960B: /* 38411 INC HL           Move #REGhl to the next cell to the right */
+    VERIFY(0x960B, 0x23);
     FETCH(0x960B);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L960C: /* 38412 CALL 38430       Check and set the attribute byte for the mid-right cell */
+    VERIFY(0x960C, 0xCD);
     FETCH(0x960C);
     IMM(0x960D); IMM(0x960E); IC(0x960E, 1);
     PUSHW(0x960F); goto L961E;
 L960F: /* 38415 LD A,(34255)     Pick up Willy's y-coordinate from #R34255 */
+    VERIFY(0x960F, 0x3A);
     FETCH(0x960F);
     { IMM(0x9610); IMM(0x9611); uint16_t ea = RD16IMM(0x9610);
     A = RD(ea); }
 L9612: /* 38418 ADD A,B          {Add the y-coordinate offset calculated earlier (to get */
+    VERIFY(0x9612, 0x80);
     FETCH(0x9612);
     add8(B);
 L9613: /* 38419 LD C,A           Willy's true y-coordinate if he's standing on a ramp) */
+    VERIFY(0x9613, 0x4F);
     FETCH(0x9613);
     C = A;
 L9614: /* 38420 ADD HL,DE        Move #REGhl down a row and back one cell to the left; at */
+    VERIFY(0x9614, 0x19);
     FETCH(0x9614);
     IR(7);
     HL = add16(HL, DE);
 L9615: /* 38421 CALL 38430       Check and set the attribute byte for the bottom-left */
+    VERIFY(0x9615, 0xCD);
     FETCH(0x9615);
     IMM(0x9616); IMM(0x9617); IC(0x9617, 1);
     PUSHW(0x9618); goto L961E;
 L9618: /* 38424 INC HL           Move #REGhl to the next cell to the right */
+    VERIFY(0x9618, 0x23);
     FETCH(0x9618);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L9619: /* 38425 CALL 38430       Check and set the attribute byte for the bottom-right */
+    VERIFY(0x9619, 0xCD);
     FETCH(0x9619);
     IMM(0x961A); IMM(0x961B); IC(0x961B, 1);
     PUSHW(0x961C); goto L961E;
 L961C: /* 38428 JR 38455         Draw Willy to the screen buffer at #R24576 */
+    VERIFY(0x961C, 0x18);
     FETCH(0x961C);
     IMM(0x961D); JRTAKEN(0x961D);
     goto L9637;
 
 /* ---- WILLYATTR ---- */
 L961E: /* 38430 LD A,(32928)     Pick up the attribute byte of the background tile in the */
+    VERIFY(0x961E, 0x3A);
     FETCH(0x961E);
     { IMM(0x961F); IMM(0x9620); uint16_t ea = RD16IMM(0x961F);
     A = RD(ea); }
 L9621: /* 38433 CP (HL)          Does this cell contain a background tile? */
+    VERIFY(0x9621, 0xBE);
     FETCH(0x9621);
     cp8(RD(HL));
 L9622: /* 38434 JR NZ,38447      Jump if not */
+    VERIFY(0x9622, 0x20);
     FETCH(0x9622);
     IMM(0x9623);
     if (!(F&FZ)) { JRTAKEN(0x9623); goto L962F; }
 L9624: /* 38436 LD A,C           {Set the zero flag if we are going to retain the INK */
+    VERIFY(0x9624, 0x79);
     FETCH(0x9624);
     A = C;
 L9625: /* 38437 AND 15           colour in this cell; this happens only if the cell is in */
+    VERIFY(0x9625, 0xE6);
     FETCH(0x9625);
     IMM(0x9626); and8(mem[(uint16_t)0x9626]);
 L9627: /* 38439 JR Z,38447       Jump if we are going to retain the current INK colour in */
+    VERIFY(0x9627, 0x28);
     FETCH(0x9627);
     IMM(0x9628);
     if ((F&FZ)) { JRTAKEN(0x9628); goto L962F; }
 L9629: /* 38441 LD A,(32928)     Pick up the attribute byte of the background tile in the */
+    VERIFY(0x9629, 0x3A);
     FETCH(0x9629);
     { IMM(0x962A); IMM(0x962B); uint16_t ea = RD16IMM(0x962A);
     A = RD(ea); }
 L962C: /* 38444 OR 7             Set bits 0-2, making the INK white */
+    VERIFY(0x962C, 0xF6);
     FETCH(0x962C);
     IMM(0x962D); or8(mem[(uint16_t)0x962D]);
 L962E: /* 38446 LD (HL),A        Set the attribute byte for this cell in the buffer at */
+    VERIFY(0x962E, 0x77);
     FETCH(0x962E);
     WR(HL, A);
 L962F: /* 38447 LD A,(32955)     Pick up the attribute byte of the nasty tile in the */
+    VERIFY(0x962F, 0x3A);
     FETCH(0x962F);
     { IMM(0x9630); IMM(0x9631); uint16_t ea = RD16IMM(0x9630);
     A = RD(ea); }
 L9632: /* 38450 CP (HL)          Has Willy hit a nasty? */
+    VERIFY(0x9632, 0xBE);
     FETCH(0x9632);
     cp8(RD(HL));
 L9633: /* 38451 JP Z,37046       Kill Willy if so */
+    VERIFY(0x9633, 0xCA);
     FETCH(0x9633);
     IMM(0x9634); IMM(0x9635);
     if ((F&FZ)) goto L90B6;
 L9636: /* 38454 RET               */
+    VERIFY(0x9636, 0xC9);
     FETCH(0x9636);
     POPPC(); goto dispatch;
 
 /* ---- DRAWWILLY ---- */
 L9637: /* 38455 LD A,(34255)     Pick up Willy's y-coordinate from #R34255 */
+    VERIFY(0x9637, 0x3A);
     FETCH(0x9637);
     { IMM(0x9638); IMM(0x9639); uint16_t ea = RD16IMM(0x9638);
     A = RD(ea); }
 L963A: /* 38458 ADD A,B          Add the y-coordinate offset (to get Willy's true */
+    VERIFY(0x963A, 0x80);
     FETCH(0x963A);
     add8(B);
 L963B: /* 38459 LD IXH,130       {Point #REGix at the entry in the screen buffer address */
+    VERIFY(0x963B, 0xDD);
     FETCH(0x963B); FETCH(0x963C);
     IMM(0x963D); IXH = mem[0x963D];
 L963E: /* 38462 LD IXL,A         lookup table at #R33280 that corresponds to Willy's */
+    VERIFY(0x963E, 0xDD);
     FETCH(0x963E); FETCH(0x963F);
     IXL = A;
 L9640: /* 38464 LD A,(34256)     Pick up Willy's direction and movement flags from */
+    VERIFY(0x9640, 0x3A);
     FETCH(0x9640);
     { IMM(0x9641); IMM(0x9642); uint16_t ea = RD16IMM(0x9641);
     A = RD(ea); }
 L9643: /* 38467 AND 1            {Now #REGe=#b0 if Willy is facing right, or #b128 if */
+    VERIFY(0x9643, 0xE6);
     FETCH(0x9643);
     IMM(0x9644); and8(mem[(uint16_t)0x9644]);
 L9645: /* 38469 RRCA             he's facing left */
+    VERIFY(0x9645, 0x0F);
     FETCH(0x9645);
     rrca();
 L9646: /* 38470 LD E,A           } */
+    VERIFY(0x9646, 0x5F);
     FETCH(0x9646);
     E = A;
 L9647: /* 38471 LD A,(34258)     Pick up Willy's animation frame (0-3) from #R34258 */
+    VERIFY(0x9647, 0x3A);
     FETCH(0x9647);
     { IMM(0x9648); IMM(0x9649); uint16_t ea = RD16IMM(0x9648);
     A = RD(ea); }
 L964A: /* 38474 AND 3            {Point #REGde at the sprite graphic data for Willy's */
+    VERIFY(0x964A, 0xE6);
     FETCH(0x964A);
     IMM(0x964B); and8(mem[(uint16_t)0x964B]);
 L964C: /* 38476 RRCA             current animation frame (see #R40192) */
+    VERIFY(0x964C, 0x0F);
     FETCH(0x964C);
     rrca();
 L964D: /* 38477 RRCA              */
+    VERIFY(0x964D, 0x0F);
     FETCH(0x964D);
     rrca();
 L964E: /* 38478 RRCA              */
+    VERIFY(0x964E, 0x0F);
     FETCH(0x964E);
     rrca();
 L964F: /* 38479 OR E              */
+    VERIFY(0x964F, 0xB3);
     FETCH(0x964F);
     or8(E);
 L9650: /* 38480 LD E,A            */
+    VERIFY(0x9650, 0x5F);
     FETCH(0x9650);
     E = A;
 L9651: /* 38481 LD D,157         } */
+    VERIFY(0x9651, 0x16);
     FETCH(0x9651);
     IMM(0x9652); D = mem[(uint16_t)0x9652];
 L9653: /* 38483 LD A,(33824)     Pick up the number of the current room from #R33824 */
+    VERIFY(0x9653, 0x3A);
     FETCH(0x9653);
     { IMM(0x9654); IMM(0x9655); uint16_t ea = RD16IMM(0x9654);
     A = RD(ea); }
 L9656: /* 38486 CP 29            Are we in #R56576(The Nightmare Room)? */
+    VERIFY(0x9656, 0xFE);
     FETCH(0x9656);
     IMM(0x9657); cp8(mem[(uint16_t)0x9657]);
 L9658: /* 38488 JR NZ,38496      Jump if not */
+    VERIFY(0x9658, 0x20);
     FETCH(0x9658);
     IMM(0x9659);
     if (!(F&FZ)) { JRTAKEN(0x9659); goto L9660; }
 L965A: /* 38490 LD D,182         {Point #REGde at the graphic data for the flying pig */
+    VERIFY(0x965A, 0x16);
     FETCH(0x965A);
     IMM(0x965B); D = mem[(uint16_t)0x965B];
 L965C: /* 38492 LD A,E           sprite (#R46592+#REGe) */
+    VERIFY(0x965C, 0x7B);
     FETCH(0x965C);
     A = E;
 L965D: /* 38493 XOR 128           */
+    VERIFY(0x965D, 0xEE);
     FETCH(0x965D);
     IMM(0x965E); xor8(mem[(uint16_t)0x965E]);
 L965F: /* 38495 LD E,A           } */
+    VERIFY(0x965F, 0x5F);
     FETCH(0x965F);
     E = A;
 L9660: /* 38496 LD B,16          There are 16 rows of pixels to copy */
+    VERIFY(0x9660, 0x06);
     FETCH(0x9660);
     IMM(0x9661); B = mem[(uint16_t)0x9661];
 L9662: /* 38498 LD A,(34259)     {Pick up Willy's screen x-coordinate (0-31) from #R34259 */
+    VERIFY(0x9662, 0x3A);
     FETCH(0x9662);
     { IMM(0x9663); IMM(0x9664); uint16_t ea = RD16IMM(0x9663);
     A = RD(ea); }
 L9665: /* 38501 AND 31           } */
+    VERIFY(0x9665, 0xE6);
     FETCH(0x9665);
     IMM(0x9666); and8(mem[(uint16_t)0x9666]);
 L9667: /* 38503 LD C,A           Copy it to #REGc */
+    VERIFY(0x9667, 0x4F);
     FETCH(0x9667);
     C = A;
 L9668: /* 38504 LD A,(IX+0)      {Set #REGhl to the address in the screen buffer at */
+    VERIFY(0x9668, 0xDD);
     FETCH(0x9668); FETCH(0x9669);
     IMM(0x966A); IC(0x966A, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x966A]); A = RD(ea); }
 L966B: /* 38507 LD H,(IX+1)      #R24576 that corresponds to where we are going to draw */
+    VERIFY(0x966B, 0xDD);
     FETCH(0x966B); FETCH(0x966C);
     IMM(0x966D); IC(0x966D, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x966D]); H = RD(ea); }
 L966E: /* 38510 OR C             the next pixel row of the sprite graphic */
+    VERIFY(0x966E, 0xB1);
     FETCH(0x966E);
     or8(C);
 L966F: /* 38511 LD L,A           } */
+    VERIFY(0x966F, 0x6F);
     FETCH(0x966F);
     L = A;
 L9670: /* 38512 LD A,(DE)        Pick up a sprite graphic byte */
+    VERIFY(0x9670, 0x1A);
     FETCH(0x9670);
     A = RD(DE);
 L9671: /* 38513 OR (HL)          Merge it with the background */
+    VERIFY(0x9671, 0xB6);
     FETCH(0x9671);
     or8(RD(HL));
 L9672: /* 38514 LD (HL),A        Save the resultant byte to the screen buffer */
+    VERIFY(0x9672, 0x77);
     FETCH(0x9672);
     WR(HL, A);
 L9673: /* 38515 INC HL           Move #REGhl along to the next cell to the right */
+    VERIFY(0x9673, 0x23);
     FETCH(0x9673);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L9674: /* 38516 INC DE           Point #REGde at the next sprite graphic byte */
+    VERIFY(0x9674, 0x13);
     FETCH(0x9674);
     IR(2);
     DE = (uint16_t)(DE + 1);
 L9675: /* 38517 LD A,(DE)        Pick it up in #REGa */
+    VERIFY(0x9675, 0x1A);
     FETCH(0x9675);
     A = RD(DE);
 L9676: /* 38518 OR (HL)          Merge it with the background */
+    VERIFY(0x9676, 0xB6);
     FETCH(0x9676);
     or8(RD(HL));
 L9677: /* 38519 LD (HL),A        Save the resultant byte to the screen buffer */
+    VERIFY(0x9677, 0x77);
     FETCH(0x9677);
     WR(HL, A);
 L9678: /* 38520 INC IX           {Point #REGix at the next entry in the screen buffer */
+    VERIFY(0x9678, 0xDD);
     FETCH(0x9678); FETCH(0x9679);
     IR(2); IX = (uint16_t)(IX + 1);
 L967A: /* 38522 INC IX           address lookup table at #R33280} */
+    VERIFY(0x967A, 0xDD);
     FETCH(0x967A); FETCH(0x967B);
     IR(2); IX = (uint16_t)(IX + 1);
 L967C: /* 38524 INC DE           Point #REGde at the next sprite graphic byte */
+    VERIFY(0x967C, 0x13);
     FETCH(0x967C);
     IR(2);
     DE = (uint16_t)(DE + 1);
 L967D: /* 38525 DJNZ 38504       Jump back until all 16 rows of pixels have been drawn */
+    VERIFY(0x967D, 0x10);
     FETCH(0x967D);
     T(1); IMM(0x967E);
     if (--B) { JRTAKEN(0x967E); goto L9668; }
 L967F: /* 38527 RET               */
+    VERIFY(0x967F, 0xC9);
     FETCH(0x967F);
     POPPC(); goto dispatch;
 
 /* ---- PRINTMSG ---- */
 L9680: /* 38528 LD A,(IX+0)      Collect a character from the message */
+    VERIFY(0x9680, 0xDD);
     FETCH(0x9680); FETCH(0x9681);
     IMM(0x9682); IC(0x9682, 5); { uint16_t ea = (uint16_t)(IX + (int8_t)mem[0x9682]); A = RD(ea); }
 L9683: /* 38531 CALL 38545       Print it */
+    VERIFY(0x9683, 0xCD);
     FETCH(0x9683);
     IMM(0x9684); IMM(0x9685); IC(0x9685, 1);
     PUSHW(0x9686); goto L9691;
 L9686: /* 38534 INC IX           Point #REGix at the next character in the message */
+    VERIFY(0x9686, 0xDD);
     FETCH(0x9686); FETCH(0x9687);
     IR(2); IX = (uint16_t)(IX + 1);
 L9688: /* 38536 INC E            {Point #REGde at the next character cell (subtracting 8 */
+    VERIFY(0x9688, 0x1C);
     FETCH(0x9688);
     E = inc8(E);
 L9689: /* 38537 LD A,D           from #REGd compensates for the operations performed by */
+    VERIFY(0x9689, 0x7A);
     FETCH(0x9689);
     A = D;
 L968A: /* 38538 SUB 8            the routine at #R38545) */
+    VERIFY(0x968A, 0xD6);
     FETCH(0x968A);
     IMM(0x968B); sub8(mem[(uint16_t)0x968B]);
 L968C: /* 38540 LD D,A           } */
+    VERIFY(0x968C, 0x57);
     FETCH(0x968C);
     D = A;
 L968D: /* 38541 DEC C            Have we printed the entire message yet? */
+    VERIFY(0x968D, 0x0D);
     FETCH(0x968D);
     C = dec8(C);
 L968E: /* 38542 JR NZ,38528      If not, jump back to print the next character */
+    VERIFY(0x968E, 0x20);
     FETCH(0x968E);
     IMM(0x968F);
     if (!(F&FZ)) { JRTAKEN(0x968F); goto L9680; }
 L9690: /* 38544 RET               */
+    VERIFY(0x9690, 0xC9);
     FETCH(0x9690);
     POPPC(); goto dispatch;
 
 /* ---- PRINTCHAR ---- */
 L9691: /* 38545 LD H,7           {Point #REGhl at the bitmap for the character (in the */
+    VERIFY(0x9691, 0x26);
     FETCH(0x9691);
     IMM(0x9692); H = mem[(uint16_t)0x9692];
 L9693: /* 38547 LD L,A           ROM) */
+    VERIFY(0x9693, 0x6F);
     FETCH(0x9693);
     L = A;
 L9694: /* 38548 SET 7,L           */
+    VERIFY(0x9694, 0xCB);
     FETCH(0x9694); FETCH(0x9695);
     L = (uint8_t)(L | (1u << 7));
 L9696: /* 38550 ADD HL,HL         */
+    VERIFY(0x9696, 0x29);
     FETCH(0x9696);
     IR(7);
     HL = add16(HL, HL);
 L9697: /* 38551 ADD HL,HL         */
+    VERIFY(0x9697, 0x29);
     FETCH(0x9697);
     IR(7);
     HL = add16(HL, HL);
 L9698: /* 38552 ADD HL,HL        } */
+    VERIFY(0x9698, 0x29);
     FETCH(0x9698);
     IR(7);
     HL = add16(HL, HL);
 L9699: /* 38553 LD B,8           There are eight pixel rows in a character bitmap */
+    VERIFY(0x9699, 0x06);
     FETCH(0x9699);
     IMM(0x969A); B = mem[(uint16_t)0x969A];
 L969B: /* 38555 LD A,(HL)        {Copy the character bitmap (or triangle UDG, or item */
+    VERIFY(0x969B, 0x7E);
     FETCH(0x969B);
     A = RD(HL);
 L969C: /* 38556 LD (DE),A        graphic) to the screen (or screen buffer) */
+    VERIFY(0x969C, 0x12);
     FETCH(0x969C);
     WR(DE, A);
 L969D: /* 38557 INC HL            */
+    VERIFY(0x969D, 0x23);
     FETCH(0x969D);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L969E: /* 38558 INC D             */
+    VERIFY(0x969E, 0x14);
     FETCH(0x969E);
     D = inc8(D);
 L969F: /* 38559 DJNZ 38555       } */
+    VERIFY(0x969F, 0x10);
     FETCH(0x969F);
     T(1); IMM(0x96A0);
     if (--B) { JRTAKEN(0x96A0); goto L969B; }
 L96A1: /* 38561 RET               */
+    VERIFY(0x96A1, 0xC9);
     FETCH(0x96A1);
     POPPC(); goto dispatch;
 
 /* ---- PLAYTUNE ---- */
 L96A2: /* 38562 LD A,(HL)        Pick up the next byte of tune data from the table at */
+    VERIFY(0x96A2, 0x7E);
     FETCH(0x96A2);
     A = RD(HL);
 L96A3: /* 38563 CP 255           Has the tune finished? */
+    VERIFY(0x96A3, 0xFE);
     FETCH(0x96A3);
     IMM(0x96A4); cp8(mem[(uint16_t)0x96A4]);
 L96A5: /* 38565 RET Z            Return (with the zero flag set) if so */
+    VERIFY(0x96A5, 0xC8);
     FETCH(0x96A5);
     IR(1);
     if ((F&FZ)) { POPPC(); goto dispatch; }
 L96A6: /* 38566 LD BC,100        #REGb=0 (short note duration counter), #REGc=100 (short */
+    VERIFY(0x96A6, 0x01);
     FETCH(0x96A6);
     IMM(0x96A7); IMM(0x96A8); BC = RD16IMM(0x96A7);
 L96A9: /* 38569 XOR A            #REGa=0 (border colour and speaker state) */
+    VERIFY(0x96A9, 0xAF);
     FETCH(0x96A9);
     xor8(A);
 L96AA: /* 38570 LD E,(HL)        Save the byte of tune data in #REGe for retrieval during */
+    VERIFY(0x96AA, 0x5E);
     FETCH(0x96AA);
     E = RD(HL);
 L96AB: /* 38571 LD D,E           Initialise #REGd (pitch delay counter) */
+    VERIFY(0x96AB, 0x53);
     FETCH(0x96AB);
     D = E;
 L96AC: /* 38572 OUT (254),A      {Produce a short note (approximately 0.003s) whose pitch */
+    VERIFY(0x96AC, 0xD3);
     FETCH(0x96AC);
     IMM(0x96AD); OUTP((uint16_t)((mem[(uint16_t)0x96AD]) | (A << 8)), A);
 L96AE: /* 38574 DEC D            is determined by the value in #REGe */
+    VERIFY(0x96AE, 0x15);
     FETCH(0x96AE);
     D = dec8(D);
 L96AF: /* 38575 JR NZ,38580       */
+    VERIFY(0x96AF, 0x20);
     FETCH(0x96AF);
     IMM(0x96B0);
     if (!(F&FZ)) { JRTAKEN(0x96B0); goto L96B4; }
 L96B1: /* 38577 LD D,E            */
+    VERIFY(0x96B1, 0x53);
     FETCH(0x96B1);
     D = E;
 L96B2: /* 38578 XOR 24            */
+    VERIFY(0x96B2, 0xEE);
     FETCH(0x96B2);
     IMM(0x96B3); xor8(mem[(uint16_t)0x96B3]);
 L96B4: /* 38580 DJNZ 38572       } */
+    VERIFY(0x96B4, 0x10);
     FETCH(0x96B4);
     T(1); IMM(0x96B5);
     if (--B) { JRTAKEN(0x96B5); goto L96AC; }
 L96B6: /* 38582 EX AF,AF'        Save #REGa briefly */
+    VERIFY(0x96B6, 0x08);
     FETCH(0x96B6);
     EXAF();
 L96B7: /* 38583 LD A,C           {Is the short note counter in #REGc (which starts off at */
+    VERIFY(0x96B7, 0x79);
     FETCH(0x96B7);
     A = C;
 L96B8: /* 38584 CP 50            100) down to 50 yet?} */
+    VERIFY(0x96B8, 0xFE);
     FETCH(0x96B8);
     IMM(0x96B9); cp8(mem[(uint16_t)0x96B9]);
 L96BA: /* 38586 JR NZ,38590      Jump if not */
+    VERIFY(0x96BA, 0x20);
     FETCH(0x96BA);
     IMM(0x96BB);
     if (!(F&FZ)) { JRTAKEN(0x96BB); goto L96BE; }
 L96BC: /* 38588 RL E             Otherwise double the value in #REGe (which halves the */
+    VERIFY(0x96BC, 0xCB);
     FETCH(0x96BC); FETCH(0x96BD);
     E = rl(E);
 L96BE: /* 38590 EX AF,AF'        Restore the value of #REGa */
+    VERIFY(0x96BE, 0x08);
     FETCH(0x96BE);
     EXAF();
 L96BF: /* 38591 DEC C            Decrement the short note counter in #REGc */
+    VERIFY(0x96BF, 0x0D);
     FETCH(0x96BF);
     C = dec8(C);
 L96C0: /* 38592 JR NZ,38572      Jump back unless we've finished playing 50 short notes */
+    VERIFY(0x96C0, 0x20);
     FETCH(0x96C0);
     IMM(0x96C1);
     if (!(F&FZ)) { JRTAKEN(0x96C1); goto L96AC; }
 L96C2: /* 38594 CALL 38601       Check whether ENTER, 0 or the fire button is being */
+    VERIFY(0x96C2, 0xCD);
     FETCH(0x96C2);
     IMM(0x96C3); IMM(0x96C4); IC(0x96C4, 1);
     PUSHW(0x96C5); goto L96C9;
 L96C5: /* 38597 RET NZ           Return (with the zero flag reset) if it is */
+    VERIFY(0x96C5, 0xC0);
     FETCH(0x96C5);
     IR(1);
     if (!(F&FZ)) { POPPC(); goto dispatch; }
 L96C6: /* 38598 INC HL           Move #REGhl along to the next byte of tune data */
+    VERIFY(0x96C6, 0x23);
     FETCH(0x96C6);
     IR(2);
     HL = (uint16_t)(HL + 1);
 L96C7: /* 38599 JR 38562         Jump back to play the next batch of 100 short notes */
+    VERIFY(0x96C7, 0x18);
     FETCH(0x96C7);
     IMM(0x96C8); JRTAKEN(0x96C8);
     goto L96A2;
 
 /* ---- CHECKENTER ---- */
 L96C9: /* 38601 LD A,(34254)     Collect the Kempston joystick indicator from #R34254 */
+    VERIFY(0x96C9, 0x3A);
     FETCH(0x96C9);
     { IMM(0x96CA); IMM(0x96CB); uint16_t ea = RD16IMM(0x96CA);
     A = RD(ea); }
 L96CC: /* 38604 OR A             Is the joystick connected? */
+    VERIFY(0x96CC, 0xB7);
     FETCH(0x96CC);
     or8(A);
 L96CD: /* 38605 JR Z,38612       Jump if not */
+    VERIFY(0x96CD, 0x28);
     FETCH(0x96CD);
     IMM(0x96CE);
     if ((F&FZ)) { JRTAKEN(0x96CE); goto L96D4; }
 L96CF: /* 38607 IN A,(31)        Collect input from the joystick */
+    VERIFY(0x96CF, 0xDB);
     FETCH(0x96CF);
     IMM(0x96D0); A = INP((uint16_t)((mem[(uint16_t)0x96D0]) | (A << 8)));
 L96D1: /* 38609 BIT 4,A          Is the fire button being pressed? */
+    VERIFY(0x96D1, 0xCB);
     FETCH(0x96D1); FETCH(0x96D2);
     bit(4, A);
 L96D3: /* 38611 RET NZ           Return (with the zero flag reset) if so */
+    VERIFY(0x96D3, 0xC0);
     FETCH(0x96D3);
     IR(1);
     if (!(F&FZ)) { POPPC(); goto dispatch; }
 L96D4: /* 38612 LD BC,45054      {Read keys H-J-K-L-ENTER and 6-7-8-9-0 */
+    VERIFY(0x96D4, 0x01);
     FETCH(0x96D4);
     IMM(0x96D5); IMM(0x96D6); BC = RD16IMM(0x96D5);
 L96D7: /* 38615 IN A,(C)         } */
+    VERIFY(0x96D7, 0xED);
     FETCH(0x96D7); FETCH(0x96D8);
     { uint8_t v = INP(BC); in_flags(v); A = v; }
 L96D9: /* 38617 AND 1            Keep only bit 0 of the result (ENTER, 0) */
+    VERIFY(0x96D9, 0xE6);
     FETCH(0x96D9);
     IMM(0x96DA); and8(mem[(uint16_t)0x96DA]);
 L96DB: /* 38619 CP 1             Reset the zero flag if ENTER or 0 is being pressed */
+    VERIFY(0x96DB, 0xFE);
     FETCH(0x96DB);
     IMM(0x96DC); cp8(mem[(uint16_t)0x96DC]);
 L96DD: /* 38621 RET               */
+    VERIFY(0x96DD, 0xC9);
     FETCH(0x96DD);
     POPPC(); goto dispatch;
 
 /* ---- INTROSOUND ---- */
 L96DE: /* 38622 LD E,A           Save the value of #REGa in #REGe for later retrieval */
+    VERIFY(0x96DE, 0x5F);
     FETCH(0x96DE);
     E = A;
 L96DF: /* 38623 LD C,254         We will output to port #b254 */
+    VERIFY(0x96DF, 0x0E);
     FETCH(0x96DF);
     IMM(0x96E0); C = mem[(uint16_t)0x96E0];
 L96E1: /* 38625 LD D,A           Copy #REGa into #REGd; bits 0-2 of #REGd determine the */
+    VERIFY(0x96E1, 0x57);
     FETCH(0x96E1);
     D = A;
 L96E2: /* 38626 RES 4,D          Reset bit 4 of #REGd (initial speaker state) */
+    VERIFY(0x96E2, 0xCB);
     FETCH(0x96E2); FETCH(0x96E3);
     D = (uint8_t)(D & ~(1u << 4));
 L96E4: /* 38628 RES 3,D          Reset bit 3 of #REGd (initial MIC state) */
+    VERIFY(0x96E4, 0xCB);
     FETCH(0x96E4); FETCH(0x96E5);
     D = (uint8_t)(D & ~(1u << 3));
 L96E6: /* 38630 LD B,E           Initialise #REGb (delay counter for the inner loop) */
+    VERIFY(0x96E6, 0x43);
     FETCH(0x96E6);
     B = E;
 L96E7: /* 38631 CP B             Is it time to flip the MIC and speaker and make the */
+    VERIFY(0x96E7, 0xB8);
     FETCH(0x96E7);
     cp8(B);
 L96E8: /* 38632 JR NZ,38636      Jump if not */
+    VERIFY(0x96E8, 0x20);
     FETCH(0x96E8);
     IMM(0x96E9);
     if (!(F&FZ)) { JRTAKEN(0x96E9); goto L96EC; }
 L96EA: /* 38634 LD D,24          Set bits 3 (MIC) and 4 (speaker) of #REGd, and reset */
+    VERIFY(0x96EA, 0x16);
     FETCH(0x96EA);
     IMM(0x96EB); D = mem[(uint16_t)0x96EB];
 L96EC: /* 38636 OUT (C),D        Set the MIC state, speaker state and border colour */
+    VERIFY(0x96EC, 0xED);
     FETCH(0x96EC); FETCH(0x96ED);
     OUTP(BC, D);
 L96EE: /* 38638 DJNZ 38631       Jump back until the inner loop is finished */
+    VERIFY(0x96EE, 0x10);
     FETCH(0x96EE);
     T(1); IMM(0x96EF);
     if (--B) { JRTAKEN(0x96EF); goto L96E7; }
 L96F0: /* 38640 DEC A            Is the outer loop finished too? */
+    VERIFY(0x96F0, 0x3D);
     FETCH(0x96F0);
     A = dec8(A);
 L96F1: /* 38641 JR NZ,38625      Jump back if not */
+    VERIFY(0x96F1, 0x20);
     FETCH(0x96F1);
     IMM(0x96F2);
     if (!(F&FZ)) { JRTAKEN(0x96F2); goto L96E1; }
 L96F3: /* 38643 RET               */
+    VERIFY(0x96F3, 0xC9);
     FETCH(0x96F3);
     POPPC(); goto dispatch;
 }

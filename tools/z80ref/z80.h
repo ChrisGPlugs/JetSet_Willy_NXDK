@@ -12,6 +12,9 @@ struct z80 {
   uint8_t (*port_in)(z80*, uint16_t);
   void (*port_out)(z80*, uint16_t, uint8_t);
   void* userdata;
+  // Called after every instruction, just before interrupts are considered
+  // (JSW port addition: lets the host raise and drop /INT on its schedule).
+  void (*before_int)(z80*);
 
   unsigned long cyc; // cycle count (t-states)
 

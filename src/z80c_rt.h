@@ -242,7 +242,49 @@ static inline int cpi_rep(int dir)
 
 #define EXAF()  do { uint16_t t_ = AF; AF = af2_; af2_ = t_; } while (0)
 #define EXX_()  do { uint16_t t_; t_ = BC; BC = bc2_; bc2_ = t_; t_ = DE; DE = de2_; de2_ = t_; t_ = HL; HL = hl2_; hl2_ = t_; } while (0)
-#define HALT_() z80c_bad_jump(0xFFFF)
+/* ---- interrupts (generated with --interrupts) ----
+ * Checked at every instruction boundary, as the Z80 does: /INT is active
+ * for the first zx_int_len T-states of a frame (zx_int_active), IFF1 must be
+ * set, and the instruction after EI is never interrupted (ei_delay).
+ * Acceptance takes 13 (IM 1) or 19 (IM 2) T-states: a 7-T acknowledge, the
+ * push of the return address, and for IM 2 the vector read from I*256+0xFF
+ * (the Spectrum's idle data bus). */
+static Z80C_UNUSED int ei_delay;
+static inline uint16_t take_int(uint16_t ret)
+{
+    zx_iff = 0;
+    zx_int_pending = 0;
+    T(7);
+    PUSHW(ret);
+    if (zx_im == 2) {
+        uint16_t v = (uint16_t)((I_ << 8) | 0xFF);
+        uint8_t lo = RD(v), hi = RD((uint16_t)(v + 1));
+        return (uint16_t)(lo | (hi << 8));
+    }
+    return 0x0038;
+}
+#ifdef Z80C_INTERRUPTS
+#define INTCHECK(a) do { if (zx_int_pending | ei_delay) { \
+        if (ei_delay) ei_delay = 0; \
+        else if (zx_iff && zx_int_active()) { pc = take_int(a); goto dispatch; } } } while (0)
+#else
+#define INTCHECK(a) do { } while (0)
+#endif
+/* HALT: the CPU executes NOPs (4 T-states each) until an interrupt is
+ * accepted; it then returns to the instruction after the HALT. */
+#define HALT_(nx) do { for (;;) { \
+        if (zx_int_pending | ei_delay) { \
+            if (ei_delay) ei_delay = 0; \
+            else if (zx_iff && zx_int_active()) { pc = take_int(nx); goto dispatch; } } \
+        T(4); } } while (0)
+
+/* ---- opcode check (Z80C_VERIFY): catches self-modified opcodes and code
+ * run from the wrong bank, which a static translation can't follow ---- */
+#ifdef Z80C_VERIFY
+#define VERIFY(a, op) do { if (mem[a] != (op)) { z80c_bad_opcode(a); return; } } while (0)
+#else
+#define VERIFY(a, op) do { } while (0)
+#endif
 
 #define Z80C_HOOK(a) do { if (z80c_hook) { z80c_regs_sync(); z80c_hook(a); } } while (0)
 

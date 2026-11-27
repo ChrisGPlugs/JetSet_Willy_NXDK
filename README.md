@@ -1,7 +1,14 @@
 # Jet Set Willy for the original Xbox (nxdk)
 
-A native port of Matthew Smith's **Jet Set Willy** (ZX Spectrum 48K, Software
-Projects, 1984) to the original Xbox, built with [nxdk](https://github.com/XboxDev/nxdk).
+Native ports of Matthew Smith's **Jet Set Willy** (ZX Spectrum 48K, Software
+Projects, 1984) and of John Elliott's **Jet Set Willy 128** (v0.04 Hacklevel 9)
+to the original Xbox, built with [nxdk](https://github.com/XboxDev/nxdk). Two
+XBEs:
+
+| Build | XBE | Data file next to it | Title ID |
+|---|---|---|---|
+| `make` | `bin/default.xbe` "Jet Set Willy" | `JetSetWilly.tzx` | 4A535700 |
+| `make -C jsw128` | `jsw128/bin/default.xbe` "Jet Set Willy 128" | `JetSetWilly128.tzx` (the HL9 tape) | 4A535701 |
 
 The game logic is the original Z80 code, translated to C instruction by
 instruction from Richard Dymond's annotated
@@ -41,13 +48,44 @@ bugs and the code card. On the code screen, X, B, Y and A are the colour keys
 1–4 (blue, red, magenta, green) and Start is ENTER. You'll need the code card;
 two wrong codes reset the game, as on the Spectrum.
 
+## Jet Set Willy 128 (HL9)
+
+JSW128 runs on a 128K Spectrum: 130 rooms kept in four 16K banks, AY music
+played by Ian Collier's TUNE.BIN from IM2 interrupts, a new font and title
+screen, extra guardian types, the in-game teleporter and an extended
+cheat mode. Put the HL9 tape next to the XBE as `JetSetWilly128.tzx` (the
+original file name, `Jet Set Willy 128k v. 0.04 HL 9.tzx`, also works).
+
+Same pad layout as the 48K game, except: there is no code card and no
+original/fixed choice, pause is X or Start (JSW128 pauses on A only), and
+with the cheat on White/Black teleport through rooms 0–129. JSW128's own
+cheat-mode keys are on the keyboard (desktop build) as on the Spectrum.
+
+How it's translated: there is no full disassembly of HL9, so the code map
+for `src/jsw128_code.c` comes from
+
+- a trace of every instruction the original executes on the reference Z80
+  core in long scripted runs (`tools/z80c/maps/jsw128_hl9_trace.txt`),
+- every 48K code address whose bytes are unchanged in HL9,
+- the 16-entry guardian-type jump table at 34002,
+- and static descent from all of those (untaken branches, call targets).
+
+The 128K machine (paging by copying 16K banks in and out of 0xC000,
+contention of the odd banks, the AY ports, the /INT window of 36 T-states)
+is in `src/zx.c`; interrupts are taken at instruction boundaries in the
+generated code, with the EI delay, HALT, and IM 1/IM 2 timing. Comments for
+the unchanged code come from the 48K disassembly; code new in JSW128 is
+marked `(JSW128)`. If the game ever reaches code outside the map, the XBE
+stops with the address on screen (please report it).
+
 ## Building
 
 ```sh
 export NXDK_DIR=/path/to/nxdk
 make                         # bin/default.xbe (+ JetSetWilly.iso)
-make -f Makefile.host        # desktop build (SDL2), ./jetsetwilly
-make -f Makefile.host test   # compare with the original Z80 code
+make -C jsw128               # jsw128/bin/default.xbe (+ JetSetWilly128.iso)
+make -f Makefile.host        # desktop builds (SDL2): ./jetsetwilly, ./jetsetwilly128
+make -f Makefile.host test   # compare both with the original Z80 code
 ```
 
 The XBE's title ID is `4A535700` ("JSW"); `tools/xbe_titleid.sh` patches it
@@ -102,6 +140,18 @@ because the reference core lacks it. `tools/run_difftest.sh` runs:
 
 All are identical to the original, RAM and timing.
 
+For JSW128, `tools/difftest128.c` / `tools/run_difftest128.sh` do the same on
+a 128K machine, hashing every bank and also the sequence of AY register
+writes: the title screen (40 s of attract animation and tune), standing
+still, the ending, random play with teleports through all 256 room numbers
+(77–81 rooms visited per run), random play without the cheat (deaths, game
+overs), and random presses of every key with cheat mode on, 20,000
+main-loop passes each. All identical. The test build also checks, before
+every instruction, that the opcode in RAM is the one that was translated.
+
+Stopwatch for JSW128 (contention on): one in-game minute is 22.8 s, so
+7:00am to 7:05am standing still takes about 1 min 54 s.
+
 Stopwatch check on hardware: with contention, one in-game minute is 256
 main-loop passes, or **23.0 s**. Start a game and stand still: the clock
 should go from 7:00am to 7:05am in about 1 min 55 s.
@@ -109,9 +159,10 @@ should go from 7:00am to 7:05am in about 1 min 55 s.
 ## Licence
 
 - Port code: MIT (see LICENSE).
-- `src/jsw_code.c` is generated from Richard Dymond's
+- `src/jsw_code.c` and `src/jsw128_code.c` are generated from Richard Dymond's
   [Jet Set Willy disassembly](https://github.com/skoolkid/jetsetwilly) and
-  carries its labels and comments, so that one file is under the disassembly's
-  licence for annotations, **CC BY-SA 3.0**, with attribution in its header.
-- Jet Set Willy is © 1984 Matthew Smith / Software Projects. The game data is
-  not included: never commit it, or share ISOs built with it.
+  carry its labels and comments, so those files are under the disassembly's
+  licence for annotations, **CC BY-SA 3.0**, with attribution in their headers.
+- Jet Set Willy is © 1984 Matthew Smith / Software Projects; Jet Set Willy
+  128 is John Elliott's. The game data is not included: never commit it, or
+  share ISOs built with it.
