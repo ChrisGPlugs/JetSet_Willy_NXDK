@@ -32,27 +32,51 @@
 #define DATA_DIR ""
 #endif
 
-#ifdef JSW_ONLY_128
-/* Jet Set Willy 128 (John Elliott, v0.04 Hacklevel 9): 128K machine, AY
- * music from IM2 interrupts, 130 rooms. */
+/* Three builds share this file:
+ *   default        Jet Set Willy (48K) only
+ *   JSW_ONLY_128   Jet Set Willy 128 (John Elliott, v0.04 Hacklevel 9):
+ *                  128K machine, AY music from IM2 interrupts, 130 rooms
+ *   JSW_COMBINED   JetSetWillyX: both; with both tapes present, a chooser
+ *                  built on the 48K game's own title screen */
+#if defined(JSW_COMBINED)
+#define GAME_TITLE "JetSetWillyX"
+#define HAVE_48  1
+#define HAVE_128 1
+static int v128;
+#elif defined(JSW_ONLY_128)
 #define GAME_TITLE "Jet Set Willy 128"
 #define HAVE_128 1
 static const int v128 = 1;
 #else
 #define GAME_TITLE "Jet Set Willy"
+#define HAVE_48  1
+static const int v128 = 0;
 #endif
 
 #include "zx.h"
 #include "zx_font.h"
 #include "jsw.h"
-#ifdef JSW_ONLY_128
+#include <setjmp.h>
+#ifdef HAVE_128
 #include "ay.h"
 #include "jsw128.h"
 #include "z80c.h"
-int jsw_in_title;                       /* jsw.c's, for the 48K build */
-#define JSW_ROOMS 130                   /* HL9: rooms 0-129 */
-#else
-#define JSW_ROOMS 61                    /* rooms 0-60 */
+#endif
+#ifndef HAVE_48
+int jsw_in_title;                       /* jsw.c's, which this build doesn't link */
+#endif
+#define JSW_ROOMS (v128 ? 130 : 61)     /* HL9: rooms 0-129; 48K: 0-60 */
+
+#if defined(HAVE_48) && defined(HAVE_128)
+/* Chooser: the 48K title screen with a menu in rows 21-23. Back pressed
+ * twice within 1.5 s on either game's title screen returns to it (the
+ * frame hook longjmps out of the running engine, as in ManicMinerX). */
+static int      chooser_available, in_chooser, chooser_sel;
+static int      ui_up, ui_down, ui_select, ui_stick_y;
+static int      back_to_chooser;
+static uint64_t last_back_frame;
+static jmp_buf  chooser_jmp, chosen_jmp;
+#define BACK_DOUBLE_FRAMES 75
 #endif
 
 #define ROM_FONT 0x3D00
@@ -344,13 +368,13 @@ static uint8_t teleport_in_filter(uint16_t port, uint8_t v)
     if (teleport_armed == 1 && port == 0xEFFE) {
         teleport_armed = 2;
         v &= (uint8_t)~0x02;                                   /* '9' */
-#ifdef JSW_ONLY_128
-        if (teleport_target & 32)  v &= (uint8_t)~0x04;        /* '8' */
-        if (teleport_target & 64)  v &= (uint8_t)~0x08;        /* '7' */
-        if (teleport_target & 128) v &= (uint8_t)~0x10;        /* '6' */
-#else
-        if (teleport_target & 32) v &= (uint8_t)~0x10;         /* '6' */
-#endif
+        if (v128) {
+            if (teleport_target & 32)  v &= (uint8_t)~0x04;    /* '8' */
+            if (teleport_target & 64)  v &= (uint8_t)~0x08;    /* '7' */
+            if (teleport_target & 128) v &= (uint8_t)~0x10;    /* '6' */
+        } else if (teleport_target & 32) {
+            v &= (uint8_t)~0x10;                               /* '6' */
+        }
         return v;
     }
     if (teleport_armed == 2 && port == 0xF7FE) {
@@ -372,13 +396,14 @@ static void start_teleport(int forward)
 static void game_hook(uint16_t addr)
 {
     switch (addr) {
-#ifdef JSW_ONLY_128
-    case JSW_TITLESCREEN: jsw_in_title = 1; break;
-    case JSW_STARTGAME:   jsw_in_title = 0; break;
-#else
-    case JSW_ENTERCODES:  in_codes = 1; break;
-    case JSW_TITLESCREEN: in_codes = 0; break;
-#endif
+    case JSW_TITLESCREEN:
+        in_codes = 0;
+        if (v128) jsw_in_title = 1;      /* (jsw.c does this for the 48K game) */
+        break;
+    case JSW_STARTGAME:
+        if (v128) jsw_in_title = 0;
+        break;
+    case JSW_ENTERCODES:  if (!v128) in_codes = 1; break;
     case JSW_TELECHECK:   if (teleport_pending) teleport_armed = 1; break;
     case JSW_MAINLOOP:    teleport_armed = 0; break;
     default: break;
@@ -415,6 +440,23 @@ static void run_macros(void)
  * (blue, red, magenta, green), Start = ENTER. */
 static void pad_button(int button, int down)
 {
+#if defined(HAVE_48) && defined(HAVE_128)
+    if (in_chooser) {
+        /* Nothing reaches the game: it would start on ENTER or fire. */
+        if (down) {
+            if (button == SDL_CONTROLLER_BUTTON_DPAD_UP) ui_up = 1;
+            if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) ui_down = 1;
+            if (button == SDL_CONTROLLER_BUTTON_A || button == SDL_CONTROLLER_BUTTON_START) ui_select = 1;
+            if (button == SDL_CONTROLLER_BUTTON_LEFTSTICK) diag_on = !diag_on;
+        }
+        return;
+    }
+    if (button == SDL_CONTROLLER_BUTTON_BACK && down && chooser_available && jsw_in_title) {
+        if (last_back_frame && frame_count - last_back_frame <= BACK_DOUBLE_FRAMES)
+            back_to_chooser = 1;
+        last_back_frame = frame_count;
+    }
+#endif
     if (in_codes) {
         switch (button) {
         case SDL_CONTROLLER_BUTTON_X: set_bit(pad_keys, ZX_ROW_1_5, 0, down); return;
@@ -488,6 +530,18 @@ static void read_pad_axes(void)
         fire  = !in_codes && (SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_A) ||
                               SDL_GameControllerGetButton(pad, SDL_CONTROLLER_BUTTON_B));
     }
+#if defined(HAVE_48) && defined(HAVE_128)
+    if (pad) {
+        int y = SDL_GameControllerGetAxis(pad, SDL_CONTROLLER_AXIS_LEFTY);
+        int dir = y < -16000 ? -1 : (y > 16000 ? 1 : 0);
+        if (dir != ui_stick_y) { if (dir < 0) ui_up = 1; if (dir > 0) ui_down = 1; }
+        ui_stick_y = dir;
+    }
+    if (in_chooser) {
+        zx_kempston = 0;
+        return;
+    }
+#endif
     if (right) joy |= 0x01;
     if (left)  joy |= 0x02;
     if (fire)  joy |= 0x10;
@@ -549,6 +603,12 @@ static void poll_input(void)
             if (!e.key.repeat) {
                 if (e.key.keysym.sym == SDLK_ESCAPE) exit(0);
                 if (e.key.keysym.sym == SDLK_F1 && e.type == SDL_KEYDOWN) diag_on = !diag_on;
+#if defined(HAVE_48) && defined(HAVE_128)
+                if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_UP) ui_up = 1;
+                if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_DOWN) ui_down = 1;
+                if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_RETURN && in_chooser) ui_select = 1;
+                if (e.key.keysym.sym == SDLK_BACKSPACE) pad_button(SDL_CONTROLLER_BUTTON_BACK, e.type == SDL_KEYDOWN);
+#endif
                 keyboard_key(e.key.keysym.sym, e.type == SDL_KEYDOWN);
             }
             break;
@@ -561,6 +621,9 @@ static void poll_input(void)
     run_macros();
     for (int row = 0; row < 8; row++)
         zx_keys[row] = (uint8_t)(0x1F & ~(pad_keys[row] | kb_keys[row] | macro_keys[row]));
+#if defined(HAVE_48) && defined(HAVE_128)
+    if (in_chooser) zx_keys_clear();       /* the title would start on ENTER/0 */
+#endif
 }
 
 /* ------------------------------------------------------------------------ */
@@ -692,7 +755,8 @@ static void pace(void)
  *   JSW_EXIT_AFTER=<n>      quit after n frames
  *   JSW_SHOTS=<f1,f2,...>   save shot_<frame>.bmp at those frames
  *   JSW_KEYS=<f>:<c>,...    hold key c ('1'-'9', '0', a-z, '#' ENTER, '_' SPACE,
- *                           '^' SHIFT, '<' White, '>' Black) for 10 frames from frame f
+ *                           '^' SHIFT, '<' White, '>' Black; JetSetWillyX: 'U'/'D' menu
+ *                           up/down, 'S' select, '!' pad Back) for 10 frames from frame f
  *   JSW_CHEAT=<f>           turn the WRITETYPER cheat on at frame f
  *   JSW_REPORT=1            print room / lives / items / clock every 100 frames
  *   JSW_DIAG=1              start with the diagnostics overlay on (F1) */
@@ -703,6 +767,12 @@ static const char *dbg_shots, *dbg_keys;
 static void dbg_key_char(char c, int down)
 {
     static const char *rows[8] = { "^zxcv", "asdfg", "qwert", "12345", "09876", "poiuy", "#lkjh", "_ mnb" };
+#if defined(HAVE_48) && defined(HAVE_128)
+    if (c == 'U' && down) { ui_up = 1; return; }
+    if (c == 'D' && down) { ui_down = 1; return; }
+    if (c == 'S' && down) { ui_select = 1; return; }
+    if (c == '!') { pad_button(SDL_CONTROLLER_BUTTON_BACK, down); return; }
+#endif
     if (c == '<' || c == '>') {
         if (down) pad_button(c == '<' ? SDL_CONTROLLER_BUTTON_LEFTSHOULDER : SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, 1);
         return;
@@ -749,10 +819,60 @@ static void debug_frame(void)
 }
 #endif
 
+#if defined(HAVE_48) && defined(HAVE_128)
+/* Print text at a character cell with the ROM font. */
+static void ui_print(int row, int col, const char *t, uint8_t attr)
+{
+    for (; *t && col < 32; t++, col++) {
+        uint8_t ch = (uint8_t)*t;
+        if (ch < 32 || ch > 127) ch = '?';
+        for (int py = 0; py < 8; py++) {
+            uint16_t addr = (uint16_t)(0x4000 | ((row & 0x18) << 8) | (py << 8) | ((row & 7) << 5) | col);
+            mem[addr] = mem[ROM_FONT + (ch - 32) * 8 + py];
+        }
+        mem[0x5800 + row * 32 + col] = attr;
+    }
+}
+
+/* The menu, redrawn over the 48K title screen every frame (the title
+ * clears the screen each time it starts over). Selected: the cavern-name
+ * colours of the game (INK 0: PAPER 6); others: INK 7 on black. */
+static void chooser_draw(void)
+{
+    static const char *const items[2] = {
+        "    JET SET WILLY  (1984)       ",
+        "    JET SET WILLY 128  (HL9)    ",
+    };
+    ui_print(20, 0, "                                ", 0x00);
+    for (int i = 0; i < 2; i++)
+        ui_print(21 + i, 0, items[i], chooser_sel == i ? 0x30 : 0x07);
+    ui_print(23, 0, " D-pad choose     A / Start play", 0x05);
+}
+
+/* Chooser input; returns when nothing was chosen this frame. */
+static void chooser_frame(void)
+{
+    if (ui_up)   { chooser_sel = 0; ui_up = 0; }
+    if (ui_down) { chooser_sel = 1; ui_down = 0; }
+    chooser_draw();
+    if (ui_select) {
+        ui_select = 0;
+        longjmp(chosen_jmp, 1 + chooser_sel);
+    }
+}
+#endif
+
 static void frame_hook(void)
 {
     render_audio();
     poll_input();
+#if defined(HAVE_48) && defined(HAVE_128)
+    if (in_chooser) chooser_frame();
+    if (back_to_chooser) {
+        back_to_chooser = 0;
+        longjmp(chooser_jmp, 1);               /* leave the engine for the chooser */
+    }
+#endif
 #ifndef NXDK
     debug_frame();
 #endif
@@ -814,38 +934,127 @@ static void fatal_screen(const char *line1, const char *line2)
     exit(1);
 }
 
-/* The data file: the original tape as TZX or TAP, or a 32K dump. */
-static const char *const data_files[] = {
-#ifdef JSW_ONLY_128
-    DATA_DIR "JetSetWilly128.tzx", DATA_DIR "JetSetWilly128.tap",
-    DATA_DIR "Jet Set Willy 128k v. 0.04 HL 9.tzx", DATA_DIR "Jet Set Willy 128k v. 0.04 HL 9.tap",
-#else
+/* The data files: the original tapes as TZX or TAP (or a 32K dump of the
+ * 48K game). */
+#ifdef HAVE_48
+static const char *const files48[] = {
     DATA_DIR "JetSetWilly.tzx", DATA_DIR "JetSetWilly.tap", DATA_DIR "JetSetWilly.bin",
     DATA_DIR "Jet Set Willy.tzx", DATA_DIR "Jet Set Willy.tap",
-#endif
 };
+static uint8_t image48[JSW_IMAGE_SIZE];
+#endif
+#ifdef HAVE_128
+static const char *const files128[] = {
+    DATA_DIR "JetSetWilly128.tzx", DATA_DIR "JetSetWilly128.tap",
+    DATA_DIR "Jet Set Willy 128k v. 0.04 HL 9.tzx", DATA_DIR "Jet Set Willy 128k v. 0.04 HL 9.tap",
+};
+static jsw128_image_t image128;
+#endif
+static uint8_t tape[1 << 20];
+static uint8_t rom[0x4000];
+static int     have_rom;
 
-#ifdef JSW_ONLY_128
-static void run_128(const uint8_t *tape_data, long n, int have_rom, const uint8_t *rom)
+/* 1 = loaded, 0 = no file, -1 = a file that isn't the right tape. */
+#ifdef HAVE_48
+static int load48(void)
 {
-    static jsw128_image_t img;
-    if (jsw128_load(tape_data, n, &img))
-        fatal_screen("The data file isn't the JSW128", "v0.04 HL9 tape (see README).");
-    for (;;) {
-        jsw128_prepare(&img);
-        zx_install_font(have_rom ? rom : NULL);
-        ay_init(&ay, AY_CLOCK_128K, AUDIO_RATE);
-        frame_start_level = 0;
-        zx_in_filter = teleport_in_filter;
-        z80c_hook = game_hook;
-        jsw_in_title = 0;
-        jsw128_z80_run(JSW128_BEGIN);
-        /* The translated code only returns if the game went somewhere that
-         * wasn't translated: say where, so it can be reported. */
-        char where[40];
-        snprintf(where, sizeof where, "Stopped at %04X (bank %d).", z80c_bad_addr, zx_bank_c000);
-        fatal_screen(where, "Please report this.");
+    int found = 0;
+    for (unsigned i = 0; i < sizeof files48 / sizeof files48[0]; i++) {
+        long n = load_file(files48[i], tape, sizeof tape);
+        if (n < 0) continue;
+        found = 1;
+        if (jsw_load(tape, n, image48) == 0) return 1;
     }
+    return found ? -1 : 0;
+}
+#endif
+#ifdef HAVE_128
+static int load128(void)
+{
+    int found = 0;
+    for (unsigned i = 0; i < sizeof files128 / sizeof files128[0]; i++) {
+        long n = load_file(files128[i], tape, sizeof tape);
+        if (n < 0) continue;
+        found = 1;
+        if (jsw128_load(tape, n, &image128) == 0) return 1;
+    }
+    return found ? -1 : 0;
+}
+#endif
+
+#ifdef HAVE_48
+/* Run the 48K game. Returns only to start over after a machine reset (two
+ * wrong code-card entries), which it does itself. */
+static void run48(int original)
+{
+    for (;;) {
+        jsw_prepare(image48, original ? JSW_OPT_CODECARD : JSW_OPT_FIXES);
+        zx_install_font(have_rom ? rom : NULL);
+        /* The code card's grid square comes from the FRAMES system
+         * variable, which on a real Spectrum is whatever the tape loading
+         * left there (the game runs with interrupts off). */
+        uint32_t seed = (uint32_t)SDL_GetPerformanceCounter();
+        mem[23672] = (uint8_t)(seed ^ (seed >> 8) ^ (seed >> 16));
+        zx_in_filter = teleport_in_filter;
+        jsw_hook = game_hook;
+        in_codes = 0;
+        jsw_run();          /* returns only when the game resets the machine */
+    }
+}
+#endif
+
+#ifdef HAVE_128
+static void run128(void)
+{
+    jsw128_prepare(&image128);
+    zx_install_font(have_rom ? rom : NULL);
+    ay_init(&ay, AY_CLOCK_128K, AUDIO_RATE);
+    frame_start_level = 0;
+    zx_in_filter = teleport_in_filter;
+    z80c_hook = game_hook;
+    jsw_in_title = 0;
+    jsw128_z80_run(JSW128_BEGIN);
+    /* The translated code only returns if the game went somewhere that
+     * wasn't translated: say where, so it can be reported. */
+    char where[40];
+    snprintf(where, sizeof where, "Stopped at %04X (bank %d).", z80c_bad_addr, zx_bank_c000);
+    fatal_screen(where, "Please report this.");
+}
+#endif
+
+#if defined(HAVE_48) && defined(HAVE_128)
+/* The chooser: the 48K game's title screen (picture, tune, scrolling
+ * message), run by the 48K engine itself, with the menu drawn over rows
+ * 20-23 by the frame hook. Returns 1 (48K) or 2 (128) via longjmp. */
+static void release_all_keys(void)
+{
+    /* A button can be pressed in one mode and released in another (Back
+     * twice opens the chooser while Back is still down): drop everything
+     * held so nothing sticks. */
+    memset(pad_keys, 0, sizeof pad_keys);
+    memset(kb_keys, 0, sizeof kb_keys);
+    zx_keys_clear();
+    ui_up = ui_down = ui_select = 0;
+}
+
+static int run_chooser(void)
+{
+    int r = setjmp(chosen_jmp);
+    if (r) {
+        in_chooser = 0;
+        release_all_keys();
+        return r;
+    }
+    release_all_keys();
+    in_chooser = 1;
+    v128 = 0;
+    jsw_prepare(image48, JSW_OPT_FIXES);
+    zx_install_font(have_rom ? rom : NULL);
+    zx_in_filter = NULL;
+    jsw_hook = NULL;
+    jsw_run();              /* the title screen loops until something is chosen */
+    in_chooser = 0;
+    return 1;
 }
 #endif
 
@@ -880,8 +1089,7 @@ int main(int argc, char **argv)
         if (SDL_IsGameController(i) && !pad) pad = SDL_GameControllerOpen(i);
 
     /* Optional 48K ROM for the authentic character set. */
-    static uint8_t rom[0x4000];
-    int have_rom = load_file(DATA_DIR "48.rom", rom, sizeof rom) == (long)sizeof rom;
+    have_rom = load_file(DATA_DIR "48.rom", rom, sizeof rom) == (long)sizeof rom;
 
     zx_reset();
     memset(mem, 0, sizeof mem);
@@ -896,27 +1104,24 @@ int main(int argc, char **argv)
 #endif
     zx_frame_hook = frame_hook;
 
-    static uint8_t tape[1 << 20];
-#ifdef JSW_ONLY_128
-    for (unsigned i = 0; i < sizeof data_files / sizeof data_files[0]; i++) {
-        long n = load_file(data_files[i], tape, sizeof tape);
-        if (n >= 0) run_128(tape, n, have_rom, rom);
+#if defined(HAVE_48) && defined(HAVE_128)
+    int ok48 = load48(), ok128 = load128();
+    if (ok48 <= 0 && ok128 <= 0) {
+        if (ok48 < 0 || ok128 < 0) fatal_screen("A data file isn't the right", "tape (see README).");
+        fatal_screen("Put JetSetWilly.tzx and/or", "JetSetWilly128.tzx by the XBE.");
     }
-    fatal_screen("JetSetWilly128.tzx not found.", "See README for where to get it.");
+#elif defined(HAVE_128)
+    int ok48 = 0, ok128 = load128();
+    if (ok128 < 0) fatal_screen("The data file isn't the JSW128", "v0.04 HL9 tape (see README).");
+    if (ok128 == 0) fatal_screen("JetSetWilly128.tzx not found.", "See README for where to get it.");
 #else
-    static uint8_t image[JSW_IMAGE_SIZE];
-    int found = 0, ok = 0;
-    for (unsigned i = 0; i < sizeof data_files / sizeof data_files[0] && !ok; i++) {
-        long n = load_file(data_files[i], tape, sizeof tape);
-        if (n < 0) continue;
-        found = 1;
-        ok = jsw_load(tape, n, image) == 0;
-    }
-    if (!ok) {
-        if (found) fatal_screen("The data file isn't the Jet Set", "Willy tape (see README).");
-        fatal_screen("JetSetWilly.tzx not found.", "See README for where to get it.");
-    }
+    int ok48 = load48(), ok128 = 0;
+    if (ok48 < 0) fatal_screen("The data file isn't the Jet Set", "Willy tape (see README).");
+    if (ok48 == 0) fatal_screen("JetSetWilly.tzx not found.", "See README for where to get it.");
+#endif
+    (void)ok128;
 
+#ifdef HAVE_48
     /* Original 1984 release (code card, original bugs): hold X or Y while
      * the game starts (desktop: JSW_ORIGINAL=1). Otherwise the official
      * Software Projects bug-fix POKEs are applied and the code card is
@@ -929,20 +1134,33 @@ int main(int argc, char **argv)
 #ifndef NXDK
     if (getenv("JSW_ORIGINAL") && *getenv("JSW_ORIGINAL") == '1') original = 1;
 #endif
+#endif
 
-    for (;;) {
-        jsw_prepare(image, original ? JSW_OPT_CODECARD : JSW_OPT_FIXES);
-        zx_install_font(have_rom ? rom : NULL);
-        /* The code card's grid square comes from the FRAMES system
-         * variable, which on a real Spectrum is whatever the tape loading
-         * left there (the game runs with interrupts off). */
-        uint32_t seed = (uint32_t)SDL_GetPerformanceCounter();
-        mem[23672] = (uint8_t)(seed ^ (seed >> 8) ^ (seed >> 16));
-        zx_in_filter = teleport_in_filter;
-        jsw_hook = game_hook;
-        in_codes = 0;
-        jsw_run();          /* returns only when the game resets the machine */
+#if defined(HAVE_48) && defined(HAVE_128)
+    volatile int choice = ok48 > 0 ? 1 : 2;
+    chooser_available = ok48 > 0 && ok128 > 0;
+    if (chooser_available) {
+        /* Back twice on a game's title screen lands here again. */
+        if (setjmp(chooser_jmp)) {
+            last_back_frame = 0;
+            macro_step = -1;
+            teleport_pending = teleport_armed = 0;
+            in_codes = 0;
+            jsw_in_title = 0;
+            frame_start_level = 0;
+            stats_t0_us = 0;
+        }
+        choice = run_chooser();
     }
+    v128 = choice == 2;
+    stats_t0_us = 0;
+    if (v128) run128();
+    else      run48(original);
+#elif defined(HAVE_128)
+    run128();
+#else
+    (void)ok48;
+    run48(original);
 #endif
     return 0;
 }

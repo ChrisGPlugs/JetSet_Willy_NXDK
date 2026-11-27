@@ -2,13 +2,24 @@
 
 Native ports of Matthew Smith's **Jet Set Willy** (ZX Spectrum 48K, Software
 Projects, 1984) and of John Elliott's **Jet Set Willy 128** (v0.04 Hacklevel 9)
-to the original Xbox, built with [nxdk](https://github.com/XboxDev/nxdk). Two
-XBEs:
+to the original Xbox, built with [nxdk](https://github.com/XboxDev/nxdk). Three
+XBEs, all with title ID **4A535758** ("JSWX"), so they share one save folder:
 
-| Build | XBE | Data file next to it | Title ID |
-|---|---|---|---|
-| `make` | `bin/default.xbe` "Jet Set Willy" | `JetSetWilly.tzx` | 4A535700 |
-| `make -C jsw128` | `jsw128/bin/default.xbe` "Jet Set Willy 128" | `JetSetWilly128.tzx` (the HL9 tape) | 4A535701 |
+| Build | XBE | Data file(s) next to it |
+|---|---|---|
+| `make -C JetSetWillyX` | `JetSetWillyX/bin/default.xbe` "JetSetWillyX": both games | `JetSetWilly.tzx` and/or `JetSetWilly128.tzx` |
+| `make` | `bin/default.xbe` "Jet Set Willy" | `JetSetWilly.tzx` |
+| `make -C jsw128` | `jsw128/bin/default.xbe` "Jet Set Willy 128" | `JetSetWilly128.tzx` (the HL9 tape) |
+
+## JetSetWillyX
+
+With both tapes present, JetSetWillyX starts on a chooser: the 48K game's
+own title screen (picture, theme tune, scrolling message), with a menu
+underneath. D-pad (or stick) chooses, A or Start plays. **Back pressed twice
+within 1.5 s on either game's title screen** returns to the chooser. With one
+tape it runs that game directly (no chooser); with neither it says what's
+missing. Holding X or Y at start-up still selects the original 1984 release
+for the 48K game.
 
 The game logic is the original Z80 code, translated to C instruction by
 instruction from Richard Dymond's annotated
@@ -82,14 +93,17 @@ stops with the address on screen (please report it).
 
 ```sh
 export NXDK_DIR=/path/to/nxdk
+make -C JetSetWillyX         # JetSetWillyX/bin/default.xbe (+ JetSetWillyX.iso)
 make                         # bin/default.xbe (+ JetSetWilly.iso)
 make -C jsw128               # jsw128/bin/default.xbe (+ JetSetWilly128.iso)
-make -f Makefile.host        # desktop builds (SDL2): ./jetsetwilly, ./jetsetwilly128
+make -f Makefile.host        # desktop builds (SDL2): ./jetsetwilly, ./jetsetwilly128, ./jetsetwillyx
 make -f Makefile.host test   # compare both with the original Z80 code
 ```
 
-The XBE's title ID is `4A535700` ("JSW"); `tools/xbe_titleid.sh` patches it
-in after linking, because nxdk's `cxbe` always writes FFFF0002.
+The title ID (`4A535758`, "JSWX") is patched in after linking by
+`tools/xbe_titleid.sh`, because nxdk's `cxbe` always writes FFFF0002. Each
+XBE has its own folder with small wrapper `.c` files, because nxdk writes
+object files next to their sources.
 
 If `JetSetWilly.tzx` is in this folder or in `Data files/` when you run
 `make`, it is copied next to the XBE and into the ISO. **Don't share ISOs or

@@ -8,7 +8,7 @@
 # and they are copied next to default.xbe and into the ISO.
 
 XBE_TITLE = Jet\ Set\ Willy
-XBE_TITLEID = 4A535700    # "JSW" 00 (cxbe writes FFFF0002; patched after linking)
+XBE_TITLEID = 4A535758    # "JSWX", shared by all three XBEs: one save folder (cxbe writes FFFF0002; patched after linking)
 GEN_XISO  = JetSetWilly.iso
 NXDK_SDL  = y
 
