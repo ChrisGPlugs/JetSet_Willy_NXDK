@@ -11,6 +11,14 @@ XBEs, all with title ID **4A535758** ("JSWX"), so they share one save folder:
 | `make` | `bin/default.xbe` "Jet Set Willy" | `JetSetWilly.tzx` |
 | `make -C jsw128` | `jsw128/bin/default.xbe` "Jet Set Willy 128" | `JetSetWilly128.tzx` (the HL9 tape) |
 
+> **RXDK version:** there is also a port of JetSetWillyX built with the
+> RXDK + SDL3 toolchain, with a proper 4:3 picture (and a 16:9 toggle), all
+> dashboard video modes up to 1080i, audio through the Xbox's own sound
+> hardware, LT/RT directional jumps and an END GAME? confirmation on Back.
+> Same game code and title ID. See
+> [JetSetWilly-rxdk](https://github.com/ChrisGPlugs/JetSetWilly-rxdk) and its
+> [v1.0.1 release](https://github.com/ChrisGPlugs/JetSetWilly-rxdk/releases/tag/v1.0.1).
+
 ## JetSetWillyX
 
 With both tapes present, JetSetWillyX starts on a chooser: the 48K game's
