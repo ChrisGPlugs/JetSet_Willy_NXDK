@@ -7,7 +7,7 @@
 # root, or in "Data files/", and it is copied next to default.xbe.
 
 XBE_TITLE = Jet\ Set\ Willy\ 128
-XBE_TITLEID = 4A535701    # "JSW" 01 (cxbe writes FFFF0002; patched after linking)
+XBE_TITLEID = 4A535758    # "JSWX", shared by all three XBEs (cxbe writes FFFF0002; patched after linking)
 GEN_XISO  = JetSetWilly128.iso
 NXDK_SDL  = y
 

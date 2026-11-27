@@ -13,7 +13,10 @@ GAME_SRCS = src/jsw.c src/jsw_code.c src/z80c_glue.c src/tape.c src/zx.c src/zx_
 GAME128_SRCS = src/jsw128.c src/jsw128_code.c src/z80c_glue.c src/tape.c src/zx.c
 HDRS = src/*.h
 
-all: jetsetwilly jetsetwilly128
+all: jetsetwilly jetsetwilly128 jetsetwillyx
+
+jetsetwillyx: src/main.c $(GAME_SRCS) src/jsw128.c src/jsw128_code.c src/ay.c $(HDRS)
+	$(CC) $(CFLAGS) -DJSW_COMBINED $(SDL_CFLAGS) -o $@ src/main.c $(GAME_SRCS) src/jsw128.c src/jsw128_code.c src/ay.c $(SDL_LIBS)
 
 jetsetwilly128: src/main.c $(GAME128_SRCS) src/zx_font.c src/ay.c $(HDRS)
 	$(CC) $(CFLAGS) -DJSW_ONLY_128 $(SDL_CFLAGS) -o $@ src/main.c $(GAME128_SRCS) src/zx_font.c src/ay.c $(SDL_LIBS)
@@ -33,6 +36,6 @@ test: difftest difftest128
 	./tools/run_difftest128.sh
 
 clean:
-	rm -f jetsetwilly jetsetwilly128 difftest difftest128 difftest128p
+	rm -f jetsetwilly jetsetwilly128 jetsetwillyx difftest difftest128 difftest128p
 
 .PHONY: all test clean
